@@ -3,870 +3,498 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#8B4513">
-    <title>☕ Espresso Tracker</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="icon-192.png">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    
+    <title>☕ Espresso Tracker (simple)</title>
     <style>
+        /* Tous tes styles sont déjà ici, je les garde à l'identique */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f8f5f0;
-            padding: 0;
-            min-height: 100vh;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%);
-            color: white;
-            padding: 25px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 28px;
-            font-weight: 700;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            justify-content: center;
-        }
-        
-        .tab {
-            padding: 15px 35px;
-            background: white;
-            border: 2px solid #e0d5c7;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 17px;
-            font-weight: 600;
-            color: #666;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        .tab:hover {
-            border-color: #8B4513;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15);
-        }
-        
-        .tab.active {
-            background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%);
-            color: white;
-            border-color: #8B4513;
-        }
-        
-        .section {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        
-        h2 {
-            color: #8B4513;
-            font-size: 24px;
-            margin-bottom: 25px;
-            font-weight: 700;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 600;
-            font-size: 15px;
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e0d5c7;
-            border-radius: 10px;
-            font-size: 16px;
-            background: #fafaf8;
-            transition: all 0.2s;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #8B4513;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
-        }
-        
-        .row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .btn {
-            padding: 16px 32px;
-            border: none;
-            border-radius: 12px;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%);
-            color: white;
-            width: 100%;
-            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4);
-        }
-        
-        .btn-secondary {
-            background: #f0e6d9;
-            color: #8B4513;
-            font-weight: 600;
-            padding: 12px 24px;
-            font-size: 15px;
-        }
-        
-        .btn-small {
-            padding: 10px 20px;
-            font-size: 14px;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .shot-item {
-            background: #fafaf8;
-            border: 2px solid #e8ddd0;
-            border-radius: 14px;
-            padding: 25px;
-            margin-bottom: 20px;
-            transition: all 0.3s;
-        }
-        
-        .shot-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border-color: #8B4513;
-        }
-        
-        .shot-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e8ddd0;
-        }
-        
-        .shot-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #8B4513;
-        }
-        
-        .shot-date {
-            font-size: 14px;
-            color: #888;
-            margin-top: 5px;
-        }
-        
-        .shot-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 18px;
-            margin-top: 15px;
-        }
-        
-        .detail {
-            background: white;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 15px;
-            color: #555;
-        }
-        
-        .detail strong {
-            color: #8B4513;
-            font-weight: 700;
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .bag-item {
-            background: #fafaf8;
-            border: 2px solid #e8ddd0;
-            border-radius: 14px;
-            padding: 25px;
-            margin-bottom: 20px;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-        
-        .bag-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(250, 250, 248, 0.85);
-            border-radius: 14px;
-            z-index: 0;
-        }
-        
-        .bag-item > * {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .bag-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .bag-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #8B4513;
-        }
-        
-        .bag-info {
-            margin-top: 12px;
-            font-size: 15px;
-            color: #666;
-            line-height: 1.6;
-        }
-        
-        .bag-status {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            margin-top: 10px;
-        }
-        
-        .bag-status.active {
-            background: #4caf50;
-            color: white;
-        }
-        
-        .bag-status.finished {
-            background: #9e9e9e;
-            color: white;
-        }
-        
-        .alert {
-            padding: 18px 22px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            font-weight: 500;
-            font-size: 15px;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border-left: 5px solid #28a745;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border-left: 5px solid #dc3545;
-        }
-        
-        .file-input-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-        }
-        
-        @media (max-width: 600px) {
-            .row { grid-template-columns: 1fr; }
-            .container { padding: 20px 15px; }
-            .tabs { flex-direction: column; gap: 10px; }
-            .tab { padding: 12px 20px; }
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f5f0; padding: 0; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); color: white; padding: 25px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .header h1 { font-size: 28px; font-weight: 700; }
+        .container { max-width: 900px; margin: 0 auto; padding: 30px 20px; }
+        .tabs { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
+        .tab { padding: 15px 35px; background: white; border: 2px solid #e0d5c7; border-radius: 12px; cursor: pointer; font-size: 17px; font-weight: 600; color: #666; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .tab:hover { border-color: #8B4513; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15); }
+        .tab.active { background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); color: white; border-color: #8B4513; }
+        .section { background: white; border-radius: 16px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h2 { color: #8B4513; font-size: 24px; margin-bottom: 25px; font-weight: 700; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; font-size: 15px; }
+        input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid #e0d5c7; border-radius: 10px; font-size: 16px; background: #fafaf8; transition: all 0.2s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #8B4513; background: white; box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1); }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn { padding: 16px 32px; border: none; border-radius: 12px; font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); color: white; width: 100%; box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4); }
+        .btn-secondary { background: #f0e6d9; color: #8B4513; font-weight: 600; padding: 12px 24px; font-size: 15px; }
+        .btn-small { padding: 10px 20px; font-size: 14px; }
+        .btn-danger { background: #dc3545; color: white; }
+        .shot-item { background: #fafaf8; border: 2px solid #e8ddd0; border-radius: 14px; padding: 25px; margin-bottom: 20px; transition: all 0.3s; }
+        .shot-item:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #8B4513; }
+        .shot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e8ddd0; }
+        .shot-title { font-size: 20px; font-weight: 700; color: #8B4513; }
+        .shot-date { font-size: 14px; color: #888; margin-top: 5px; }
+        .shot-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-top: 15px; }
+        .detail { background: white; padding: 14px; border-radius: 10px; font-size: 15px; color: #555; }
+        .detail strong { color: #8B4513; font-weight: 700; display: block; margin-bottom: 5px; }
+        .bag-item { background: #fafaf8; border: 2px solid #e8ddd0; border-radius: 14px; padding: 25px; margin-bottom: 20px; background-size: cover; background-position: center; position: relative; }
+        .bag-item::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(250, 250, 248, 0.85); border-radius: 14px; z-index: 0; }
+        .bag-item > * { position: relative; z-index: 1; }
+        .bag-header { display: flex; justify-content: space-between; align-items: center; }
+        .bag-title { font-size: 20px; font-weight: 700; color: #8B4513; }
+        .bag-info { margin-top: 12px; font-size: 15px; color: #666; line-height: 1.6; }
+        .bag-status { display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-top: 10px; }
+        .bag-status.active { background: #4caf50; color: white; }
+        .bag-status.finished { background: #9e9e9e; color: white; }
+        .alert { padding: 18px 22px; border-radius: 12px; margin-bottom: 25px; font-weight: 500; font-size: 15px; }
+        .alert-success { background: #d4edda; color: #155724; border-left: 5px solid #28a745; }
+        .alert-error { background: #f8d7da; color: #721c24; border-left: 5px solid #dc3545; }
+        .file-input-wrapper { position: relative; display: inline-block; }
+        .file-input-wrapper input[type=file] { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+        .actions { display: flex; gap: 12px; margin-top: 25px; }
+        @media (max-width: 600px) { .row { grid-template-columns: 1fr; } .container { padding: 20px 15px; } .tabs { flex-direction: column; gap: 10px; } .tab { padding: 12px 20px; } }
     </style>
+    <!-- Chargement de Supabase (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="header">
         <h1>☕ Espresso Tracker</h1>
     </div>
-    
-    <div id="root">
-        <div class="container">
-            <div style="text-align: center; padding: 60px 20px; color: #8B4513;">
-                <h2>⏳ Chargement...</h2>
-            </div>
-        </div>
+    <div id="app" class="container">
+        <!-- Le contenu sera généré ici par JavaScript -->
+        <div style="text-align: center; padding: 60px; color: #8B4513;">⏳ Chargement...</div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
     <script>
-        window.addEventListener('load', function() {
-            if (!window.supabase) {
-                document.getElementById('root').innerHTML = '<div class="container"><div class="alert alert-error">❌ Erreur de chargement</div></div>';
-                return;
+        // ---------- 1. CONFIG SUPABASE (remplace avec TES clés) ----------
+        const SUPABASE_URL = 'https://duzxzqmjkovrsfwhdyml.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1enh6cW1qa292cnNmd2hkeW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3NjAzMzYsImV4cCI6MjA4NjMzNjMzNn0.hRUDEbr9yhd_R1Q0lLVYYppnht5tUAd5TtE9kanzvos';
+
+        // Initialisation Supabase (version CDN)
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ---------- 2. DONNÉES GLOBALES ----------
+        let currentTab = 'shots'; // shots, bags, settings
+        let shots = [];
+        let bags = [];
+        let message = null;
+
+        // Référence à l'élément #app
+        const appEl = document.getElementById('app');
+
+        // ---------- 3. FONCTIONS UTILITAIRES ----------
+        function showMessage(type, text) {
+            message = { type, text };
+            setTimeout(() => { message = null; render(); }, 4000);
+            render();
+        }
+
+        // Logos et images (reprise de ton code)
+        const LOGOS = {
+            timana: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACbUlEQVR4nO2bPVLDMBSEVxnOkQ5OQUtDTkBNmYaOM9DRUKbmBlSUnIKSjlOYgiiRZcnSk/WzzmgbMkNG8n5vnyx7IoW6GgTfVcWuouIkEsMhFbnWEoN6TQ/vN9GDqIfv2X8Lrmd+nlwDwWFcYjgkD5DF158DQFHjtnKDWArgZL6kaZ8sGEleUgGMqt7CvJYjESJPKQDOVd8f/j/cviQMk1epadgI55maB4CvZ+Ew+WWlMPr2KwHgNk+kFAixAMLmCVIAyCHEAIiv/AohhADQx96nWAhzANLMk6QAiIMQbIG1Vd5WaI/iAzAAC8wTpQAYQZikwAUgzyMsGQRDI3/eFlh79G35WsEGsCz6tshS4GoF6Vb44mQCyPn66iyyFBgaAEcCLq33bdlrQZ0W4E3B6bk57+LnE8F7Ay39/qAvglVnI2yFngDU6n8tkhTou0FPQJNZSVIAtEwACYTeAk1nJ0jBVesL2P1+Npx921ugKYDd9V3L6QE0BMBgHmi9CBJog+MjsXp7rDYpQ/U/nrYAegLqA2CovqmegOPfKusAS/V1/wNQ1RLAYt7WBEDNu0ELGdUHMAZQ7HfDpNVXQF8EJwCyL4ZM1TcXP/3Bm4BLWwvs3tdyAci2FjBV39DIny8Bi1uBybwr+lrBRXDtreCLvtYcgBMtKQSW6lvmna0dSkAyhNaKMQ/E7QNEEBiqH2seiN8IRUFYm3lAthOkbwepeUC+FfZCaF39FPOiL1oanxnaH5oBcNzmRJ5SH4YUCFrCUXVxQYucG7x//ckwrFuejU2zc4OmioLIbTzbAA55f3EqARLYwlKeHXaJ/vT4H4+IseLBtt/JAAAAAElFTkSuQmCC',
+            gedeo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACcUlEQVR4nO2bvU7DMBSFTyo2dgZmNhaeAYmZHfYO3XkKdiTYeQDmCt6CjZWFvXNY6shx7NjX8c9J5bNQidbO+e65jhMlHcqqF3y3y3YUBSeRGPYpy7HmGNRp+vb9EDzI1+P53L+THXdKABPjEsM+OYAsPv4UALIaN5UaxFIAg/mcpl0yYER5iQUwqnoN80qWRIg8xQAYzG/3OwDAz99zxDBpFZuGjXCeiXkAuLp4Eg6TXkYKg0+/EgBW80yKgRAKwGueIQWAHEIIgODKrxGCDwB97F0KhTAHIMo8SwqAMAjeFlhb5U359iguAD0Qb54pBcAIwiQFNgBJLmHZIGga+XO2wNqjb8rVCiaARdE3xZYCWytIt8InJx1AyttXg9hSoKkHLAk4td43Za4FRVqAOAXDdXPSxc8lhvsGSur+QVsES07G2AotASjU/0osKVBng5aAGpOypAComAAWCK0Fak7OkIKz2gfwefNQbe4OrQXqAni9/K05PYCKABjMA60FsMHxkvjt7qXYpAzV764/ALQElAfAUH1dLQHHv0XWAZbqq/4H0BVLAIt5UxMAJc8GNaRVH8AYQLbnhkmr3wFtEZwASL4YMlVfX/zUB2cCTm0tMHtfyQYg2VrAVH1NI3+uBCxuBSbztugreRfBtbeCK/pKcwAGWlIILNU3zFtb25eAaAi1FWIeCNsHiCAwVD/UPBC+EQqCsDbzgGwnSN8OUvOAfCvshFC7+jHmRV80NHqibLvfVQNgOc1lf2dI1wCi/75fOJRcsVVf/CNDk+cLc8JwbGyqvTeoKyuI1MaTDWCR84lTCRDPFpby3WGb6N8e/wdHGbWdc2XBIwAAAABJRU5ErkJggg==',
+            generic: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACdUlEQVR4nO2bP07DMBjFXypuwYbETTgDExIDOwsLW8XWhYWdoRITZ0Bi4QLMSEyUiTuEpY4cx679Of7zUvktVKK1837f+xwnSjqUVS/4bpftKApOIjHsU5ZjzTGo0/Tb60vwIBeXV4f+ney4UwKYGJcY9skBZPbxpwCQ1bip1CDmAhjM5zTtkgEjykssgFHVa5hXsiRC5CkGwGB+u1kDAE7PziOGSavYNKyE80zMA8Du+0s4THoZKQw+/UoAWM0zKQZCKACveYYUAHIIIQCCK79ECD4A9LF3KRTCIQBR5llSAIRB8LbA0ipvyrdHcQHogXjzTCkARhAmKbABSHIJywZB08ifswWWHn1TrlYwAcyKvim2FNhaQboVPjrpAFLevhrElgJNPWBJwLH1vilzLSjSAsQpGK6bky5+LjHcN1BS9w/aIlhyMsZWaAlAof5XYkmBOhu0BNSYlCUFQMUEsEBoLVBzcoYUnNQ+gM+P96rztxaoOfnf70/N6QFUBMBgHmgtgBX2l8TX9w/FJmWo/t3TM4CWgPIAGKqvqyVg/7fIOsBSfdX/ALpiCWAxb2oCoOTZoIa06gMYA8j23DBp9TugLYITAMkXQ6bq64uf+uBMwLGtBWbvK9kAJFsLmKqvaeTPlYDZrcBk3hZ9Je8iuPRWcEVf6RCAgZYUAkv1DfPW1vYlIBpCbYWYB8L2ASIIDNUPNQ+Eb4SCICzNPCDbCdK3g9Q8IN8KOyHUrn6MedEXDY2eKNtu1tUAWE5z2d8Z0jWAeLy9mTmUXLFVn/0jQ5PnC3PCcGxsqr03qCsriNTGkw1gkfOJUwkQzxaW8t1hm+jfHv8HiQrra/56lPwAAAAASUVORK5CYII='
+        };
+
+        const PACKAGE_IMAGES = {
+            gedeo: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAMwAzAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAGpAlgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//2Q==',
+            timana: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAMwAzAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAGpAlgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//2Q=='
+        };
+
+        function getLogo(name) {
+            if (!name) return LOGOS.generic;
+            const n = name.toLowerCase();
+            if (n.includes('timana') || n.includes('timanà')) return LOGOS.timana;
+            if (n.includes('gedeo') || n.includes('gédéo')) return LOGOS.gedeo;
+            return LOGOS.generic;
+        }
+
+        function getPackageImage(name) {
+            if (!name) return null;
+            const n = name.toLowerCase();
+            if (n.includes('timana') || n.includes('timanà')) return PACKAGE_IMAGES.timana;
+            if (n.includes('gedeo') || n.includes('gédéo')) return PACKAGE_IMAGES.gedeo;
+            return null;
+        }
+
+        // ---------- 4. CHARGEMENT DES DONNÉES ----------
+        async function loadData() {
+            try {
+                const { data: s } = await supabase.from('shots').select('*').order('created_at', { ascending: false });
+                const { data: b } = await supabase.from('bags').select('*').order('created_at', { ascending: false });
+                shots = s || [];
+                bags = b || [];
+            } catch (e) {
+                console.error(e);
+                showMessage('error', '❌ Erreur de chargement Supabase');
             }
-            
-            const { useState, useEffect } = React;
-            const { createClient } = window.supabase;
+            render();
+        }
 
-            const supabase = createClient(
-                'https://duzxzqmjkovrsfwhdyml.supabase.co',
-                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1enh6cW1qa292cnNmd2hkeW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3NjAzMzYsImV4cCI6MjA4NjMzNjMzNn0.hRUDEbr9yhd_R1Q0lLVYYppnht5tUAd5TtE9kanzvos'
-            );
+        // ---------- 5. FONCTIONS CRUD ----------
+        async function addShot(event) {
+            event.preventDefault();
+            const form = event.target;
+            const selectedBag = bags.find(b => b.id.toString() === form.bag_id.value);
+            const age = selectedBag && selectedBag.roast_date ? 
+                Math.floor((new Date() - new Date(selectedBag.roast_date.split('/').reverse().join('-'))) / 86400000) : 0;
 
-            const LOGOS = {
-                timana: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACbUlEQVR4nO2bPVLDMBSEVxnOkQ5OQUtDTkBNmYaOM9DRUKbmBlSUnIKSjlOYgiiRZcnSk/WzzmgbMkNG8n5vnyx7IoW6GgTfVcWuouIkEsMhFbnWEoN6TQ/vN9GDqIfv2X8Lrmd+nlwDwWFcYjgkD5DF158DQFHjtnKDWArgZL6kaZ8sGEleUgGMqt7CvJYjESJPKQDOVd8f/j/cviQMk1epadgI55maB4CvZ+Ew+WWlMPr2KwHgNk+kFAixAMLmCVIAyCHEAIiv/AohhADQx96nWAhzANLMk6QAiIMQbIG1Vd5WaI/iAzAAC8wTpQAYQZikwAUgzyMsGQRDI3/eFlh79G35WsEGsCz6tshS4GoF6Vb44mQCyPn66iyyFBgaAEcCLq33bdlrQZ0W4E3B6bk57+LnE8F7Ay39/qAvglVnI2yFngDU6n8tkhTou0FPQJNZSVIAtEwACYTeAk1nJ0jBVesL2P1+Npx921ugKYDd9V3L6QE0BMBgHmi9CBJog+MjsXp7rDYpQ/U/nrYAegLqA2CovqmegOPfKusAS/V1/wNQ1RLAYt7WBEDNu0ELGdUHMAZQ7HfDpNVXQF8EJwCyL4ZM1TcXP/3Bm4BLWwvs3tdyAci2FjBV39DIny8Bi1uBybwr+lrBRXDtreCLvtYcgBMtKQSW6lvmna0dSkAyhNaKMQ/E7QNEEBiqH2seiN8IRUFYm3lAthOkbwepeUC+FfZCaF39FPOiL1oanxnaH5oBcNzmRJ5SH4YUCFrCUXVxQYucG7x//ckwrFuejU2zc4OmioLIbTzbAA55f3EqARLYwlKeHXaJ/vT4H4+IseLBtt/JAAAAAElFTkSuQmCC',
-                gedeo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACcUlEQVR4nO2bvU7DMBSFTyo2dgZmNhaeAYmZHfYO3XkKdiTYeQDmCt6CjZWFvXNY6shx7NjX8c9J5bNQidbO+e65jhMlHcqqF3y3y3YUBSeRGPYpy7HmGNRp+vb9EDzI1+P53L+THXdKABPjEsM+OYAsPv4UALIaN5UaxFIAg/mcpl0yYER5iQUwqnoN80qWRIg8xQAYzG/3OwDAz99zxDBpFZuGjXCeiXkAuLp4Eg6TXkYKg0+/EgBW80yKgRAKwGueIQWAHEIIgODKrxGCDwB97F0KhTAHIMo8SwqAMAjeFlhb5U359iguAD0Qb54pBcAIwiQFNgBJLmHZIGga+XO2wNqjb8rVCiaARdE3xZYCWytIt8InJx1AyttXg9hSoKkHLAk4td43Za4FRVqAOAXDdXPSxc8lhvsGSur+QVsES07G2AotASjU/0osKVBng5aAGpOypAComAAWCK0Fak7OkIKz2gfwefNQbe4OrQXqAni9/K05PYCKABjMA60FsMHxkvjt7qXYpAzV764/ALQElAfAUH1dLQHHv0XWAZbqq/4H0BVLAIt5UxMAJc8GNaRVH8AYQLbnhkmr3wFtEZwASL4YMlVfX/zUB2cCTm0tMHtfyQYg2VrAVH1NI3+uBCxuBSbztugreRfBtbeCK/pKcwAGWlIILNU3zFtb25eAaAi1FWIeCNsHiCAwVD/UPBC+EQqCsDbzgGwnSN8OUvOAfCvshFC7+jHmRV80NHqibLvfVQNgOc1lf2dI1wCi/75fOJRcsVVf/CNDk+cLc8JwbGyqvTeoKyuI1MaTDWCR84lTCRDPFpby3WGb6N8e/wdHGbWdc2XBIwAAAABJRU5ErkJggg==',
-                generic: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACdUlEQVR4nO2bP07DMBjFXypuwYbETTgDExIDOwsLW8XWhYWdoRITZ0Bi4QLMSEyUiTuEpY4cx679Of7zUvktVKK1837f+xwnSjqUVS/4bpftKApOIjHsU5ZjzTGo0/Tb60vwIBeXV4f+ney4UwKYGJcY9skBZPbxpwCQ1bip1CDmAhjM5zTtkgEjykssgFHVa5hXsiRC5CkGwGB+u1kDAE7PziOGSavYNKyE80zMA8Du+0s4THoZKQw+/UoAWM0zKQZCKACveYYUAHIIIQCCK79ECD4A9LF3KRTCIQBR5llSAIRB8LbA0ipvyrdHcQHogXjzTCkARhAmKbABSHIJywZB08ifswWWHn1TrlYwAcyKvim2FNhaQboVPjrpAFLevhrElgJNPWBJwLH1vilzLSjSAsQpGK6bky5+LjHcN1BS9w/aIlhyMsZWaAlAof5XYkmBOhu0BNSYlCUFQMUEsEBoLVBzcoYUnNQ+gM+P96rztxaoOfnf70/N6QFUBMBgHmgtgBX2l8TX9w/FJmWo/t3TM4CWgPIAGKqvqyVg/7fIOsBSfdX/ALpiCWAxb2oCoOTZoIa06gMYA8j23DBp9TugLYITAMkXQ6bq64uf+uBMwLGtBWbvK9kAJFsLmKqvaeTPlYDZrcBk3hZ9Je8iuPRWcEVf6RCAgZYUAkv1DfPW1vYlIBpCbYWYB8L2ASIIDNUPNQ+Eb4SCICzNPCDbCdK3g9Q8IN8KOyHUrn6MedEXDY2eKNtu1tUAWE5z2d8Z0jWAeLy9mTmUXLFVn/0jQ5PnC3PCcGxsqr03qCsriNTGkw1gkfOJUwkQzxaW8t1hm+jfHv8HiQrra/56lPwAAAAASUVORK5CYII='
+            const shot = {
+                date: new Date().toLocaleString('fr-FR'),
+                coffee: form.coffee.value || (selectedBag ? selectedBag.name : ''),
+                roaster: selectedBag ? selectedBag.roaster : "L'Arbre à Café",
+                roast_date: selectedBag ? selectedBag.roast_date : '',
+                age,
+                dose: parseFloat(form.dose.value),
+                output: parseFloat(form.output.value),
+                ratio: parseFloat((form.output.value / form.dose.value).toFixed(2)),
+                grind: parseFloat(form.grind.value),
+                time: parseInt(form.time.value),
+                preinfusion: parseInt(form.preinfusion.value),
+                wdt: form.wdt.value,
+                channeling: form.channeling.value,
+                flow: form.flow.value,
+                taste: form.taste.value,
+                notes: form.notes.value
             };
 
-            // Images des paquets
-            const PACKAGE_IMAGES = {
-                gedeo: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAMwAzAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAGpAlgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigAooooAKKKKACiiigAooooAKKKKACiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9FAFiiq9WKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAK9FFFAgooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqxVerFAwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigCvRRRQIKKKKACiiigAooooAKKKKACiiigAooooAKKKKACikyB3FIZEHV1/OgB1FRm4hHWVP++qb9rg/56igCaioPtkH9/wDQ0fa4ezH8qAJ6Kh+1Rep/Kj7TH7/lQBNRUX2hPf8AKjz09/yoAloqL7QnvR9oT0NAEtFRfaE9Go+0J6GgCWiovtCehpPtCehoAmoqA3Kj+FqT7Uv900AWKKr/AGof3D+dH2of3f1oAsUVAt2hOGBX3qcEEZByKACiiigAooooAKKKKACiiigAooooAKKKKACrFV6sUDCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAK9FFFAgooooAKKKKACiiigAooooAKKKKAEZgilmOAOprJuL+SRiEYqnbHWp9UchEQdDyay6AJPOkPWR/8Avo0eYx6sT+NR0ooAfk0c0gyadigBMZpQKXFLQA4U9RTBUi9KAHCpFqMVItADwKXFKozTiMCgCM0lDECmb6AH0oFIOakUcUANxSYqTFNNADKQinGmk0ANzSZowTQVwOaAENT2kpD+Ueh5HtVYOCSKmtgDcL+NAGhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABViq9WKBhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAFeiiigQUUUUAFFFFABRRRQAUUUUAFFFFAGfqn3Y/xrMNaWqn/VfjWZmgApelAoNADu1APNApQvNAD6KKKAFFSLmmKKlUUAPUVIoqMVKtAEyjApsnSlB4pr80AV2yxpwQCnYxRQAVIDxUdOBoAdSGlpDQAw00mlY1GTQApNMdqRmphOaAGjg5q1aHNwv4/yqsans/8Aj6T8f5UAalFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFWKr1YoGFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAV6KKKBBRRRQAUUUUAFFFFABRRRQAUUUUAZurf8ALP8AGsytPVv+WX41mUgFp6jIplPU0wDGDUi0nWlFADiKTFOoFACqKlFNFPFACrUq0wU9aAJO1NNFBoAYRSU402gApRSUUAPpCaTOKjZ6AEdqiLUjNmoyaAHE0gpKVaAHgVNajFyn4/ypijirVtEm4OW+YHgUAXKKKKACiiigAooooAKKKKACiiigAooooAKsVXqxQMKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAr0UUUCCiiigAooooAKKKKACiiigAooooAo6nMyRKgxh85rIFamrD5Ij7mssUALT1GaYKtwxYGTQAwIcUYxVgrxUbJQAzNOB5ppGKQHFAE1PFRK2akBoAkHSnimLTxQA4UUCigBDTTTjTTQAlITikY1GzUAKzVEzUM1MJoAQmkNLRQAU9RTKlQUASqKmhH75KiSp4f9atAFuiiigAooooAKKKKACiiigAooooAKKKKACrFV6sUDCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAK9FFFAgooooAKKKKACiiigAooooAKKKKAM/Vv9VGfc1lCtfVBm3Q/wC1WRQA+MZatGNRtFU4RzV5OlACleKiZasgcVG60AVHGKjNTOKhagBQamU1XBqRWoAsrUgqFDUwoAWlNIKDQAhpjHFKxqJmoARmqMtmhmpmaAAmkoooAKKXFLQAAVIoxTKkXpQBKlTRf61aiQVPF/rFoAs0UUUAFFFFABRRRQAUUUUAFFFFABRRRQAVYqvVigYUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQBXooooEFFFFABRRRQAUUUUAFFFFABRRRQBT1MZtPowrHHWtvUBmzb6isZRzQBYhXmrqdKrQiraDigBw6UjDin0jdKAKkgqswq7IMiqjigCLODTlNMbrQOKALKNVhTmqStzVmJqALFNJpc1G7YoAa7VAzUrvzUXWgANFLinBTQA3FLinhadtoAjxS7alC04R0ARBDTsYqbaBVeeQKDQBYjOami/1i1n2cu6QjtWhH/rFoAs0UUUAFFFFABRRRQAUUUUAFFFFABRRRQAVYqvVigYUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQBXooooEFFFFABRRRQAUUUUAFFFFABRRRQBDdjdaSD2rEX7wremGYXH+yawwPmoAuQjirSjioIF4FWgMUAGKaadSGgCJxVSQVdccVVlFAFRqaKe4plADxU8eRUAqZOlAFnfxUTZNNeVIwNx5NCyK4yKV0OzIypzQFNT7aNtMREFp4WnbaeBigBoSnbacBS4oAQLTulFNdsCgBkkmAayp5izVZupeDWYWy1AGlYffJ9q1YeZBWVY8ZNatvzIfpQBZooooAKKKKACiiigAooooAKKKKACiiigAqxVerFAwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigCvRRRQIKKKKACiiigAooooAKKKKACiiigBCMqR6isIjDVvViSjErD0JoAvwYCCpc1BAf3Y+lS0ALmlpKKABhkVWlFWsVBMvFAFBxTOlSuOaiYUAKGqRTioRUgGRigDC1S9lS4wDjnGcVPp9+zOFY5p19YCc5I5/nSafpTRzA5b8T0rjnCfPdHbGcPZ2Z0ScqD60pFOUBVCjtRXWjjY2lpcUUxAKWkFLQAhNQSvgVK5wKo3EmAaAKlxJkmqq8tTpWyaanWkBp2fCmtW05LGsu14jrVsx8jn3pgWaKKKACiiigAooooAKKKKACiiigAooooAKsVXqxQMKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAr0UUUCCiiigAooooAKKKKACiiigAooooAKyLkYuZPrWvWXeDFy3vzQA+A/IKsCq1v938atUALSgUAU4CgAxUMo4qaon6UAY+qX9rplqbm8kMcIZULBGbliAOAD1JA/GopL63juY7Z3KyyRNKoZSAVXG45xgY3DjrzUXiqxuNQ0R7a0i8yVpoXwWAACyq56+ymqVzHqU6OzWmGkuQgAdN0dv8ALu74JYqePf2oA0LW8tryyhvLeZXt5lDxyZwGB6VHZ6xZXktxHHLhoJvIbf8ALufarfL68MK5Sbw5eE/2e1iLjTIdUF1DvdM+UwYyJjPTcxwO4OKsXXhaS5j1i1+yxKL26jlt512/uEVY1+oI8skAe3I5whnZiaL5laROASQSOAKWe9WCwe7ijNwiru2xFcsO+MkD9e1cOPDd7DHcXNtYRLdjVjd7TIqmeDcSE3DO3BO4A8ZH41sy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uPeW5uLde/qyj19R3rn11WMgNGwwPvIeDXw2Py2rRre7t0N41E42kUNb0rzEYRxLkjg4rk30W3s0Clcyg7gemM13Uuoo6oynhqwNTBmuNyjtzxXpZdWrJKnLQ8rGrlTlEqW7sEwzA/UZq0PlAAxUEaYX0711Oh+ELjU7Y3FzI1tGR8ilDlvfntX3eESo0VKbPHhTlUdoopeGbdZ/EVorRq67iSGHoCc/hXqTtWRpfh6DSzHIGLSoCN3rmtRzXPiqsak047HtYKjKlB861ZBKc5qjMOatyGq0grmOwrYpKkYU0DJpACqc5rVg/wBUD7VnDrWjD/qxQBdsRm6HsCa1azdOH75j6LWlTAKKKKACiiigAooooAKKKKACiiigAooooAKsVXqxQMKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAr0UUUCCiiigAooooAKKKKACiiigAooooAKKKKAKE4xM31p9uM0lyMTH3FOtu9AFodKDR2pD0oAQ1GaeaaaAIzTTTzTDQA2uf1rwnp+ruZtot7kn5po15P1roDTTUVKcai5ZK407Hn83gW7jZfKmSRAMEA4qabwnO8RHlYfHXI5ruKQ15tTKaU5KSk1b0/yCXLKLi1uebJ4M1IyZMIVSepdeK9DgV0t40cgsqgHBzUlIelevzycFB9DmoYWFFtx6jGNQuakaoXqToIXNQNUz1E1AED9KjDYNSPUJpATLya04f8AVismNua1of8AVihAaWnDmQ/Sr9U9OH7lz6tirlMAooooAKKKKACiiigAooooAKKKKACiiigAqxVerFAwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigCvRRRQIKKKKACiiigAooooAKKKKACiiigAooooAq3Q+cH2pIeGNPuR901HEfnoAsig80dqKAENNNONNNADTTDTzTDQAw1jXGqyFtUWCSGH+zyFdpY2cEmMPnCkELhsZ9jW0RWTqljYpHdX8ltuleERS4kZBInOA+OoG49QcZNAFN9fVd97tmeyiDxyBEwAyruLHI6ZG0cjk9DnIZJq9zFqV3ZzFVeR44rbYN21mR2JPHPCE9D0qG6TTo3vPN05mW4R/MVJn8lx5QySv3QSvy5AzUUq6e080JsLiRgC7z/AGqQkGI4U785B+Y85Bwe+cUAXhroS1lke2lzalFuA5AYZOMgY54+btwemeK2DWVY29jdSSSrBh4yqN+9Zt+0lgWz97kkgnJ5rVbpQBE1QsalbpULUARNUTVI1Rt3oAhao9uTUh60gpACJWnB/qx9KoA9qvw/6sUAbFgMWv1JNWaitV22sY9s1LTAKKKKACiiigAooooAKKKKACiiigAooooAKsVXqxQMKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAr0UUUCCiiigAooooAKKKKACiiigAooooAKKKKAIbgfuwfeoE4YVZmGYjVUdaALY6UGkWnGgBppppxpDQAw1n3dldzXPnW+oPbrtClPLDDvk89+R+VaBppoAxv7M1MSmT+2pOeo8hcflnA/Ch7DVXkJ/tYohZjtWBflHYZI5rWNQm4hEhjM0YcdV3DP5UAZp0/VCwP9tNjuBbJSSWOpOYsauVCKAwFuvzkd/b+VaAuYGfas8ZbpgOM+n9D+VIZ4txXzU3DORuGeOtAGdJYak0bKNWfLN18lRtXnge/TuOlRtY6mST/bDc9ALdeK0hcQu+xZoy3oGBNI7oudzKPqaAMv7DqCupOrOUD7ivkLyM5xnr7VcanGWNiQsikg4IB6H/ACRUW9ZEDowZT0KnINADGqJjUjVC5oAjNANBpq0gJk5IrRi+5WfH1rRhGQB60wN2MYiUegApaKKACiiigAooooAKKKKACiiigAooooAKKKKACrFV6sUDCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAK9FFFAgooooAKKKKACiiigAooooAKKKKACiiigBsnMbfSqQq8wypHtVLFAFqPoKcaZH90U8+tADTSGlNIaAKl9HdyQhbOZIZNwJZ13celZ8lrrZkYx30arnIVgG42qMfcH8Qc59/y2aaaAMxYb4Rz/aZEkDKgQJ6jqeg69f/ANVZuoxwSXzrJpdxIwfKyoXxkhfmJA9h69OnNdE1NNAHP2+GEzHTbiNoB56bmbLtl2AHH+0fzxzUS2dtc2stzJps8byT5aMu2Sc43EdvvN09fy6M0w0AcnFMlrJm30XUQw5VjnAJXB5Pb/AcVr3mlWd+++4iZmOOjkdM46fU/Xj0FaRqNqAMwaVbRACPzFAIIAc8Y24/9AWnw26WsCwxltiAKoJzgVaaon6UAQtUL9amaoW60gGGkHBpaXbQBLF1FadsP3kY/wBoVmRda1LTmaMf7QpgbVFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABViq9WKBhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAFeiiigQUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAVTI+YirlVWGHP1oAlQfKBT8cU1Ogp5oAbTTTqaaAIp3McDuOSoJFRMArRqS5Yn7wPWrJGRgjio/LT+6OmKAKcRLMpLYHMmS3VTnj+VO3N9pTOQrKQAfw/8Ar1M0MZAGxcAYAx0FNZFYglQSOme1ICqciQgsSkwyvPQ+34fypOCZmJIUHaOfQf8A16s7FVQAoAHT2qMxoDwq+vSgCAM7NEj8HZub3PFQzHG1UJO9/XoB1/l+tXCoJBIGR0NQsiZB2jI6H0oAp5L+X8xw7FsZ6DHT86MfMx55PFTPGn90cHI4qN+BgUARNUJqR6jNACCjeBTScCmZyaALMRy9atn/AMfEX1rJg61r2AzdRfU/yNMDZooooAKKKKACiiigAooooAKKKKACiiigAooooAKsVXqxQMKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAr0UUUCCiiigAooooAKKKKACiiigAooooAKKKKACq0nEhqzVeX79AD0qU1DEcmpqAGGm09qbQA09KbTzTDQAw0w09qYaAGtUZqRulRmgBp6VE1SHpUbUAQt3qBzU796rOaAIWPNNNIx5qN3wMUgEducCmryajyc1ItAFyAc1rad/wAfS+wJrKgrY0xc3DN6J/UUwNWiiigAooooAKKKKACiiigAooooAKKKKACiiigAqxVerFAwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigCvRRRQIKKKKACiiigAooooAKKKKACiiigAooooAKgmHzD6VPUM/agBIjzU9Voz81WaAEYZptPppFADDTTT6YaAI2php7Uw0ANbpUZqQ1GelADG6VEakY1GaAIJO9VXNWpehqjK+KAI5GxVdjT2bNQs1IBc4pyHmo91Kp5oA07f7tbeljmQ+wrCtz8lb2k8rKfcf1pgaNFFFABRRRQAUUZFJketAC0Um4UbhQAtFN3ijeKAHUU3eKN4oAdRTd4pPMFAD6sVU31boGFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAV6KKKBBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABUcoyBTzntUTs2KAERcNmpxUEbBvr6VOKACkIp1JQAwimEVIaYaAIiOajNTNURoAY3SozUpqM0ARMOajY4qR6gc0AV53OKz5TzVyY8VQmbFAETtVd37U2aXFVHuB61NwLYkqRHyazBcjPWrEMwJHNFwN23b5cVu6VKI4pCx4J4rm7eT5RiryTS7QFHFUB0hu0FMN4vrWEGnNPAmPegDYN4PWm/ah61mhJfepFjk96ALv2r3o+05qqIn9KeIn9KAJ/PNL531qMRP6U4RNQA/zCaUOaBE1OEZoATcfWl3e9OEdOEftQAzdS7qk8v2p3l0ARZrQqrsFWqBhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAFeiiigQUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUEA0UUARmJSc8g+1NaJz0lcfjU1FAFYx3QHyz5+qionXUP4ZY/wAUq9RQBkSJrP8ADJB/3x/9eoHXX+0lv/37/wDr1vUUAc06+I+zwf8AfuoSniX/AJ6Q/wDfsV1dFAHImPxN/wA9If8Av2Kb5PiU/wDLSH/v3XYUUAcd9n8SHq8P/fuj7F4hPVof++K7GigDjf7L1t/vPF/3xTT4f1ST70q/gtdpRQBxB8JXj/emP4AUo8FOfvysfxrtqKLAcengtF6tmrUXhKBOtdNRQBjw6DDGOtW002FKu0UAQLaxD+GnCCMfw1LRQAzyk/u0eWnpT6KAG7F9KNi+lOooATaPSjA9KWigAwPSjFFFABRRRQAUUUUAFWKr1YoGFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAV6KKKBBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABViq9WKBhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/Z',
-                timana: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAMwAzAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAGpAlgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigAooooAKKKKACiiigAooooAKKKKACikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikooAWikpaACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAEooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo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KACiiigAooooAKKKKACiiigBKKKKACiiigAooooAKKKKACiiigAooooAr3y7rKT6Zrn1+8K6S4G63kH+ya5sD5qALsK1bUcVBAuRVkcCgQUhpaDQMhccVUkHNXXFVZVoEVGptPcc02gBw61PHkGoF61MlAFnfxUTZNNkmSLG48ntQsqvjFLmWw+V2uRlTmlCmpttLtpiIgtOVaeBTgtADQtOCU/FKBQAgXmlwBS0x2wKAGyybVNZU8xZ8VZupeDWYWy9AGlYf6wn2rXteZh9DWPY9Ca2LLmUn/ZoAvUUUUDCiiigAooooAKKKKACiiigAooooAKWkpaACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAEooooAKKKKACiiigAooooAKKKKACiiigBGGUI9RXNEYNdNXOSriVh6MaAL8HCCpc1BAfkFTUALmjNJS0AIwyKrSireKryigRRcVHUzjrUJoAUHmpA2BmoRUgG5SD0IoA5/Ur2RbkgEjnrViwvmLqCc0t/p/mnJ4b19aTTtLkWZTk/U9q4pQnz3R3RnDkszpIvmQH1p5FKihEAHQUtdi2OJjQKWlFFMQgpwpKKAAmq8r4FSucCqVxJgGgCncyZJFVQfmp0rZNNQZakBqWfCGtjT+Wc+gFY9twn41taePkc+9MC5RRRQMKKKKACiiigAooooAKKKKACiiigApaSloAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooASiiigAooooAKKKKACiiigAooooAKKKKACsG6XF1IP9o1vVi34xeP74P6UAOt/uCrFVbc/LVoUAKBTsUAUtAgqGUVNUbjigDF1XULXSrU3V5I0cIZULBGfBY4HCg9SQPxqKS/tY7qO2kkKSyxNMoZCAVXG45xgY3Dg881F4tsbrUdCe1s4fNmaeF8bgoASVXPJPopqhdRarcRyO1kQ0t0EADpvitvl3DJOCWKnI9/YUAadrfWt7Yw3tvMj28yh45M4BB6daistasr2S4jil2mCfyDvwu59ob5fXhhXIz+Gr4405tP+06ZDqq3cO94wfJYHzExkcbicDuDg4qxdeFJLmPWrX7HEgvbqOW2uF2/uEVYx9QRsJAAxyOR2BnbieAblaWP5QSwLDgDrmlu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XTnyTUl0M6sOeDj3PBb53idecetUJJBsy3XtXZeJ/C97DqxcRKbRyRGynJPfkdv/AK1c5PoVzb4NwQFz2HWvceLopXbOXCZTia8U4R623RQ04ndJkelaB4BNBgijfMS4GADTsV4GJqKpVc11P0vLsNLDYWFGTu1/mRljgccmrAXbDjvio1GJRnpitvR9EudYnAjUrAD+8lPQD29T7VgdFarClHmm7JHSeAtMa1sJr6RcNOdqf7o/xP8AKurZqSGGO2to4IhiONQqj2FMc1slZHwWLxDxFaVV9fy6EUrcVQlFXJDVZxmmcxWxSVIwpgFIAVTnitSD/VAms8Vowf6oUAX9MGb1T6AmtusjSl/0hz6L/WtemMKKKKACiiigAooooAKKKKACiiigAooooAKWkpaACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAEooooAKKKKACiiigAooooAKKKKACiiigAooooAybgYuHHvT7foaLwYuG9wDS2/egRZA4ooopgI1RmnmmGkAxulNNPNMNADHUMuGAIPY1jat4ftdUgKn5G/hI6ZrapjUGlKrOlLmg7M8wuPBuqwTlViEkfJDoQentTY/B2sSbf9HVQepZwMV6fSGp5Eet/buJtay/r5nH2PgO2Xa19M0hHJRDgfnXVxQxW8SxQxrHGowqqMAVJTWppJHnYjF1sQ71ZXGsagc1KxqBjTOYic81Xap2qE0AQPTAae9QnrSAmU5NacP+rFZUZ5rVh/1YoA1tJXmVvoP51p1Q0oYhkb1bFX6YwooooAKKKKACiiigAooooAKKKKACiiigApaSloAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooASiiigAooooAKKKKACiiigAooooAKKKKACiiigChfL+9U+oqODhj9Knvh9w/UVXi4cUCLXag9KQdKcaBjKQ0tIaBDDTDUhphoGV7ozLaTG2CtOEbyw/QtjjPtmuck1jVEt5p3MBhjuzbExREMD5yID8zEYILZ/CuorHvNL0600y5VoJGhkmE7qZ3+/vB3Fs5UA4JxxgdKBFVPEFxPNCkWm586ae3jZpwP3kTMpzwcKdh55Pt3pkXiiKa2sZ/s+xLoQ/LJIA6mQcYH8QBIBOfXriqsVxpUcq7bWSOSKaaWItdNtDs+HJOeM7yx64U571lQXGiK6W66PewptLhJriRV/cgbTjcQTgKM+gwc4xQBtDxHJcxIn2WW2+028kkMqOrMpR0Q5BGBgyKc8jAORWlpOojU7Dz/k3rJJC+xsqWRypIPoSuR7Gs2y0rSNSiMf2Z1FrmOPbdyErllckHIx8yKwPXgdK1rOwttOieO1QoruZGy7MSx5JySTyefrQBM3SoGqZulQPQBG1QtUrVC1AETVGVqRutA60gESOtSH/Vj6VnitCH/VigDc00YtM+rE1cqCzXbaRj1GanpjCiiigAooooAKKKKACiiigAooooAKKKKAClpKWgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigBKKKKACiiigAooooAKKKKACiiigAooooAKKKKAK14MxA+hqonDCr1yMwN7VQHWgRbHSjtSL0pTQA2kNLSGgDFl0rUz5nka5JCXlZ+YA+AcYUbicAYP1zUb6VrBGP8AhIHyGyD9lTpjp/8ArrcNIelAzCTS9XRkzr8jKG3FTapyM5xnr7VXnstVs7GWRtefCsZGkNuh2LhiQAevJXqeAO1dCeOtRNPCpIaaMYODlhwaBHFrrUYnUnxTL82AVay7DPb6nHA/PFJNqkkEhhbxPMZF3RlVskJJBxnPQYx3/wAK7DfbPKZFeIyKuCwIyF+vpkH8qBNGysyyoVU7SQwwD6UAc/aC41UT3Fhr8jR+blQbbAT5emDjPBHtx60640vWXuy8euskLMWKeQvy+gHt/Ot4uvUuv51AlxDMzCKaNyvUKwOKAMr+ztTDxM+tO2yTc3+jqNy8fKcfjz71TOj6osaKNdl+XnJhBJP58/Q10DVC9AFeNZVgRZnEkgXDOq7Qx9cdqa1StULGgCJjzQDQaRaQEqcmtGLhBWfHyRWlCu4KPXimB0US7YkX0UCn0UUDCiiigAooooAKKKKACiiigAooooAKKKKAClpKWgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigBKKKKACiiigAooooAKKKKACiiigAooooAKKKKAGTDML/SswVqOMow9RWZQBaQ/KKdUcf3RUlAhp60h6Up60hoAo6jFfSwKLC4jglDZLOu4EYIx+ZB/Cs17PxAZJCmoxKhb5AwVsDAH9wc5yf078bxpp6UDMZINRCObyRJcyW+xY+du0ruPQdSCf/1Vi6tBbEyPNoF9cFZZDH5LElvmGTx0Byx59K7A000COLeGBbdQdCvg0ilHiWRj8hXGM9ORgYyOnNStdLd2cdnNod/5W8SkMXGCWzycZJBOceo9Oa6xqYaAOetLeDVbcwXNlcWyxAqqu7Avu2uxzgH7wHPtVW31KaLEqaPfIdu6QNktjc/BGMHls4B6EeldS1RGgDBg12eeYrJpN3CgOA7oeeRjjH/6qsWd6955pa2khVNu0yAgtlQTwR2Jx+FaLVC9AETGoWNSPUTUgGGkHWlpwWgCSLqK1LUZliH+0P51mRda1bLm4iH+0KYHQUUUUDCiiigAooooAKKKKACiiigAooooAKKKKAClpKWgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigBKKKKACiiigAooooAKKKKACiiigAooooAKKKKACswjDEVp1nP/rW+tAEqDCinmmR9KeaBDTSUppDQBFO5jgdwMlVJFRMArRqSxYn72euOtWCAQQeRTDGnTaOmPwoGU4mLMpLbRzJkt1Xnj+VO3t9pQnIVlIAP4VM0MeAuxcAYAx2pGjRiCVBI6e1ICoc+ZgsdkwyvPQ//q/lSfKTMzEhR8owemB/9erOxVAAUADoPSo/LQdFHXPSgCAF2aJHODs3N7moJjyqoSS79M9AOv8AL9auMqkgkDI6GomjTIO0ZHT2oAp5LiP5j87bsZ6DHT86MfM596mZE/ujrnp3qJ+OBQIhfvUTVI5qM0AIKUvimE4FNzk0AWIjlhWvYf8AH3F/vVkW4+YVsacM3sX1P8jTA36KKKBhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABS0lLQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAlFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABVCUYmb61fqlOMTn6UALHUhHFRR9amoAYabTmptAhDTTTjTTQMYetMNPPWmGgQxqYae1MNADGqM09qjNAELVA9TvVdzQBCx5pjdKGPNRSPgYpAI7c4FIvWos5NSIeaALkA5rZ0sZvF9gTWPB2rb0hc3LH0T+opgbVFFFAwooooAKKKKACiiigAooooAKKKKACiiigApaSloAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooASiiigAooooAKKKKACiiigAooooAKKKKACiiigAqpcjEoPqKt1Wu+qmgCKM/NU9Vo/v1YHSgBDyaaaeaaRQIb2php9NNAEbUw09qYaAGNTDTzTDQAxqiNPY80w0AQSd6quasy9KoyvigBjtiq7nNOdqhLUgFp6Hmot1OU80Aadt0Fb+jDmU+gH9a563PyCuh0XlJj7j+tMDVooooGFFFFABRSZFG4UALRSbh60m8UAOopu8UbxQA6im7xSbxQA+imbxRvoAfS1HvqSgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigBKKKKACiiigAooooAKKKKACiiigAooooAKKKKACoLoZVT71Mc9qhlLFSKAIEGGqcVCnWphQAU2nUhoAaRTCKeelNNAiE0w1KajNAEZFMNSNUZoAiYc1GxqR6gc0AV52NUJTzVyY1nzNjNICJ2qBn96bLLiqb3Az1oAuCSpEfJrL+0jPWrEMwJHNK4G7bN8oFdFo8oihkLdGIxXL2z5HFacc0u0KowBTA6U3iDoaYb1exrCBnNPCzGmM2DeD1ppux61mLHKfWpBFJ6UAXvtXvR9pqosT+lSCJ/SgCf7QTR5xqMRP6U8RN6UAO8007zDSCJqeIjQAgY+tKG96cIqcIvagBm4U7d7GniP2pwjoAjDe1Waj2CpKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAEooooAKKKKACiiigAooooAKKKKACiiigAooooAKQgGlooAjaFT7VG1ux6SsPxqxRQBUMFwPuzZ+oFQvDf8A8Msf4rWjRQBivDrH8MsP/fv/AOvVd4te/hkg/wC/f/166KigDlni8Rdng/791EYfEnaSH/v1XXUUAcaYPEp/5aRf9+hTTbeJf78X/fsV2lFAHFfZPEh6vF/37o/s/wAQN1aL/viu1ooA4n+yNbf7zxf98U1vDeqSfflUfRa7iigDhP8AhD7t/vzH8BTl8DsfvSMfxruaKVgONj8ERjq2atR+D7dCCQK6iinYDFh0CGLgdKuJpkKVeooArrZxL2FPFvGP4RUtFAEfkp6UvlJ6U+igBvlr6UbF9KdRQAm0elG0elLRQAmB6UYHpS0UAGKKKKACiiigApaSloAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooASiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigApaSloAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//2Q=='
+            const { data } = await supabase.from('shots').insert([shot]).select();
+            shots = [data[0], ...shots];
+            showMessage('success', '✅ Shot enregistré !');
+            form.reset();
+            // Remettre les valeurs par défaut
+            form.dose.value = 18;
+            form.output.value = 38;
+            form.grind.value = 7.5;
+            form.time.value = 30;
+            form.preinfusion.value = 8;
+            render();
+        }
+
+        async function deleteShot(id) {
+            if (!confirm('Supprimer ce shot ?')) return;
+            await supabase.from('shots').delete().eq('id', id);
+            shots = shots.filter(s => s.id !== id);
+            render();
+        }
+
+        async function addBag(event) {
+            event.preventDefault();
+            const form = event.target;
+            const bag = {
+                name: form.name.value,
+                roaster: form.roaster.value,
+                roast_date: form.roast_date.value,
+                weight: parseInt(form.weight.value),
+                notes: form.notes.value,
+                status: 'active'
             };
+            const { data } = await supabase.from('bags').insert([bag]).select();
+            bags = [data[0], ...bags];
+            showMessage('success', '✅ Paquet ajouté !');
+            form.reset();
+            render();
+        }
 
-            function getPackageImage(name) {
-                if (!name) return null;
-                const n = name.toLowerCase();
-                if (n.includes('timana') || n.includes('timanà')) return PACKAGE_IMAGES.timana;
-                if (n.includes('gedeo') || n.includes('gédéo')) return PACKAGE_IMAGES.gedeo;
-                return null;
+        async function toggleBag(id, status) {
+            const newStatus = status === 'active' ? 'finished' : 'active';
+            await supabase.from('bags').update({ status: newStatus }).eq('id', id);
+            bags = bags.map(b => b.id === id ? { ...b, status: newStatus } : b);
+            render();
+        }
+
+        async function deleteBag(id) {
+            if (!confirm('Supprimer ce paquet ?')) return;
+            await supabase.from('bags').delete().eq('id', id);
+            bags = bags.filter(b => b.id !== id);
+            render();
+        }
+
+        async function importCSV(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                try {
+                    const lines = ev.target.result.split('\n').filter(l => l.trim());
+                    const data = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const v = lines[i].split(',');
+                        if (v.length < 10) continue;
+                        data.push({
+                            date: v[0].trim(),
+                            coffee: v[1].trim(),
+                            roaster: v[2].trim(),
+                            roast_date: v[3].trim(),
+                            age: parseInt(v[4]) || 0,
+                            dose: parseFloat(v[5]) || 18,
+                            output: parseFloat(v[6]) || 36,
+                            ratio: parseFloat(v[7]) || 2,
+                            grind: parseFloat(v[8]) || 7.5,
+                            time: parseInt(v[9]) || 0,
+                            preinfusion: parseInt(v[10]) || 0,
+                            wdt: v[11]?.trim() || 'non',
+                            channeling: v[12]?.trim() || 'non',
+                            flow: v[13]?.trim() || 'stable',
+                            taste: v[14]?.trim() || '',
+                            notes: v[15]?.trim() || ''
+                        });
+                    }
+                    await supabase.from('shots').insert(data);
+                    await loadData();
+                    showMessage('success', `✅ ${data.length} shots importés !`);
+                } catch (e) {
+                    showMessage('error', '❌ ' + e.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportCSV() {
+            const h = ['Date shot','Café','Torréfacteur','Date torréfaction','Âge (jours)','Dose (g)','Sortie (g)','Ratio','Mouture','Temps (s)','Préinfusion (s)','WDT','Channeling','Débit','Goût','Notes'];
+            const rows = shots.map(s => [s.date,s.coffee,s.roaster,s.roast_date,s.age,s.dose,s.output,s.ratio,s.grind,s.time,s.preinfusion,s.wdt,s.channeling,s.flow,s.taste,s.notes].join(','));
+            const csv = [h.join(','), ...rows].join('\n');
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `espresso_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        // ---------- 6. RENDU DE L'INTERFACE (Fonction qui génère le HTML) ----------
+        function render() {
+            const activeBags = bags.filter(b => b.status === 'active');
+
+            let html = `
+                <div class="tabs">
+                    <button class="tab ${currentTab === 'shots' ? 'active' : ''}" onclick="setTab('shots')">☕ Shots</button>
+                    <button class="tab ${currentTab === 'bags' ? 'active' : ''}" onclick="setTab('bags')">📦 Paquets</button>
+                    <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="setTab('settings')">⚙️ Paramètres</button>
+                </div>
+            `;
+
+            if (message) {
+                html += `<div class="alert alert-${message.type}">${message.text}</div>`;
             }
 
-            function getLogo(name) {
-                if (!name) return LOGOS.generic;
-                const n = name.toLowerCase();
-                if (n.includes('timana') || n.includes('timanà')) return LOGOS.timana;
-                if (n.includes('gedeo') || n.includes('gédéo')) return LOGOS.gedeo;
-                return LOGOS.generic;
-            }
+            // ---------- ONGLET SHOTS ----------
+            if (currentTab === 'shots') {
+                html += `
+                    <div class="section">
+                        <h2>+ Nouveau Shot</h2>
+                        <form id="form-shot" onsubmit="event.preventDefault(); addShot(event)">
+                            <div class="form-group">
+                                <label>Paquet actif</label>
+                                <select name="bag_id">
+                                    <option value="">-- Choisir un paquet --</option>
+                                    ${activeBags.map(b => `<option value="${b.id}">${b.name} (${b.roaster})</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Café (optionnel si paquet sélectionné)</label>
+                                <input type="text" name="coffee" placeholder="Nom du café">
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label>Dose (g)</label>
+                                    <input type="number" step="0.1" name="dose" value="18" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Sortie (g)</label>
+                                    <input type="number" step="0.1" name="output" value="38" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label>Mouture</label>
+                                    <input type="number" step="0.1" name="grind" value="7.5" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Temps (s)</label>
+                                    <input type="number" name="time" value="30" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label>Préinfusion (s)</label>
+                                    <input type="number" name="preinfusion" value="8">
+                                </div>
+                                <div class="form-group">
+                                    <label>WDT</label>
+                                    <select name="wdt">
+                                        <option value="non">Non</option>
+                                        <option value="léger">Léger</option>
+                                        <option value="normal">Normal</option>
+                                        <option value="profond">Profond</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label>Channeling</label>
+                                    <select name="channeling">
+                                        <option value="non">Non</option>
+                                        <option value="oui">Oui</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Débit</label>
+                                    <select name="flow">
+                                        <option value="rapide">Rapide</option>
+                                        <option value="stable" selected>Stable</option>
+                                        <option value="lent">Lent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Goût</label>
+                                <input type="text" name="taste" placeholder="très bon, bon, acide...">
+                            </div>
+                            <div class="form-group">
+                                <label>Notes</label>
+                                <textarea name="notes" rows="3" placeholder="Observations..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Enregistrer le Shot</button>
+                        </form>
+                    </div>
 
-            function App() {
-                const [tab, setTab] = useState('shots');
-                const [shots, setShots] = useState([]);
-                const [bags, setBags] = useState([]);
-                const [msg, setMsg] = useState(null);
-                const [formData, setFormData] = useState({
-                    coffee: '',
-                    bag_id: '',
-                    dose: 18,
-                    output: 38,
-                    grind: 7.5,
-                    time: 30,
-                    preinfusion: 8,
-                    wdt: 'non',
-                    channeling: 'non',
-                    flow: 'stable',
-                    taste: '',
-                    notes: ''
+                    <div class="section">
+                        <h2>📋 Historique (${shots.length} shots)</h2>
+                        ${shots.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun shot enregistré</p>' : ''}
+                `;
+
+                shots.forEach(s => {
+                    html += `
+                        <div class="shot-item">
+                            <div class="shot-header">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <img src="${getLogo(s.coffee)}" style="width:40px; height:40px; border-radius:50%;">
+                                    <div>
+                                        <div class="shot-title">${s.coffee}</div>
+                                        <div class="shot-date">${s.date}</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-danger btn-small" onclick="deleteShot('${s.id}')">✕ Supprimer</button>
+                            </div>
+                            <div class="shot-details">
+                                <div class="detail"><strong>Dose → Sortie</strong>${s.dose}g → ${s.output}g (1:${s.ratio.toFixed(1)})</div>
+                                <div class="detail"><strong>Mouture</strong>${s.grind}</div>
+                                <div class="detail"><strong>Temps</strong>${s.time}s</div>
+                                <div class="detail"><strong>Préinfusion</strong>${s.preinfusion}s</div>
+                                <div class="detail"><strong>Âge</strong>${s.age}j</div>
+                                <div class="detail"><strong>WDT</strong>${s.wdt}</div>
+                                <div class="detail"><strong>Channeling</strong>${s.channeling}</div>
+                                <div class="detail"><strong>Goût</strong>${s.taste || '-'}</div>
+                            </div>
+                            ${s.notes ? `<div style="margin-top:15px; font-size:15px; color:#666; font-style:italic;">📝 ${s.notes}</div>` : ''}
+                        </div>
+                    `;
                 });
 
-                useEffect(() => { load(); }, []);
-
-                async function load() {
-                    const { data: s } = await supabase.from('shots').select('*').order('created_at', { ascending: false });
-                    const { data: b } = await supabase.from('bags').select('*').order('created_at', { ascending: false });
-                    setShots(s || []);
-                    setBags(b || []);
-                }
-
-                function showMsg(type, text) {
-                    setMsg({ type, text });
-                    setTimeout(() => setMsg(null), 4000);
-                }
-
-                async function addShot(e) {
-                    e.preventDefault();
-                    
-                    const selectedBag = bags.find(b => b.id.toString() === formData.bag_id);
-                    const age = selectedBag && selectedBag.roast_date ? 
-                        Math.floor((new Date() - new Date(selectedBag.roast_date.split('/').reverse().join('-'))) / 86400000) : 0;
-                    
-                    const shot = {
-                        date: new Date().toLocaleString('fr-FR'),
-                        coffee: formData.coffee || (selectedBag ? selectedBag.name : ''),
-                        roaster: selectedBag ? selectedBag.roaster : "L'Arbre à Café",
-                        roast_date: selectedBag ? selectedBag.roast_date : '',
-                        age,
-                        dose: parseFloat(formData.dose),
-                        output: parseFloat(formData.output),
-                        ratio: parseFloat((formData.output / formData.dose).toFixed(2)),
-                        grind: parseFloat(formData.grind),
-                        time: parseInt(formData.time),
-                        preinfusion: parseInt(formData.preinfusion),
-                        wdt: formData.wdt,
-                        channeling: formData.channeling,
-                        flow: formData.flow,
-                        taste: formData.taste,
-                        notes: formData.notes
-                    };
-                    
-                    const { data } = await supabase.from('shots').insert([shot]).select();
-                    setShots([data[0], ...shots]);
-                    showMsg('success', '✅ Shot enregistré !');
-                    
-                    setFormData({
-                        coffee: '',
-                        bag_id: '',
-                        dose: 18,
-                        output: 38,
-                        grind: 7.5,
-                        time: 30,
-                        preinfusion: 8,
-                        wdt: 'non',
-                        channeling: 'non',
-                        flow: 'stable',
-                        taste: '',
-                        notes: ''
-                    });
-                }
-
-                async function delShot(id) {
-                    if (!confirm('Supprimer ?')) return;
-                    await supabase.from('shots').delete().eq('id', id);
-                    setShots(shots.filter(s => s.id !== id));
-                }
-
-                async function addBag(e) {
-                    e.preventDefault();
-                    const form = e.target;
-                    const bag = {
-                        name: form.name.value,
-                        roaster: form.roaster.value,
-                        roast_date: form.roast_date.value,
-                        weight: parseInt(form.weight.value),
-                        notes: form.notes.value,
-                        status: 'active'
-                    };
-                    const { data } = await supabase.from('bags').insert([bag]).select();
-                    setBags([data[0], ...bags]);
-                    showMsg('success', '✅ Paquet ajouté !');
-                    form.reset();
-                }
-
-                async function toggleBag(id, status) {
-                    await supabase.from('bags').update({ status: status === 'active' ? 'finished' : 'active' }).eq('id', id);
-                    setBags(bags.map(b => b.id === id ? { ...b, status: status === 'active' ? 'finished' : 'active' } : b));
-                }
-
-                async function delBag(id) {
-                    if (!confirm('Supprimer ?')) return;
-                    await supabase.from('bags').delete().eq('id', id);
-                    setBags(bags.filter(b => b.id !== id));
-                }
-
-                async function importCSV(e) {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = async (ev) => {
-                        try {
-                            const lines = ev.target.result.split('\n').filter(l => l.trim());
-                            const data = [];
-                            for (let i = 1; i < lines.length; i++) {
-                                const v = lines[i].split(',');
-                                if (v.length < 10) continue;
-                                data.push({
-                                    date: v[0].trim(),
-                                    coffee: v[1].trim(),
-                                    roaster: v[2].trim(),
-                                    roast_date: v[3].trim(),
-                                    age: parseInt(v[4]) || 0,
-                                    dose: parseFloat(v[5]) || 18,
-                                    output: parseFloat(v[6]) || 36,
-                                    ratio: parseFloat(v[7]) || 2,
-                                    grind: parseFloat(v[8]) || 7.5,
-                                    time: parseInt(v[9]) || 0,
-                                    preinfusion: parseInt(v[10]) || 0,
-                                    wdt: v[11]?.trim() || 'non',
-                                    channeling: v[12]?.trim() || 'non',
-                                    flow: v[13]?.trim() || 'stable',
-                                    taste: v[14]?.trim() || '',
-                                    notes: v[15]?.trim() || ''
-                                });
-                            }
-                            await supabase.from('shots').insert(data);
-                            load();
-                            showMsg('success', `✅ ${data.length} shots importés !`);
-                        } catch (e) {
-                            showMsg('error', '❌ ' + e.message);
-                        }
-                    };
-                    reader.readAsText(file);
-                }
-
-                function exportCSV() {
-                    const h = ['Date shot','Café','Torréfacteur','Date torréfaction','Âge (jours)','Dose (g)','Sortie (g)','Ratio','Mouture','Temps (s)','Préinfusion (s)','WDT','Channeling','Débit','Goût','Notes'];
-                    const rows = shots.map(s => [s.date,s.coffee,s.roaster,s.roast_date,s.age,s.dose,s.output,s.ratio,s.grind,s.time,s.preinfusion,s.wdt,s.channeling,s.flow,s.taste,s.notes].join(','));
-                    const csv = [h.join(','), ...rows].join('\n');
-                    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = `espresso_${new Date().toISOString().split('T')[0]}.csv`;
-                    link.click();
-                }
-
-                const activeBags = bags.filter(b => b.status === 'active');
-
-                return React.createElement('div', { className: 'container' },
-                    React.createElement('div', { className: 'tabs' },
-                        React.createElement('button', {
-                            className: `tab ${tab === 'shots' ? 'active' : ''}`,
-                            onClick: () => setTab('shots')
-                        }, '☕ Shots'),
-                        React.createElement('button', {
-                            className: `tab ${tab === 'bags' ? 'active' : ''}`,
-                            onClick: () => setTab('bags')
-                        }, '📦 Paquets'),
-                        React.createElement('button', {
-                            className: `tab ${tab === 'settings' ? 'active' : ''}`,
-                            onClick: () => setTab('settings')
-                        }, '⚙️ Paramètres')
-                    ),
-
-                    msg && React.createElement('div', { className: `alert alert-${msg.type}` }, msg.text),
-
-                    tab === 'shots' && React.createElement('div', null,
-                        React.createElement('div', { className: 'section' },
-                            React.createElement('h2', null, '+ Nouveau Shot'),
-                            React.createElement('form', { onSubmit: addShot },
-                                React.createElement('div', { className: 'form-group' },
-                                    React.createElement('label', null, 'Paquet actif'),
-                                    React.createElement('select', {
-                                        value: formData.bag_id,
-                                        onChange: (e) => {
-                                            const bag = bags.find(b => b.id.toString() === e.target.value);
-                                            setFormData({
-                                                ...formData,
-                                                bag_id: e.target.value,
-                                                coffee: bag ? bag.name : formData.coffee
-                                            });
-                                        }
-                                    },
-                                        React.createElement('option', { value: '' }, '-- Choisir un paquet --'),
-                                        activeBags.map(b => React.createElement('option', { key: b.id, value: b.id }, `${b.name} (${b.roaster})`))
-                                    )
-                                ),
-                                React.createElement('div', { className: 'form-group' },
-                                    React.createElement('label', null, 'Café (optionnel si paquet sélectionné)'),
-                                    React.createElement('input', {
-                                        type: 'text',
-                                        placeholder: 'Nom du café',
-                                        value: formData.coffee,
-                                        onChange: (e) => setFormData({...formData, coffee: e.target.value})
-                                    })
-                                ),
-                                React.createElement('div', { className: 'row' },
-                                    React.createElement('div', { className: 'form-group' },
-                                        React.createElement('label', null, 'Dose (g)'),
-                                        React.createElement('input', {
-                                            type: 'number',
-                                            step: '0.1',
-                                            value: formData.dose,
-                                            onChange: (e) => setFormData({...formData, dose: e.target.value}),
-                                            required: true
-                                        })
-                                    ),
-                                    React.createElement('div', { className: 'form-group' },
-                                        React.createElement('label', null, 'Sortie (g)'),
-                                        React.createElement('input', {
-                                            type: 'number',
-                                            step: '0.1',
-                                            value: formData.output,
-                                            onChange: (e) => setFormData({...formData, output: e.target.value}),
-                                            required: true
-                                        })
-                                    )
-                                ),
-                                React.createElement('div', { className: 'row' },
-                                    React.createElement('div', { className: 'form-group' },
-                                        React.createElement('label', null, 'Mouture'),
-                                        React.createElement('input', {
-                                            type: 'number',
-                                            step: '0.1',
-                                            value: formData.grind,
-                                            onChange: (e) => setFormData({...formData, grind: e.target.value}),
-                                            required: true
-                                        })
-                                    ),
-                                    React.createElement('div', { className: 'form-group' },
-                                        React.createElement('label', null, 'Temps (s)'),
-                                        React.createElement('input', {
-                                            type: 'number',
-                                            value: formData.time,
-                                            onChange: (e) => setFormData({...formData, time: e.target.value}),
-                                            required: true
-                                        })
-                                    )
-                                ),
-                                React.createElement('div', { className: 'row' },
-                                    React.createElement('div', { className: 'form-group' },
-                                        React.createElement('label', null, 'Préinfusion (s)'),
-                                        React.createElement('input', {
-                                            type: 'number',
-                                            value: formData.preinfusion,
-                                            onChange: (e) => setFormData({...formData, preinfusion: e.target.value})
-                                        })
-                                    ),
-                                    React.createElement('div', { className: 'form-group' },
-                                        React.createElement('label', null, 'WDT'),
-                                        React.createElement('select', {
-                                            value: formData.wdt,
-                                            onChange: (e) => setFormData({...formData, wdt: e.target.value})
-                                        },
-                                            ['non', 'léger', 'normal', 'profond'].map(o => React.createElement('option', { key: o, value: o }, o.charAt(0).toUpperCase() + o.slice(1)))
-                                        )
-                                    )
-                                ),
-                                React.createElement('div', { className: 'row' },
-                                    React.createElement('div', { className: 'form-group' },
-                                        React.createElement('label', null, 'Channeling'),
-                                        React.createElement('select', {
-                                            value: formData.channeling,
-                                            onChange: (e) => setFormData({...formData, channeling: e.target.value})
-                                        },
-                                            React.createElement('option', { value: 'non' }, 'Non'),
-                                            React.createElement('option', { value: 'oui' }, 'Oui')
-                                        )
-                                    ),
-                                    React.createElement('div', { className: 'form-group' },
-                                        React.createElement('label', null, 'Débit'),
-                                        React.createElement('select', {
-                                            value: formData.flow,
-                                            onChange: (e) => setFormData({...formData, flow: e.target.value})
-                                        },
-                                            ['rapide', 'stable', 'lent'].map(o => React.createElement('option', { key: o, value: o }, o.charAt(0).toUpperCase() + o.slice(1)))
-                                        )
-                                    )
-                                ),
-                                React.createElement('div', { className: 'form-group' },
-                                    React.createElement('label', null, 'Goût'),
-                                    React.createElement('input', {
-                                        type: 'text',
-                                        placeholder: 'très bon, bon, acide...',
-                                        value: formData.taste,
-                                        onChange: (e) => setFormData({...formData, taste: e.target.value})
-                                    })
-                                ),
-                                React.createElement('div', { className: 'form-group' },
-                                    React.createElement('label', null, 'Notes'),
-                                    React.createElement('textarea', {
-                                        rows: 3,
-                                        placeholder: 'Observations...',
-                                        value: formData.notes,
-                                        onChange: (e) => setFormData({...formData, notes: e.target.value})
-                                    })
-                                ),
-                                React.createElement('button', { type: 'submit', className: 'btn btn-primary' }, 'Enregistrer le Shot')
-                            )
-                        ),
-
-                        React.createElement('div', { className: 'section' },
-                            React.createElement('h2', null, `📋 Historique (${shots.length} shots)`),
-                            shots.length === 0 && React.createElement('p', { style: { textAlign: 'center', color: '#888', padding: '40px' } }, 'Aucun shot enregistré'),
-                            shots.map(s => React.createElement('div', { key: s.id, className: 'shot-item' },
-                                React.createElement('div', { className: 'shot-header' },
-                                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } },
-                                        React.createElement('img', {
-                                            src: getLogo(s.coffee),
-                                            style: { width: '40px', height: '40px', borderRadius: '50%' }
-                                        }),
-                                        React.createElement('div', null,
-                                            React.createElement('div', { className: 'shot-title' }, s.coffee),
-                                            React.createElement('div', { className: 'shot-date' }, s.date)
-                                        )
-                                    ),
-                                    React.createElement('button', {
-                                        className: 'btn btn-danger btn-small',
-                                        onClick: () => delShot(s.id)
-                                    }, '✕ Supprimer')
-                                ),
-                                React.createElement('div', { className: 'shot-details' },
-                                    React.createElement('div', { className: 'detail' },
-                                        React.createElement('strong', null, 'Dose → Sortie'),
-                                        `${s.dose}g → ${s.output}g (1:${s.ratio.toFixed(1)})`
-                                    ),
-                                    React.createElement('div', { className: 'detail' },
-                                        React.createElement('strong', null, 'Mouture'),
-                                        s.grind
-                                    ),
-                                    React.createElement('div', { className: 'detail' },
-                                        React.createElement('strong', null, 'Temps'),
-                                        s.time + 's'
-                                    ),
-                                    React.createElement('div', { className: 'detail' },
-                                        React.createElement('strong', null, 'Préinfusion'),
-                                        s.preinfusion + 's'
-                                    ),
-                                    React.createElement('div', { className: 'detail' },
-                                        React.createElement('strong', null, 'Âge'),
-                                        s.age + 'j'
-                                    ),
-                                    React.createElement('div', { className: 'detail' },
-                                        React.createElement('strong', null, 'WDT'),
-                                        s.wdt
-                                    ),
-                                    React.createElement('div', { className: 'detail' },
-                                        React.createElement('strong', null, 'Channeling'),
-                                        s.channeling
-                                    ),
-                                    React.createElement('div', { className: 'detail' },
-                                        React.createElement('strong', null, 'Goût'),
-                                        s.taste || '-'
-                                    )
-                                ),
-                                s.notes && React.createElement('div', { style: { marginTop: '15px', fontSize: '15px', color: '#666', fontStyle: 'italic' } }, '📝 ' + s.notes)
-                            ))
-                        )
-                    ),
-
-                    tab === 'bags' && React.createElement('div', null,
-                        React.createElement('div', { className: 'section' },
-                            React.createElement('h2', null, '+ Nouveau Paquet'),
-                            React.createElement('form', { onSubmit: addBag },
-                                React.createElement('div', { className: 'form-group' },
-                                    React.createElement('label', null, 'Nom du café *'),
-                                    React.createElement('input', { type: 'text', name: 'name', placeholder: 'Gédéo, Timanà...', required: true })
-                                ),
-                                React.createElement('div', { className: 'form-group' },
-                                    React.createElement('label', null, 'Torréfacteur'),
-                                    React.createElement('input', { type: 'text', name: 'roaster', defaultValue: "L'Arbre à Café" })
-                                ),
-                                React.createElement('div', { className: 'row' },
-                                    React.createElement('div', { className: 'form-group' },
-                                        React.createElement('label', null, 'Date torréfaction (JJ/MM/AAAA) *'),
-                                        React.createElement('input', { type: 'text', name: 'roast_date', placeholder: '31/12/2025', required: true })
-                                    ),
-                                    React.createElement('div', { className: 'form-group' },
-                                        React.createElement('label', null, 'Poids (g)'),
-                                        React.createElement('input', { type: 'number', name: 'weight', defaultValue: 250 })
-                                    )
-                                ),
-                                React.createElement('div', { className: 'form-group' },
-                                    React.createElement('label', null, 'Notes'),
-                                    React.createElement('textarea', { name: 'notes', rows: 3, placeholder: 'Profil aromatique...' })
-                                ),
-                                React.createElement('button', { type: 'submit', className: 'btn btn-primary' }, 'Ajouter le Paquet')
-                            )
-                        ),
-
-                        React.createElement('div', { className: 'section' },
-                            React.createElement('h2', null, `📦 Mes Paquets (${bags.length})`),
-                            bags.length === 0 && React.createElement('p', { style: { textAlign: 'center', color: '#888', padding: '40px' } }, 'Aucun paquet enregistré'),
-                            bags.map(b => {
-                                const age = b.roast_date ? Math.floor((new Date() - new Date(b.roast_date.split('/').reverse().join('-'))) / 86400000) : 0;
-                                const bgImage = getPackageImage(b.name);
-                                return React.createElement('div', { 
-                                    key: b.id, 
-                                    className: 'bag-item',
-                                    style: bgImage ? { backgroundImage: `url(${bgImage})` } : {}
-                                },
-                                    React.createElement('div', { className: 'bag-header' },
-                                        React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', gap: '15px' } },
-                                            React.createElement('img', {
-                                                src: getLogo(b.name),
-                                                style: { width: '50px', height: '50px', borderRadius: '50%', marginTop: '4px' }
-                                            }),
-                                            React.createElement('div', null,
-                                                React.createElement('div', { className: 'bag-title' }, b.name),
-                                                React.createElement('div', { className: 'bag-info' },
-                                                    `${b.roaster} • Torréfié le ${b.roast_date}`,
-                                                    React.createElement('br'),
-                                                    `Âge: ${age} jours • ${b.weight}g`
-                                                ),
-                                                React.createElement('span', { className: `bag-status ${b.status}` }, b.status === 'active' ? '✓ Actif' : '○ Terminé')
-                                            )
-                                        ),
-                                        React.createElement('div', { style: { display: 'flex', gap: '10px' } },
-                                            React.createElement('button', {
-                                                className: 'btn btn-secondary btn-small',
-                                                onClick: () => toggleBag(b.id, b.status)
-                                            }, b.status === 'active' ? 'Terminer' : 'Réactiver'),
-                                            React.createElement('button', {
-                                                className: 'btn btn-danger btn-small',
-                                                onClick: () => delBag(b.id)
-                                            }, '✕')
-                                        )
-                                    ),
-                                    b.notes && React.createElement('div', { style: { marginTop: '12px', fontSize: '15px', color: '#666', fontStyle: 'italic' } }, '📝 ' + b.notes)
-                                );
-                            })
-                        )
-                    ),
-
-                    tab === 'settings' && React.createElement('div', { className: 'section' },
-                        React.createElement('h2', null, '⚙️ Paramètres'),
-                        React.createElement('div', { className: 'alert alert-success' }, '✅ Synchronisé avec Supabase'),
-                        React.createElement('h3', { style: { marginTop: '25px', marginBottom: '15px' } }, 'Importer des données CSV'),
-                        React.createElement('div', { className: 'file-input-wrapper' },
-                            React.createElement('button', { className: 'btn btn-secondary' }, '📁 Choisir un fichier CSV'),
-                            React.createElement('input', { type: 'file', accept: '.csv', onChange: importCSV })
-                        ),
-                        React.createElement('h3', { style: { marginTop: '30px', marginBottom: '15px' } }, 'Exporter les données'),
-                        React.createElement('p', { style: { marginBottom: '15px', color: '#666' } }, `${shots.length} shots enregistrés`),
-                        React.createElement('button', {
-                            className: 'btn btn-primary',
-                            onClick: exportCSV,
-                            disabled: shots.length === 0,
-                            style: { width: 'auto' }
-                        }, '📥 Télécharger CSV')
-                    )
-                );
+                html += `</div>`;
             }
 
-            const root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(React.createElement(App));
-        });
+            // ---------- ONGLET PAQUETS ----------
+            else if (currentTab === 'bags') {
+                html += `
+                    <div class="section">
+                        <h2>+ Nouveau Paquet</h2>
+                        <form id="form-bag" onsubmit="event.preventDefault(); addBag(event)">
+                            <div class="form-group">
+                                <label>Nom du café *</label>
+                                <input type="text" name="name" placeholder="Gédéo, Timanà..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>Torréfacteur</label>
+                                <input type="text" name="roaster" value="L'Arbre à Café">
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label>Date torréfaction (JJ/MM/AAAA) *</label>
+                                    <input type="text" name="roast_date" placeholder="31/12/2025" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Poids (g)</label>
+                                    <input type="number" name="weight" value="250">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Notes</label>
+                                <textarea name="notes" rows="3" placeholder="Profil aromatique..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Ajouter le Paquet</button>
+                        </form>
+                    </div>
+
+                    <div class="section">
+                        <h2>📦 Mes Paquets (${bags.length})</h2>
+                        ${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun paquet enregistré</p>' : ''}
+                `;
+
+                bags.forEach(b => {
+                    const age = b.roast_date ? Math.floor((new Date() - new Date(b.roast_date.split('/').reverse().join('-'))) / 86400000) : 0;
+                    const bgImage = getPackageImage(b.name);
+                    const bgStyle = bgImage ? `style="background-image: url('${bgImage}');"` : '';
+                    html += `
+                        <div class="bag-item" ${bgStyle}>
+                            <div class="bag-header">
+                                <div style="display:flex; align-items:flex-start; gap:15px;">
+                                    <img src="${getLogo(b.name)}" style="width:50px; height:50px; border-radius:50%; margin-top:4px;">
+                                    <div>
+                                        <div class="bag-title">${b.name}</div>
+                                        <div class="bag-info">${b.roaster} • Torréfié le ${b.roast_date}<br>Âge: ${age} jours • ${b.weight}g</div>
+                                        <span class="bag-status ${b.status}">${b.status === 'active' ? '✓ Actif' : '○ Terminé'}</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:10px;">
+                                    <button class="btn btn-secondary btn-small" onclick="toggleBag('${b.id}', '${b.status}')">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
+                                    <button class="btn btn-danger btn-small" onclick="deleteBag('${b.id}')">✕</button>
+                                </div>
+                            </div>
+                            ${b.notes ? `<div style="margin-top:12px; font-size:15px; color:#666; font-style:italic;">📝 ${b.notes}</div>` : ''}
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            }
+
+            // ---------- ONGLET PARAMÈTRES ----------
+            else if (currentTab === 'settings') {
+                html += `
+                    <div class="section">
+                        <h2>⚙️ Paramètres</h2>
+                        <div class="alert alert-success">✅ Synchronisé avec Supabase</div>
+                        <h3 style="margin-top:25px; margin-bottom:15px;">Importer des données CSV</h3>
+                        <div class="file-input-wrapper">
+                            <button class="btn btn-secondary">📁 Choisir un fichier CSV</button>
+                            <input type="file" accept=".csv" onchange="importCSV(this.files[0])">
+                        </div>
+                        <h3 style="margin-top:30px; margin-bottom:15px;">Exporter les données</h3>
+                        <p style="margin-bottom:15px; color:#666;">${shots.length} shots enregistrés</p>
+                        <button class="btn btn-primary" onclick="exportCSV()" style="width:auto;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button>
+                    </div>
+                `;
+            }
+
+            appEl.innerHTML = html;
+        }
+
+        // ---------- 7. FONCTIONS GLOBALES POUR LES ÉVÉNEMENTS ----------
+        window.setTab = function(tab) {
+            currentTab = tab;
+            render();
+        };
+
+        window.addShot = addShot;
+        window.deleteShot = deleteShot;
+        window.addBag = addBag;
+        window.toggleBag = toggleBag;
+        window.deleteBag = deleteBag;
+        window.importCSV = importCSV;
+        window.exportCSV = exportCSV;
+
+        // ---------- 8. DÉMARRAGE ----------
+        loadData();
     </script>
 </body>
 </html>
