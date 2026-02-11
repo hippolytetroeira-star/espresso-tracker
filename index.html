@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>☕ Espresso Tracker (simple)</title>
+    <title>☕ Espresso Tracker</title>
     <style>
-        /* Tous tes styles sont déjà ici, je les garde à l'identique */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f5f0; padding: 0; min-height: 100vh; }
         .header { background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); color: white; padding: 25px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
@@ -53,7 +52,6 @@
         .actions { display: flex; gap: 12px; margin-top: 25px; }
         @media (max-width: 600px) { .row { grid-template-columns: 1fr; } .container { padding: 20px 15px; } .tabs { flex-direction: column; gap: 10px; } .tab { padding: 12px 20px; } }
     </style>
-    <!-- Chargement de Supabase (CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -61,35 +59,32 @@
         <h1>☕ Espresso Tracker</h1>
     </div>
     <div id="app" class="container">
-        <!-- Le contenu sera généré ici par JavaScript -->
         <div style="text-align: center; padding: 60px; color: #8B4513;">⏳ Chargement...</div>
     </div>
 
     <script>
-        // ---------- 1. CONFIG SUPABASE (remplace avec TES clés) ----------
+        // === CONFIG SUPABASE (tes clés) ===
         const SUPABASE_URL = 'https://duzxzqmjkovrsfwhdyml.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1enh6cW1qa292cnNmd2hkeW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3NjAzMzYsImV4cCI6MjA4NjMzNjMzNn0.hRUDEbr9yhd_R1Q0lLVYYppnht5tUAd5TtE9kanzvos';
 
-        // Initialisation Supabase (version CDN)
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // ✅ Création du client Supabase – renommé "sb" pour éviter le conflit avec la variable globale
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // ---------- 2. DONNÉES GLOBALES ----------
-        let currentTab = 'shots'; // shots, bags, settings
+        // === DONNÉES GLOBALES ===
+        let currentTab = 'shots';
         let shots = [];
         let bags = [];
         let message = null;
-
-        // Référence à l'élément #app
         const appEl = document.getElementById('app');
 
-        // ---------- 3. FONCTIONS UTILITAIRES ----------
+        // === FONCTIONS UTILITAIRES ===
         function showMessage(type, text) {
             message = { type, text };
             setTimeout(() => { message = null; render(); }, 4000);
             render();
         }
 
-        // Logos et images (reprise de ton code)
+        // Logos et images
         const LOGOS = {
             timana: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACbUlEQVR4nO2bPVLDMBSEVxnOkQ5OQUtDTkBNmYaOM9DRUKbmBlSUnIKSjlOYgiiRZcnSk/WzzmgbMkNG8n5vnyx7IoW6GgTfVcWuouIkEsMhFbnWEoN6TQ/vN9GDqIfv2X8Lrmd+nlwDwWFcYjgkD5DF158DQFHjtnKDWArgZL6kaZ8sGEleUgGMqt7CvJYjESJPKQDOVd8f/j/cviQMk1epadgI55maB4CvZ+Ew+WWlMPr2KwHgNk+kFAixAMLmCVIAyCHEAIiv/AohhADQx96nWAhzANLMk6QAiIMQbIG1Vd5WaI/iAzAAC8wTpQAYQZikwAUgzyMsGQRDI3/eFlh79G35WsEGsCz6tshS4GoF6Vb44mQCyPn66iyyFBgaAEcCLq33bdlrQZ0W4E3B6bk57+LnE8F7Ay39/qAvglVnI2yFngDU6n8tkhTou0FPQJNZSVIAtEwACYTeAk1nJ0jBVesL2P1+Npx921ugKYDd9V3L6QE0BMBgHmi9CBJog+MjsXp7rDYpQ/U/nrYAegLqA2CovqmegOPfKusAS/V1/wNQ1RLAYt7WBEDNu0ELGdUHMAZQ7HfDpNVXQF8EJwCyL4ZM1TcXP/3Bm4BLWwvs3tdyAci2FjBV39DIny8Bi1uBybwr+lrBRXDtreCLvtYcgBMtKQSW6lvmna0dSkAyhNaKMQ/E7QNEEBiqH2seiN8IRUFYm3lAthOkbwepeUC+FfZCaF39FPOiL1oanxnaH5oBcNzmRJ5SH4YUCFrCUXVxQYucG7x//ckwrFuejU2zc4OmioLIbTzbAA55f3EqARLYwlKeHXaJ/vT4H4+IseLBtt/JAAAAAElFTkSuQmCC',
             gedeo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACcUlEQVR4nO2bvU7DMBSFTyo2dgZmNhaeAYmZHfYO3XkKdiTYeQDmCt6CjZWFvXNY6shx7NjX8c9J5bNQidbO+e65jhMlHcqqF3y3y3YUBSeRGPYpy7HmGNRp+vb9EDzI1+P53L+THXdKABPjEsM+OYAsPv4UALIaN5UaxFIAg/mcpl0yYER5iQUwqnoN80qWRIg8xQAYzG/3OwDAz99zxDBpFZuGjXCeiXkAuLp4Eg6TXkYKg0+/EgBW80yKgRAKwGueIQWAHEIIgODKrxGCDwB97F0KhTAHIMo8SwqAMAjeFlhb5U359iguAD0Qb54pBcAIwiQFNgBJLmHZIGga+XO2wNqjb8rVCiaARdE3xZYCWytIt8InJx1AyttXg9hSoKkHLAk4td43Za4FRVqAOAXDdXPSxc8lhvsGSur+QVsES07G2AotASjU/0osKVBng5aAGpOypAComAAWCK0Fak7OkIKz2gfwefNQbe4OrQXqAni9/K05PYCKABjMA60FsMHxkvjt7qXYpAzV764/ALQElAfAUH1dLQHHv0XWAZbqq/4H0BVLAIt5UxMAJc8GNaRVH8AYQLbnhkmr3wFtEZwASL4YMlVfX/zUB2cCTm0tMHtfyQYg2VrAVH1NI3+uBCxuBSbztugreRfBtbeCK/pKcwAGWlIILNU3zFtb25eAaAi1FWIeCNsHiCAwVD/UPBC+EQqCsDbzgGwnSN8OUvOAfCvshFC7+jHmRV80NHqibLvfVQNgOc1lf2dI1wCi/75fOJRcsVVf/CNDk+cLc8JwbGyqvTeoKyuI1MaTDWCR84lTCRDPFpby3WGb6N8e/wdHGbWdc2XBIwAAAABJRU5ErkJggg==',
@@ -117,11 +112,11 @@
             return null;
         }
 
-        // ---------- 4. CHARGEMENT DES DONNÉES ----------
+        // === CHARGEMENT DES DONNÉES ===
         async function loadData() {
             try {
-                const { data: s } = await supabase.from('shots').select('*').order('created_at', { ascending: false });
-                const { data: b } = await supabase.from('bags').select('*').order('created_at', { ascending: false });
+                const { data: s } = await sb.from('shots').select('*').order('created_at', { ascending: false });
+                const { data: b } = await sb.from('bags').select('*').order('created_at', { ascending: false });
                 shots = s || [];
                 bags = b || [];
             } catch (e) {
@@ -131,7 +126,7 @@
             render();
         }
 
-        // ---------- 5. FONCTIONS CRUD ----------
+        // === CRUD SHOTS ===
         async function addShot(event) {
             event.preventDefault();
             const form = event.target;
@@ -158,11 +153,10 @@
                 notes: form.notes.value
             };
 
-            const { data } = await supabase.from('shots').insert([shot]).select();
+            const { data } = await sb.from('shots').insert([shot]).select();
             shots = [data[0], ...shots];
             showMessage('success', '✅ Shot enregistré !');
             form.reset();
-            // Remettre les valeurs par défaut
             form.dose.value = 18;
             form.output.value = 38;
             form.grind.value = 7.5;
@@ -173,11 +167,12 @@
 
         async function deleteShot(id) {
             if (!confirm('Supprimer ce shot ?')) return;
-            await supabase.from('shots').delete().eq('id', id);
+            await sb.from('shots').delete().eq('id', id);
             shots = shots.filter(s => s.id !== id);
             render();
         }
 
+        // === CRUD BAGS ===
         async function addBag(event) {
             event.preventDefault();
             const form = event.target;
@@ -189,7 +184,7 @@
                 notes: form.notes.value,
                 status: 'active'
             };
-            const { data } = await supabase.from('bags').insert([bag]).select();
+            const { data } = await sb.from('bags').insert([bag]).select();
             bags = [data[0], ...bags];
             showMessage('success', '✅ Paquet ajouté !');
             form.reset();
@@ -198,18 +193,19 @@
 
         async function toggleBag(id, status) {
             const newStatus = status === 'active' ? 'finished' : 'active';
-            await supabase.from('bags').update({ status: newStatus }).eq('id', id);
+            await sb.from('bags').update({ status: newStatus }).eq('id', id);
             bags = bags.map(b => b.id === id ? { ...b, status: newStatus } : b);
             render();
         }
 
         async function deleteBag(id) {
             if (!confirm('Supprimer ce paquet ?')) return;
-            await supabase.from('bags').delete().eq('id', id);
+            await sb.from('bags').delete().eq('id', id);
             bags = bags.filter(b => b.id !== id);
             render();
         }
 
+        // === IMPORT/EXPORT ===
         async function importCSV(file) {
             if (!file) return;
             const reader = new FileReader();
@@ -239,7 +235,7 @@
                             notes: v[15]?.trim() || ''
                         });
                     }
-                    await supabase.from('shots').insert(data);
+                    await sb.from('shots').insert(data);
                     await loadData();
                     showMessage('success', `✅ ${data.length} shots importés !`);
                 } catch (e) {
@@ -260,15 +256,15 @@
             link.click();
         }
 
-        // ---------- 6. RENDU DE L'INTERFACE (Fonction qui génère le HTML) ----------
+        // === RENDU ===
         function render() {
             const activeBags = bags.filter(b => b.status === 'active');
 
             let html = `
                 <div class="tabs">
-                    <button class="tab ${currentTab === 'shots' ? 'active' : ''}" onclick="setTab('shots')">☕ Shots</button>
-                    <button class="tab ${currentTab === 'bags' ? 'active' : ''}" onclick="setTab('bags')">📦 Paquets</button>
-                    <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="setTab('settings')">⚙️ Paramètres</button>
+                    <button class="tab ${currentTab === 'shots' ? 'active' : ''}" onclick="window.setTab('shots')">☕ Shots</button>
+                    <button class="tab ${currentTab === 'bags' ? 'active' : ''}" onclick="window.setTab('bags')">📦 Paquets</button>
+                    <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="window.setTab('settings')">⚙️ Paramètres</button>
                 </div>
             `;
 
@@ -276,12 +272,12 @@
                 html += `<div class="alert alert-${message.type}">${message.text}</div>`;
             }
 
-            // ---------- ONGLET SHOTS ----------
+            // --- SHOTS ---
             if (currentTab === 'shots') {
                 html += `
                     <div class="section">
                         <h2>+ Nouveau Shot</h2>
-                        <form id="form-shot" onsubmit="event.preventDefault(); addShot(event)">
+                        <form id="form-shot" onsubmit="event.preventDefault(); window.addShot(event)">
                             <div class="form-group">
                                 <label>Paquet actif</label>
                                 <select name="bag_id">
@@ -356,7 +352,6 @@
                             <button type="submit" class="btn btn-primary">Enregistrer le Shot</button>
                         </form>
                     </div>
-
                     <div class="section">
                         <h2>📋 Historique (${shots.length} shots)</h2>
                         ${shots.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun shot enregistré</p>' : ''}
@@ -373,7 +368,7 @@
                                         <div class="shot-date">${s.date}</div>
                                     </div>
                                 </div>
-                                <button class="btn btn-danger btn-small" onclick="deleteShot('${s.id}')">✕ Supprimer</button>
+                                <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')">✕ Supprimer</button>
                             </div>
                             <div class="shot-details">
                                 <div class="detail"><strong>Dose → Sortie</strong>${s.dose}g → ${s.output}g (1:${s.ratio.toFixed(1)})</div>
@@ -392,13 +387,12 @@
 
                 html += `</div>`;
             }
-
-            // ---------- ONGLET PAQUETS ----------
+            // --- BAGS ---
             else if (currentTab === 'bags') {
                 html += `
                     <div class="section">
                         <h2>+ Nouveau Paquet</h2>
-                        <form id="form-bag" onsubmit="event.preventDefault(); addBag(event)">
+                        <form id="form-bag" onsubmit="event.preventDefault(); window.addBag(event)">
                             <div class="form-group">
                                 <label>Nom du café *</label>
                                 <input type="text" name="name" placeholder="Gédéo, Timanà..." required>
@@ -424,7 +418,6 @@
                             <button type="submit" class="btn btn-primary">Ajouter le Paquet</button>
                         </form>
                     </div>
-
                     <div class="section">
                         <h2>📦 Mes Paquets (${bags.length})</h2>
                         ${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun paquet enregistré</p>' : ''}
@@ -446,8 +439,8 @@
                                     </div>
                                 </div>
                                 <div style="display:flex; gap:10px;">
-                                    <button class="btn btn-secondary btn-small" onclick="toggleBag('${b.id}', '${b.status}')">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
-                                    <button class="btn btn-danger btn-small" onclick="deleteBag('${b.id}')">✕</button>
+                                    <button class="btn btn-secondary btn-small" onclick="window.toggleBag('${b.id}', '${b.status}')">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
+                                    <button class="btn btn-danger btn-small" onclick="window.deleteBag('${b.id}')">✕</button>
                                 </div>
                             </div>
                             ${b.notes ? `<div style="margin-top:12px; font-size:15px; color:#666; font-style:italic;">📝 ${b.notes}</div>` : ''}
@@ -457,8 +450,7 @@
 
                 html += `</div>`;
             }
-
-            // ---------- ONGLET PARAMÈTRES ----------
+            // --- SETTINGS ---
             else if (currentTab === 'settings') {
                 html += `
                     <div class="section">
@@ -467,11 +459,11 @@
                         <h3 style="margin-top:25px; margin-bottom:15px;">Importer des données CSV</h3>
                         <div class="file-input-wrapper">
                             <button class="btn btn-secondary">📁 Choisir un fichier CSV</button>
-                            <input type="file" accept=".csv" onchange="importCSV(this.files[0])">
+                            <input type="file" accept=".csv" onchange="window.importCSV(this.files[0])">
                         </div>
                         <h3 style="margin-top:30px; margin-bottom:15px;">Exporter les données</h3>
                         <p style="margin-bottom:15px; color:#666;">${shots.length} shots enregistrés</p>
-                        <button class="btn btn-primary" onclick="exportCSV()" style="width:auto;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button>
+                        <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button>
                     </div>
                 `;
             }
@@ -479,12 +471,11 @@
             appEl.innerHTML = html;
         }
 
-        // ---------- 7. FONCTIONS GLOBALES POUR LES ÉVÉNEMENTS ----------
+        // === FONCTIONS GLOBALES POUR LES ÉVÉNEMENTS ===
         window.setTab = function(tab) {
             currentTab = tab;
             render();
         };
-
         window.addShot = addShot;
         window.deleteShot = deleteShot;
         window.addBag = addBag;
@@ -493,7 +484,7 @@
         window.importCSV = importCSV;
         window.exportCSV = exportCSV;
 
-        // ---------- 8. DÉMARRAGE ----------
+        // === DÉMARRAGE ===
         loadData();
     </script>
 </body>
