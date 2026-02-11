@@ -457,10 +457,12 @@
                         <h2>⚙️ Paramètres</h2>
                         <div class="alert alert-success">✅ Synchronisé avec Supabase</div>
                         <h3 style="margin-top:25px; margin-bottom:15px;">Importer des données CSV</h3>
-                        <div class="file-input-wrapper">
-                            <button class="btn btn-secondary">📁 Choisir un fichier CSV</button>
-                            <input type="file" accept=".csv" onchange="window.importCSV(this.files[0])">
-                        </div>
+                        <div style="margin: 20px 0;">
+    <input type="file" 
+           accept=".csv" 
+           onchange="window.importCSV(this.files[0])" 
+           style="width: 100%; padding: 15px; border: 3px dashed #8B4513; border-radius: 12px; background: #fafaf8; font-size: 16px; color: #8B4513; font-weight: 600; cursor: pointer;">
+</div>
                         <h3 style="margin-top:30px; margin-bottom:15px;">Exporter les données</h3>
                         <p style="margin-bottom:15px; color:#666;">${shots.length} shots enregistrés</p>
                         <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button>
