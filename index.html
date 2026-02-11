@@ -71,7 +71,7 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1enh6cW1qa292cnNmd2hkeW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3NjAzMzYsImV4cCI6MjA4NjMzNjMzNn0.hRUDEbr9yhd_R1Q0lLVYYppnht5tUAd5TtE9kanzvos';
 
         // Initialisation Supabase (version CDN)
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ---------- 2. DONNÉES GLOBALES ----------
         let currentTab = 'shots'; // shots, bags, settings
