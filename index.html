@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#E85D3D">
+    <meta name="theme-color" content="#CC785C">
     <title>Espresso Tracker</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-192.png">
@@ -55,7 +55,7 @@
         .header, .container, .tabs { position: relative; z-index: 1; }
         
         .header { 
-            background: linear-gradient(135deg, #E85D3D 0%, #C74528 100%);
+            background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
             color: white; 
             padding: 40px 20px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
@@ -90,14 +90,14 @@
             cursor: pointer;
             font-size: 15px;
             font-weight: 600;
-            color: #E85D3D;
+            color: #CC785C;
             transition: all 0.2s;
         }
         .tab:hover { 
             background: rgba(107, 68, 35, 0.08);
         }
         .tab.active { 
-            background: linear-gradient(135deg, #E85D3D 0%, #C74528 100%);
+            background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
             color: white;
             box-shadow: 0 2px 8px rgba(107, 68, 35, 0.3);
         }
@@ -113,7 +113,7 @@
         }
         
         h2 { 
-            color: #E85D3D;
+            color: #CC785C;
             font-family: 'Playfair Display', serif;
             font-size: 26px;
             margin-bottom: 28px;
@@ -144,7 +144,7 @@
         }
         input:focus, select:focus, textarea:focus { 
             outline: none;
-            border-color: #E85D3D;
+            border-color: #CC785C;
             background: white;
             box-shadow: 0 0 0 4px rgba(107, 68, 35, 0.08);
         }
@@ -167,7 +167,7 @@
         }
         
         .btn-primary { 
-            background: linear-gradient(135deg, #E85D3D 0%, #C74528 100%);
+            background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
             color: white;
             width: 100%;
             box-shadow: 0 4px 12px rgba(107, 68, 35, 0.25);
@@ -183,7 +183,7 @@
         
         .btn-secondary { 
             background: #f0e6d9;
-            color: #E85D3D;
+            color: #CC785C;
             padding: 10px 20px;
             font-size: 14px;
         }
@@ -216,7 +216,7 @@
         .shot-item:hover { 
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-            border-color: #E85D3D;
+            border-color: #CC785C;
         }
         
         .shot-header { 
@@ -231,7 +231,7 @@
         .shot-title { 
             font-size: 19px;
             font-weight: 600;
-            color: #E85D3D;
+            color: #CC785C;
             letter-spacing: 0.3px;
         }
         
@@ -257,7 +257,7 @@
             border: 1px solid rgba(107, 68, 35, 0.08);
         }
         .detail strong { 
-            color: #E85D3D;
+            color: #CC785C;
             font-weight: 600;
             display: block;
             margin-bottom: 6px;
@@ -304,7 +304,7 @@
         .bag-title { 
             font-size: 19px;
             font-weight: 600;
-            color: #E85D3D;
+            color: #CC785C;
             letter-spacing: 0.3px;
         }
         
@@ -407,7 +407,7 @@
         <h1>Espresso Tracker</h1>
     </div>
     <div id="app" class="container">
-        <div style="text-align: center; padding: 60px; color: #E85D3D;">⏳ Chargement...</div>
+        <div style="text-align: center; padding: 60px; color: #CC785C;">⏳ Chargement...</div>
     </div>
 
     <script>
@@ -762,10 +762,10 @@
             }
             else if (currentTab === 'settings') {
                 html += `<div class="section"><h2>Réglages</h2><div class="alert alert-success">✅ Synchronisé avec Supabase</div>
-                    <h3 style="margin: 28px 0 16px; font-size: 16px; font-weight: 600; color: #E85D3D;">Importer des données CSV</h3>
+                    <h3 style="margin: 28px 0 16px; font-size: 16px; font-weight: 600; color: #CC785C;">Importer des données CSV</h3>
                     <p style="margin-bottom:16px; color:#666; font-size: 14px;">Les paquets manquants seront créés automatiquement</p>
-                    <input type="file" accept=".csv" onchange="window.importCSV(this.files[0])" style="width: 100%; padding: 16px; border: 2px dashed #E85D3D; border-radius: 12px; background: rgba(250, 250, 248, 0.8); font-size: 15px; color: #E85D3D; font-weight: 500; cursor: pointer;">
-                    <h3 style="margin: 32px 0 16px; font-size: 16px; font-weight: 600; color: #E85D3D;">Exporter les données</h3>
+                    <input type="file" accept=".csv" onchange="window.importCSV(this.files[0])" style="width: 100%; padding: 16px; border: 2px dashed #CC785C; border-radius: 12px; background: rgba(250, 250, 248, 0.8); font-size: 15px; color: #CC785C; font-weight: 500; cursor: pointer;">
+                    <h3 style="margin: 32px 0 16px; font-size: 16px; font-weight: 600; color: #CC785C;">Exporter les données</h3>
                     <p style="margin-bottom:16px; color:#666; font-size: 14px;">${shots.length} shots enregistrés</p>
                     <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto; padding: 14px 32px;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button></div>`;
             }
@@ -797,13 +797,13 @@
             if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'scatter',
-                data: { datasets: [{ label: 'Mouture vs Âge (validés 4-5★)', data: data, backgroundColor: 'rgba(107, 68, 35, 0.7)', borderColor: '#E85D3D', borderWidth: 2, pointRadius: 9, pointHoverRadius: 11 }] },
+                data: { datasets: [{ label: 'Mouture vs Âge (validés 4-5★)', data: data, backgroundColor: 'rgba(107, 68, 35, 0.7)', borderColor: '#CC785C', borderWidth: 2, pointRadius: 9, pointHoverRadius: 11 }] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { title: { display: true, text: 'Âge du café (jours depuis torréfaction)', font: { size: 13, weight: '600' }, color: '#E85D3D' } },
-                        y: { title: { display: true, text: 'Mouture', font: { size: 13, weight: '600' }, color: '#E85D3D' } }
+                        x: { title: { display: true, text: 'Âge du café (jours depuis torréfaction)', font: { size: 13, weight: '600' }, color: '#CC785C' } },
+                        y: { title: { display: true, text: 'Mouture', font: { size: 13, weight: '600' }, color: '#CC785C' } }
                     },
                     plugins: {
                         legend: { display: true, labels: { font: { size: 13, weight: '500' } } },
