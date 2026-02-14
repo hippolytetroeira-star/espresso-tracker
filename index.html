@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#8B4513">
-    <title>☕ Espresso Tracker</title>
+    <meta name="theme-color" content="#6B4423">
+    <title>Espresso Tracker</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-            background: #f8f5f0; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f1eb 0%, #e8dfd5 100%);
             padding: 0; 
             min-height: 100vh;
             position: relative;
@@ -28,74 +31,363 @@
             background-image: url('icon-192.png');
             background-position: center center;
             background-repeat: no-repeat;
-            background-size: 60%;
-            opacity: 0.04;
+            background-size: 50%;
+            opacity: 0.08;
             z-index: 0;
             pointer-events: none;
         }
         
         .header, .container, .tabs { position: relative; z-index: 1; }
         
-        .header { background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); color: white; padding: 25px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
-        .header h1 { font-size: 28px; font-weight: 700; }
-        .container { max-width: 900px; margin: 0 auto; padding: 30px 20px; }
-        .tabs { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap; }
-        .tab { padding: 15px 35px; background: white; border: 2px solid #e0d5c7; border-radius: 12px; cursor: pointer; font-size: 17px; font-weight: 600; color: #666; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .tab:hover { border-color: #8B4513; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15); }
-        .tab.active { background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); color: white; border-color: #8B4513; }
-        .section { background: white; border-radius: 16px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h2 { color: #8B4513; font-size: 24px; margin-bottom: 25px; font-weight: 700; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; font-size: 15px; }
-        input, select, textarea { width: 100%; padding: 14px 16px; border: 2px solid #e0d5c7; border-radius: 10px; font-size: 16px; background: #fafaf8; transition: all 0.2s; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #8B4513; background: white; box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1); }
-        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn { padding: 16px 32px; border: none; border-radius: 12px; font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
-        .btn-primary { background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); color: white; width: 100%; box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4); }
-        .btn-secondary { background: #f0e6d9; color: #8B4513; font-weight: 600; padding: 12px 24px; font-size: 15px; }
-        .btn-small { padding: 10px 20px; font-size: 14px; }
-        .btn-danger { background: #dc3545; color: white; }
-        .shot-item { background: #fafaf8; border: 2px solid #e8ddd0; border-radius: 14px; padding: 25px; margin-bottom: 20px; transition: all 0.3s; }
-        .shot-item:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #8B4513; }
-        .shot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e8ddd0; }
-        .shot-title { font-size: 20px; font-weight: 700; color: #8B4513; }
-        .shot-date { font-size: 14px; color: #888; margin-top: 5px; }
-        .shot-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-top: 15px; }
-        .detail { background: white; padding: 14px; border-radius: 10px; font-size: 15px; color: #555; }
-        .detail strong { color: #8B4513; font-weight: 700; display: block; margin-bottom: 5px; }
-        .bag-item { background: #fafaf8; border: 2px solid #e8ddd0; border-radius: 14px; padding: 25px; margin-bottom: 20px; background-size: cover; background-position: center; position: relative; }
-        .bag-item::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(250, 250, 248, 0.85); border-radius: 14px; z-index: 0; }
+        .header { 
+            background: linear-gradient(135deg, #6B4423 0%, #4A2F1A 100%);
+            color: white; 
+            padding: 35px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        .header h1 { 
+            font-size: 32px; 
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .container { max-width: 920px; margin: 0 auto; padding: 40px 20px; }
+        
+        .tabs { 
+            display: flex; 
+            gap: 12px; 
+            margin-bottom: 35px; 
+            justify-content: center; 
+            flex-wrap: wrap;
+            background: white;
+            padding: 8px;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .tab { 
+            padding: 14px 28px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: #6B4423;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .tab:hover { 
+            background: rgba(107, 68, 35, 0.08);
+        }
+        .tab.active { 
+            background: linear-gradient(135deg, #6B4423 0%, #4A2F1A 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(107, 68, 35, 0.3);
+        }
+        
+        .section { 
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            border: 1px solid rgba(107, 68, 35, 0.1);
+        }
+        
+        h2 { 
+            color: #6B4423;
+            font-size: 22px;
+            margin-bottom: 28px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        
+        .form-group { margin-bottom: 22px; }
+        
+        label { 
+            display: block;
+            margin-bottom: 10px;
+            color: #3d3d3d;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 0.2px;
+        }
+        
+        input, select, textarea { 
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #e0d5c7;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #fafaf8;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus { 
+            outline: none;
+            border-color: #6B4423;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(107, 68, 35, 0.08);
+        }
+        
+        .row { 
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+        
+        .btn { 
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, #6B4423 0%, #4A2F1A 100%);
+            color: white;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.25);
+        }
+        .btn-primary:hover:not(:disabled) { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(107, 68, 35, 0.35);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary { 
+            background: #f0e6d9;
+            color: #6B4423;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        .btn-secondary:hover {
+            background: #e8ddd0;
+        }
+        
+        .btn-small { 
+            padding: 9px 18px;
+            font-size: 13px;
+        }
+        
+        .btn-danger { 
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .shot-item { 
+            background: linear-gradient(135deg, #fafaf8 0%, #f5f1eb 100%);
+            border: 1.5px solid rgba(107, 68, 35, 0.12);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .shot-item:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            border-color: #6B4423;
+        }
+        
+        .shot-header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+            border-bottom: 1.5px solid rgba(107, 68, 35, 0.12);
+        }
+        
+        .shot-title { 
+            font-size: 19px;
+            font-weight: 600;
+            color: #6B4423;
+            letter-spacing: 0.3px;
+        }
+        
+        .shot-date { 
+            font-size: 13px;
+            color: #888;
+            margin-top: 6px;
+        }
+        
+        .shot-details { 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .detail { 
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #555;
+            border: 1px solid rgba(107, 68, 35, 0.08);
+        }
+        .detail strong { 
+            color: #6B4423;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .bag-item { 
+            background: #fafaf8;
+            border: 1.5px solid rgba(107, 68, 35, 0.12);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            transition: all 0.3s;
+        }
+        .bag-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .bag-item::before { 
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(250, 250, 248, 0.88);
+            border-radius: 16px;
+            z-index: 0;
+        }
         .bag-item > * { position: relative; z-index: 1; }
-        .bag-header { display: flex; justify-content: space-between; align-items: center; }
-        .bag-title { font-size: 20px; font-weight: 700; color: #8B4513; }
-        .bag-info { margin-top: 12px; font-size: 15px; color: #666; line-height: 1.6; }
-        .bag-status { display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-top: 10px; }
-        .bag-status.active { background: #4caf50; color: white; }
-        .bag-status.finished { background: #9e9e9e; color: white; }
-        .alert { padding: 18px 22px; border-radius: 12px; margin-bottom: 25px; font-weight: 500; font-size: 15px; }
-        .alert-success { background: #d4edda; color: #155724; border-left: 5px solid #28a745; }
-        .alert-error { background: #f8d7da; color: #721c24; border-left: 5px solid #dc3545; }
-        .alert-info { background: #e3f2fd; color: #1976d2; border-left: 5px solid #1976d2; }
-        .chart-container { position: relative; height: 400px; margin-top: 20px; }
         
-        .star-rating { display: flex; gap: 8px; font-size: 28px; cursor: pointer; }
-        .star { color: #ddd; transition: all 0.2s; cursor: pointer; }
-        .star.filled { color: #ffc107; }
-        .star:hover { transform: scale(1.2); }
-        .star-display { font-size: 20px; color: #ffc107; }
+        .bag-header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         
-        @media (max-width: 600px) { .row { grid-template-columns: 1fr; } .container { padding: 20px 15px; } .tabs { flex-direction: column; gap: 10px; } .tab { padding: 12px 20px; } }
+        .bag-title { 
+            font-size: 19px;
+            font-weight: 600;
+            color: #6B4423;
+            letter-spacing: 0.3px;
+        }
+        
+        .bag-info { 
+            margin-top: 12px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.7;
+        }
+        
+        .bag-status { 
+            display: inline-block;
+            padding: 7px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 12px;
+            letter-spacing: 0.3px;
+        }
+        .bag-status.active { 
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+        }
+        .bag-status.finished { 
+            background: #9e9e9e;
+            color: white;
+        }
+        
+        .alert { 
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            font-size: 14px;
+            border-left: 4px solid;
+        }
+        .alert-success { 
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+        .alert-error { 
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+        .alert-info { 
+            background: #e3f2fd;
+            color: #0c5460;
+            border-color: #17a2b8;
+        }
+        
+        .chart-container { 
+            position: relative;
+            height: 420px;
+            margin-top: 25px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .star-rating { 
+            display: flex;
+            gap: 10px;
+            font-size: 32px;
+            cursor: pointer;
+        }
+        .star { 
+            color: #ddd;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .star.filled { 
+            color: #ffc107;
+            text-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+        }
+        .star:hover { 
+            transform: scale(1.15);
+        }
+        .star-display { 
+            font-size: 18px;
+            color: #ffc107;
+            letter-spacing: 2px;
+        }
+        
+        @media (max-width: 600px) { 
+            .row { grid-template-columns: 1fr; }
+            .container { padding: 25px 16px; }
+            .tabs { flex-direction: column; gap: 8px; }
+            .tab { padding: 12px 20px; }
+            .section { padding: 25px 20px; }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <div class="header">
-        <h1>☕ Espresso Tracker</h1>
+        <h1>Espresso Tracker</h1>
     </div>
     <div id="app" class="container">
-        <div style="text-align: center; padding: 60px; color: #8B4513;">⏳ Chargement...</div>
+        <div style="text-align: center; padding: 60px; color: #6B4423;">⏳ Chargement...</div>
     </div>
 
     <script>
@@ -194,7 +486,7 @@
 
             const { data } = await sb.from('shots').insert([shot]).select();
             shots = [data[0], ...shots];
-            showMessage('success', '✅ Shot enregistré !');
+            showMessage('success', '✅ Shot enregistré');
             form.reset();
             form.dose.value = 18;
             form.output.value = 38;
@@ -233,7 +525,7 @@
             };
             const { data } = await sb.from('bags').insert([bag]).select();
             bags = [data[0], ...bags];
-            showMessage('success', '✅ Paquet ajouté !');
+            showMessage('success', '✅ Paquet ajouté');
             form.reset();
             render();
         }
@@ -338,7 +630,7 @@
                     const skipped = (lines.length - 1) - shotsToImport.length;
                     let msg = `✅ ${shotsToImport.length} shots`;
                     if (newBags.length > 0) msg += ` et ${newBags.length} paquets`;
-                    msg += ' importés !';
+                    msg += ' importés';
                     if (skipped > 0) msg += ` (${skipped} doublons ignorés)`;
                     
                     showMessage('success', msg);
@@ -364,16 +656,16 @@
         function render() {
             const activeBags = bags.filter(b => b.status === 'active');
             let html = `<div class="tabs">
-                <button class="tab ${currentTab === 'shots' ? 'active' : ''}" onclick="window.setTab('shots')">☕ Shots</button>
-                <button class="tab ${currentTab === 'bags' ? 'active' : ''}" onclick="window.setTab('bags')">📦 Paquets</button>
-                <button class="tab ${currentTab === 'analysis' ? 'active' : ''}" onclick="window.setTab('analysis')">📊 Analyse</button>
-                <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="window.setTab('settings')">⚙️</button>
+                <button class="tab ${currentTab === 'shots' ? 'active' : ''}" onclick="window.setTab('shots')">Shots</button>
+                <button class="tab ${currentTab === 'bags' ? 'active' : ''}" onclick="window.setTab('bags')">Paquets</button>
+                <button class="tab ${currentTab === 'analysis' ? 'active' : ''}" onclick="window.setTab('analysis')">Analyse</button>
+                <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="window.setTab('settings')">Réglages</button>
             </div>`;
             if (message) html += `<div class="alert alert-${message.type}">${message.text}</div>`;
             
             if (currentTab === 'shots') {
-                html += `<div class="section"><h2>+ Nouveau Shot</h2><form id="form-shot" onsubmit="event.preventDefault(); window.addShot(event)">
-                    <div class="form-group"><label>Paquet actif *</label><select name="bag_id" required><option value="">-- Choisir --</option>
+                html += `<div class="section"><h2>Nouveau Shot</h2><form id="form-shot" onsubmit="event.preventDefault(); window.addShot(event)">
+                    <div class="form-group"><label>Paquet</label><select name="bag_id" required><option value="">Sélectionner</option>
                     ${activeBags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
                     <div class="row"><div class="form-group"><label>Dose (g)</label><input type="number" step="0.1" name="dose" value="18" required></div>
                     <div class="form-group"><label>Sortie (g)</label><input type="number" step="0.1" name="output" value="38" required></div></div>
@@ -386,19 +678,19 @@
                     <option value="oui">Oui</option></select></div><div class="form-group"><label>Débit</label>
                     <select name="flow"><option value="rapide">Rapide</option><option value="stable" selected>Stable</option>
                     <option value="lent">Lent</option></select></div></div>
-                    <div class="form-group"><label>Note</label><div class="star-rating" id="star-rating">
+                    <div class="form-group"><label>Note</label><div class="star-rating">
                     ${[1,2,3,4,5].map(i => `<span class="star ${i <= currentRating ? 'filled' : ''}" onclick="window.setRating(${i})">★</span>`).join('')}</div></div>
                     <div class="form-group"><label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <input type="checkbox" name="validated" style="width: auto; cursor: pointer;"><span>✓ Shot validé</span></label></div>
+                    <input type="checkbox" name="validated" style="width: auto; cursor: pointer;"><span>Shot validé (pour l'analyse)</span></label></div>
                     <button type="submit" class="btn btn-primary">Enregistrer</button></form></div>
-                    <div class="section"><h2>📋 Historique (${shots.length})</h2>
-                    ${shots.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun shot</p>' : ''}`;
+                    <div class="section"><h2>Historique (${shots.length})</h2>
+                    ${shots.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun shot enregistré</p>' : ''}`;
                 shots.forEach(s => {
-                    const validatedBadge = s.validated ? '<span style="display:inline-block; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700; background:#4caf50; color:white; margin-left:10px;">✓ Validé</span>' : '<span style="display:inline-block; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700; background:#9e9e9e; color:white; margin-left:10px;">○ Test</span>';
-                    html += `<div class="shot-item"><div class="shot-header"><div style="display:flex; align-items:center; gap:12px;">
-                        <img src="${getLogo(s.coffee)}" style="width:40px; height:40px; border-radius:50%;">
+                    const validatedBadge = s.validated ? '<span style="display:inline-block; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; background:#4caf50; color:white; margin-left:10px;">Validé</span>' : '<span style="display:inline-block; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; background:#9e9e9e; color:white; margin-left:10px;">Test</span>';
+                    html += `<div class="shot-item"><div class="shot-header"><div style="display:flex; align-items:center; gap:14px;">
+                        <img src="${getLogo(s.coffee)}" style="width:42px; height:42px; border-radius:50%; border: 2px solid rgba(107, 68, 35, 0.1);">
                         <div><div class="shot-title">${s.coffee}${validatedBadge}</div><div class="shot-date">${s.date}</div></div></div>
-                        <div style="display:flex; gap:8px;"><button class="btn btn-secondary btn-small" onclick="window.toggleValidation('${s.id}', ${s.validated})">${s.validated ? 'Invalider' : 'Valider'}</button>
+                        <div style="display:flex; gap:10px;"><button class="btn btn-secondary btn-small" onclick="window.toggleValidation('${s.id}', ${s.validated})">${s.validated ? 'Invalider' : 'Valider'}</button>
                         <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')">✕</button></div></div>
                         <div class="shot-details"><div class="detail"><strong>Dose → Sortie</strong>${s.dose}g → ${s.output}g (1:${s.ratio.toFixed(1)})</div>
                         <div class="detail"><strong>Mouture</strong>${s.grind}</div><div class="detail"><strong>Temps</strong>${s.time}s</div>
@@ -409,47 +701,47 @@
                 html += `</div>`;
             }
             else if (currentTab === 'bags') {
-                html += `<div class="section"><h2>+ Nouveau Paquet</h2><form id="form-bag" onsubmit="event.preventDefault(); window.addBag(event)">
-                    <div class="form-group"><label>Nom *</label><input type="text" name="name" placeholder="Gédéo, Timanà..." required></div>
+                html += `<div class="section"><h2>Nouveau Paquet</h2><form id="form-bag" onsubmit="event.preventDefault(); window.addBag(event)">
+                    <div class="form-group"><label>Nom du café</label><input type="text" name="name" placeholder="Gédéo, Timanà..." required></div>
                     <div class="form-group"><label>Torréfacteur</label><input type="text" name="roaster" value="L'Arbre à Café"></div>
-                    <div class="row"><div class="form-group"><label>Date torréfaction (JJ/MM/AAAA) *</label>
+                    <div class="row"><div class="form-group"><label>Date torréfaction (JJ/MM/AAAA)</label>
                     <input type="text" name="roast_date" placeholder="31/12/2025" required></div>
                     <div class="form-group"><label>Poids (g)</label><input type="number" name="weight" value="250"></div></div>
                     <button type="submit" class="btn btn-primary">Ajouter</button></form></div>
-                    <div class="section"><h2>📦 Mes Paquets (${bags.length})</h2>${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun paquet</p>' : ''}`;
+                    <div class="section"><h2>Mes Paquets (${bags.length})</h2>${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun paquet</p>' : ''}`;
                 bags.forEach(b => {
                     const age = b.roast_date ? Math.floor((new Date() - new Date(b.roast_date.split('/').reverse().join('-'))) / 86400000) : 0;
                     const bgImage = getPackageImage(b.name);
                     const bgStyle = bgImage ? `style="background-image: url('${bgImage}');"` : '';
-                    html += `<div class="bag-item" ${bgStyle}><div class="bag-header"><div style="display:flex; align-items:flex-start; gap:15px;">
-                        <img src="${getLogo(b.name)}" style="width:50px; height:50px; border-radius:50%; margin-top:4px;">
-                        <div><div class="bag-title">${b.name}</div><div class="bag-info">${b.roaster} • ${b.roast_date}<br>Âge: ${age}j • ${b.weight}g</div>
-                        <span class="bag-status ${b.status}">${b.status === 'active' ? '✓ Actif' : '○ Terminé'}</span></div></div>
+                    html += `<div class="bag-item" ${bgStyle}><div class="bag-header"><div style="display:flex; align-items:flex-start; gap:16px;">
+                        <img src="${getLogo(b.name)}" style="width:52px; height:52px; border-radius:50%; border: 2px solid rgba(107, 68, 35, 0.1); margin-top:2px;">
+                        <div><div class="bag-title">${b.name}</div><div class="bag-info">${b.roaster} · Torréfié le ${b.roast_date}<br>Âge: ${age} jours · ${b.weight}g</div>
+                        <span class="bag-status ${b.status}">${b.status === 'active' ? 'Actif' : 'Terminé'}</span></div></div>
                         <div style="display:flex; gap:10px;"><button class="btn btn-secondary btn-small" onclick="window.toggleBag('${b.id}', '${b.status}')">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
                         <button class="btn btn-danger btn-small" onclick="window.deleteBag('${b.id}')">✕</button></div></div></div>`;
                 });
                 html += `</div>`;
             }
             else if (currentTab === 'analysis') {
-                html += `<div class="section"><h2>📊 Analyse : Mouture vs Âge</h2>
-                    <div class="alert alert-info">💡 Seuls les shots <strong>validés avec 4 ou 5 étoiles</strong> apparaissent</div>`;
-                if (bags.length === 0) html += `<div class="alert alert-info">Ajoutez des paquets</div>`;
+                html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>
+                    <div class="alert alert-info">Seuls les shots validés avec 4 ou 5 étoiles apparaissent dans le graphique</div>`;
+                if (bags.length === 0) html += `<div class="alert alert-info">Ajoutez des paquets pour voir l'analyse</div>`;
                 else {
                     html += `<div class="form-group"><label>Sélectionner un paquet</label>
-                        <select id="analysis-bag" onchange="window.updateChart(this.value)"><option value="">-- Tous --</option>
+                        <select id="analysis-bag" onchange="window.updateChart(this.value)"><option value="">Tous les paquets</option>
                         ${bags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
                         <div class="chart-container"><canvas id="chart"></canvas></div>`;
                 }
                 html += `</div>`;
             }
             else if (currentTab === 'settings') {
-                html += `<div class="section"><h2>⚙️ Paramètres</h2><div class="alert alert-success">✅ Synchronisé</div>
-                    <h3 style="margin-top:25px; margin-bottom:15px;">Importer CSV</h3>
-                    <p style="margin-bottom:15px; color:#666;">Les paquets manquants seront créés automatiquement.</p>
-                    <input type="file" accept=".csv" onchange="window.importCSV(this.files[0])" style="width: 100%; padding: 15px; border: 3px dashed #8B4513; border-radius: 12px; background: #fafaf8; font-size: 16px; color: #8B4513; font-weight: 600; cursor: pointer;">
-                    <h3 style="margin-top:30px; margin-bottom:15px;">Exporter</h3>
-                    <p style="margin-bottom:15px; color:#666;">${shots.length} shots</p>
-                    <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button></div>`;
+                html += `<div class="section"><h2>Réglages</h2><div class="alert alert-success">✅ Synchronisé avec Supabase</div>
+                    <h3 style="margin: 28px 0 16px; font-size: 16px; font-weight: 600; color: #6B4423;">Importer des données CSV</h3>
+                    <p style="margin-bottom:16px; color:#666; font-size: 14px;">Les paquets manquants seront créés automatiquement</p>
+                    <input type="file" accept=".csv" onchange="window.importCSV(this.files[0])" style="width: 100%; padding: 16px; border: 2px dashed #6B4423; border-radius: 12px; background: #fafaf8; font-size: 15px; color: #6B4423; font-weight: 500; cursor: pointer;">
+                    <h3 style="margin: 32px 0 16px; font-size: 16px; font-weight: 600; color: #6B4423;">Exporter les données</h3>
+                    <p style="margin-bottom:16px; color:#666; font-size: 14px;">${shots.length} shots enregistrés</p>
+                    <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto; padding: 14px 32px;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button></div>`;
             }
             appEl.innerHTML = html;
             if (currentTab === 'analysis' && bags.length > 0) setTimeout(() => window.updateChart(''), 100);
@@ -475,16 +767,16 @@
             if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'scatter',
-                data: { datasets: [{ label: 'Mouture vs Âge (validés 4-5★)', data: data, backgroundColor: 'rgba(139, 69, 19, 0.6)', borderColor: 'rgba(139, 69, 19, 1)', borderWidth: 2, pointRadius: 8, pointHoverRadius: 10 }] },
+                data: { datasets: [{ label: 'Mouture vs Âge (validés 4-5★)', data: data, backgroundColor: 'rgba(107, 68, 35, 0.7)', borderColor: '#6B4423', borderWidth: 2, pointRadius: 9, pointHoverRadius: 11 }] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { title: { display: true, text: 'Âge du café (jours)', font: { size: 14, weight: 'bold' } } },
-                        y: { title: { display: true, text: 'Mouture', font: { size: 14, weight: 'bold' } } }
+                        x: { title: { display: true, text: 'Âge du café (jours depuis torréfaction)', font: { size: 13, weight: '600' }, color: '#6B4423' } },
+                        y: { title: { display: true, text: 'Mouture', font: { size: 13, weight: '600' }, color: '#6B4423' } }
                     },
                     plugins: {
-                        legend: { display: true },
+                        legend: { display: true, labels: { font: { size: 13, weight: '500' } } },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
