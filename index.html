@@ -10,7 +10,32 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f5f0; padding: 0; min-height: 100vh; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: #f8f5f0; 
+            padding: 0; 
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('icon-192.png');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: 60%;
+            opacity: 0.04;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .header, .container, .tabs { position: relative; z-index: 1; }
+        
         .header { background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); color: white; padding: 25px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
         .header h1 { font-size: 28px; font-weight: 700; }
         .container { max-width: 900px; margin: 0 auto; padding: 30px 20px; }
@@ -53,6 +78,13 @@
         .alert-error { background: #f8d7da; color: #721c24; border-left: 5px solid #dc3545; }
         .alert-info { background: #e3f2fd; color: #1976d2; border-left: 5px solid #1976d2; }
         .chart-container { position: relative; height: 400px; margin-top: 20px; }
+        
+        .star-rating { display: flex; gap: 8px; font-size: 28px; cursor: pointer; }
+        .star { color: #ddd; transition: all 0.2s; cursor: pointer; }
+        .star.filled { color: #ffc107; }
+        .star:hover { transform: scale(1.2); }
+        .star-display { font-size: 20px; color: #ffc107; }
+        
         @media (max-width: 600px) { .row { grid-template-columns: 1fr; } .container { padding: 20px 15px; } .tabs { flex-direction: column; gap: 10px; } .tab { padding: 12px 20px; } }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -67,21 +99,18 @@
     </div>
 
     <script>
-        // === CONFIG SUPABASE ===
         const SUPABASE_URL = 'https://duzxzqmjkovrsfwhdyml.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1enh6cW1qa292cnNmd2hkeW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3NjAzMzYsImV4cCI6MjA4NjMzNjMzNn0.hRUDEbr9yhd_R1Q0lLVYYppnht5tUAd5TtE9kanzvos';
-
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // === DONNÉES GLOBALES ===
+        
         let currentTab = 'shots';
         let shots = [];
         let bags = [];
         let message = null;
         let chartInstance = null;
+        let currentRating = 0;
         const appEl = document.getElementById('app');
 
-        // === LOGOS ET IMAGES ===
         const LOGOS = {
             timana: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACbUlEQVR4nO2bPVLDMBSEVxnOkQ5OQUtDTkBNmYaOM9DRUKbmBlSUnIKSjlOYgiiRZcnSk/WzzmgbMkNG8n5vnyx7IoW6GgTfVcWuouIkEsMhFbnWEoN6TQ/vN9GDqIfv2X8Lrmd+nlwDwWFcYjgkD5DF158DQFHjtnKDWArgZL6kaZ8sGEleUgGMqt7CvJYjESJPKQDOVd8f/j/cviQMk1epadgI55maB4CvZ+Ew+WWlMPr2KwHgNk+kFAixAMLmCVIAyCHEAIiv/AohhADQx96nWAhzANLMk6QAiIMQbIG1Vd5WaI/iAzAAC8wTpQAYQZikwAUgzyMsGQRDI3/eFlh79G35WsEGsCz6tshS4GoF6Vb44mQCyPn66iyyFBgaAEcCLq33bdlrQZ0W4E3B6bk57+LnE8F7Ay39/qAvglVnI2yFngDU6n8tkhTou0FPQJNZSVIAtEwACYTeAk1nJ0jBVesL2P1+Npx921ugKYDd9V3L6QE0BMBgHmi9CBJog+MjsXp7rDYpQ/U/nrYAegLqA2CovqmegOPfKusAS/V1/wNQ1RLAYt7WBEDNu0ELGdUHMAZQ7HfDpNVXQF8EJwCyL4ZM1TcXP/3Bm4BLWwvs3tdyAci2FjBV39DIny8Bi1uBybwr+lrBRXDtreCLvtYcgBMtKQSW6lvmna0dSkAyhNaKMQ/E7QNEEBiqH2seiN8IRUFYm3lAthOkbwepeUC+FfZCaF39FPOiL1oanxnaH5oBcNzmRJ5SH4YUCFrCUXVxQYucG7x//ckwrFuejU2zc4OmioLIbTzbAA55f3EqARLYwlKeHXaJ/vT4H4+IseLBtt/JAAAAAElFTkSuQmCC',
             gedeo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACcUlEQVR4nO2bvU7DMBSFTyo2dgZmNhaeAYmZHfYO3XkKdiTYeQDmCt6CjZWFvXNY6shx7NjX8c9J5bNQidbO+e65jhMlHcqqF3y3y3YUBSeRGPYpy7HmGNRp+vb9EDzI1+P53L+THXdKABPjEsM+OYAsPv4UALIaN5UaxFIAg/mcpl0yYER5iQUwqnoN80qWRIg8xQAYzG/3OwDAz99zxDBpFZuGjXCeiXkAuLp4Eg6TXkYKg0+/EgBW80yKgRAKwGueIQWAHEIIgODKrxGCDwB97F0KhTAHIMo8SwqAMAjeFlhb5U359iguAD0Qb54pBcAIwiQFNgBJLmHZIGga+XO2wNqjb8rVCiaARdE3xZYCWytIt8InJx1AyttXg9hSoKkHLAk4td43Za4FRVqAOAXDdXPSxc8lhvsGSur+QVsES07G2AotASjU/0osKVBng5aAGpOypAComAAWCK0Fak7OkIKz2gfwefNQbe4OrQXqAni9/K05PYCKABjMA60FsMHxkvjt7qXYpAzV764/ALQElAfAUH1dLQHHv0XWAZbqq/4H0BVLAIt5UxMAJc8GNaRVH8AYQLbnhkmr3wFtEZwASL4YMlVfX/zUB2cCTm0tMHtfyQYg2VrAVH1NI3+uBCxuBSbztugreRfBtbeCK/pKcwAGWlIILNU3zFtb25eAaAi1FWIeCNsHiCAwVD/UPBC+EQqCsDbzgGwnSN8OUvOAfCvshFC7+jHmRV80NHqibLvfVQNgOc1lf2dI1wCi/75fOJRcsVVf/CNDk+cLc8JwbGyqvTeoKyuI1MaTDWCR84lTCRDPFpby3WGb6N8e/wdHGbWdc2XBIwAAAABJRU5ErkJggg==',
@@ -115,7 +144,14 @@
             render();
         }
 
-        // === CHARGEMENT DES DONNÉES ===
+        function renderStars(count) {
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                html += i <= count ? '★' : '☆';
+            }
+            return html;
+        }
+
         async function loadData() {
             try {
                 const { data: s } = await sb.from('shots').select('*').order('created_at', { ascending: false });
@@ -129,7 +165,6 @@
             render();
         }
 
-        // === CRUD SHOTS ===
         async function addShot(event) {
             event.preventDefault();
             const form = event.target;
@@ -152,7 +187,7 @@
                 wdt: form.wdt.value,
                 channeling: form.channeling.value,
                 flow: form.flow.value,
-                taste: form.taste.value,
+                rating: currentRating,
                 notes: '',
                 validated: form.validated.checked
             };
@@ -166,6 +201,7 @@
             form.grind.value = 7.5;
             form.time.value = 30;
             form.preinfusion.value = 8;
+            currentRating = 0;
             render();
         }
 
@@ -184,7 +220,6 @@
             render();
         }
 
-        // === CRUD BAGS ===
         async function addBag(event) {
             event.preventDefault();
             const form = event.target;
@@ -218,7 +253,6 @@
             render();
         }
 
-        // === IMPORT CSV INTELLIGENT ===
         async function importCSV(file) {
             if (!file) return;
             const reader = new FileReader();
@@ -228,7 +262,6 @@
                     const shotsToImport = [];
                     const bagsToCreate = new Map();
 
-                    // Parser le CSV
                     for (let i = 1; i < lines.length; i++) {
                         const v = lines[i].split(',');
                         if (v.length < 10) continue;
@@ -237,7 +270,6 @@
                         const roaster = v[2].trim();
                         const roast_date = v[3].trim();
 
-                        // Gérer les paquets
                         const bagKey = `${coffee}|${roaster}|${roast_date}`;
                         if (!bagsToCreate.has(bagKey) && roast_date) {
                             bagsToCreate.set(bagKey, {
@@ -265,12 +297,11 @@
                             wdt: v[11]?.trim() || 'non',
                             channeling: v[12]?.trim() || 'non',
                             flow: v[13]?.trim() || 'stable',
-                            taste: v[14]?.trim() || '',
+                            rating: 0,
                             notes: v[15]?.trim() || '',
                             validated: false
                         };
 
-                        // Détecter les doublons (date + café + mouture + temps)
                         const isDuplicate = shots.some(s => 
                             s.date === shotData.date &&
                             s.coffee === shotData.coffee &&
@@ -283,7 +314,6 @@
                         }
                     }
 
-                    // Créer les nouveaux paquets
                     const newBags = [];
                     for (const [key, bag] of bagsToCreate) {
                         const exists = bags.some(b => 
@@ -321,8 +351,8 @@
         }
 
         function exportCSV() {
-            const h = ['Date shot','Café','Torréfacteur','Date torréfaction','Âge (jours)','Dose (g)','Sortie (g)','Ratio','Mouture','Temps (s)','Préinfusion (s)','WDT','Channeling','Débit','Goût','Notes'];
-            const rows = shots.map(s => [s.date,s.coffee,s.roaster,s.roast_date,s.age,s.dose,s.output,s.ratio,s.grind,s.time,s.preinfusion,s.wdt,s.channeling,s.flow,s.taste,s.notes].join(','));
+            const h = ['Date shot','Café','Torréfacteur','Date torréfaction','Âge (jours)','Dose (g)','Sortie (g)','Ratio','Mouture','Temps (s)','Préinfusion (s)','WDT','Channeling','Débit','Note','Notes'];
+            const rows = shots.map(s => [s.date,s.coffee,s.roaster,s.roast_date,s.age,s.dose,s.output,s.ratio,s.grind,s.time,s.preinfusion,s.wdt,s.channeling,s.flow,s.rating,s.notes].join(','));
             const csv = [h.join(','), ...rows].join('\n');
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -331,334 +361,135 @@
             link.click();
         }
 
-        // === RENDU ===
         function render() {
             const activeBags = bags.filter(b => b.status === 'active');
-
-            let html = `
-                <div class="tabs">
-                    <button class="tab ${currentTab === 'shots' ? 'active' : ''}" onclick="window.setTab('shots')">☕ Shots</button>
-                    <button class="tab ${currentTab === 'bags' ? 'active' : ''}" onclick="window.setTab('bags')">📦 Paquets</button>
-                    <button class="tab ${currentTab === 'analysis' ? 'active' : ''}" onclick="window.setTab('analysis')">📊 Analyse</button>
-                    <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="window.setTab('settings')">⚙️</button>
-                </div>
-            `;
-
-            if (message) {
-                html += `<div class="alert alert-${message.type}">${message.text}</div>`;
-            }
-
-            // --- ONGLET SHOTS ---
+            let html = `<div class="tabs">
+                <button class="tab ${currentTab === 'shots' ? 'active' : ''}" onclick="window.setTab('shots')">☕ Shots</button>
+                <button class="tab ${currentTab === 'bags' ? 'active' : ''}" onclick="window.setTab('bags')">📦 Paquets</button>
+                <button class="tab ${currentTab === 'analysis' ? 'active' : ''}" onclick="window.setTab('analysis')">📊 Analyse</button>
+                <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="window.setTab('settings')">⚙️</button>
+            </div>`;
+            if (message) html += `<div class="alert alert-${message.type}">${message.text}</div>`;
+            
             if (currentTab === 'shots') {
-                html += `
-                    <div class="section">
-                        <h2>+ Nouveau Shot</h2>
-                        <form id="form-shot" onsubmit="event.preventDefault(); window.addShot(event)">
-                            <div class="form-group">
-                                <label>Paquet actif *</label>
-                                <select name="bag_id" required>
-                                    <option value="">-- Choisir un paquet --</option>
-                                    ${activeBags.map(b => `<option value="${b.id}">${b.name} (${b.roaster})</option>`).join('')}
-                                </select>
-                            </div>
-                            <div class="row">
-                                <div class="form-group">
-                                    <label>Dose (g)</label>
-                                    <input type="number" step="0.1" name="dose" value="18" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Sortie (g)</label>
-                                    <input type="number" step="0.1" name="output" value="38" required>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="form-group">
-                                    <label>Mouture</label>
-                                    <input type="number" step="0.1" name="grind" value="7.5" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Temps (s)</label>
-                                    <input type="number" name="time" value="30" required>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="form-group">
-                                    <label>Préinfusion (s)</label>
-                                    <input type="number" name="preinfusion" value="8">
-                                </div>
-                                <div class="form-group">
-                                    <label>WDT</label>
-                                    <select name="wdt">
-                                        <option value="non">Non</option>
-                                        <option value="léger">Léger</option>
-                                        <option value="normal">Normal</option>
-                                        <option value="profond">Profond</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="form-group">
-                                    <label>Channeling</label>
-                                    <select name="channeling">
-                                        <option value="non">Non</option>
-                                        <option value="oui">Oui</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Débit</label>
-                                    <select name="flow">
-                                        <option value="rapide">Rapide</option>
-                                        <option value="stable" selected>Stable</option>
-                                        <option value="lent">Lent</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Goût</label>
-                                <input type="text" name="taste" placeholder="très bon, bon, acide...">
-                            </div>
-                            <div class="form-group">
-                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                                    <input type="checkbox" name="validated" style="width: auto; cursor: pointer;">
-                                    <span>✓ Shot validé (pour l'analyse)</span>
-                                </label>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Enregistrer le Shot</button>
-                        </form>
-                    </div>
-                    <div class="section">
-                        <h2>📋 Historique (${shots.length} shots)</h2>
-                        ${shots.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun shot enregistré</p>' : ''}
-                `;
-
+                html += `<div class="section"><h2>+ Nouveau Shot</h2><form id="form-shot" onsubmit="event.preventDefault(); window.addShot(event)">
+                    <div class="form-group"><label>Paquet actif *</label><select name="bag_id" required><option value="">-- Choisir --</option>
+                    ${activeBags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
+                    <div class="row"><div class="form-group"><label>Dose (g)</label><input type="number" step="0.1" name="dose" value="18" required></div>
+                    <div class="form-group"><label>Sortie (g)</label><input type="number" step="0.1" name="output" value="38" required></div></div>
+                    <div class="row"><div class="form-group"><label>Mouture</label><input type="number" step="0.1" name="grind" value="7.5" required></div>
+                    <div class="form-group"><label>Temps (s)</label><input type="number" name="time" value="30" required></div></div>
+                    <div class="row"><div class="form-group"><label>Préinfusion (s)</label><input type="number" name="preinfusion" value="8"></div>
+                    <div class="form-group"><label>WDT</label><select name="wdt"><option value="non">Non</option><option value="léger">Léger</option>
+                    <option value="normal">Normal</option><option value="profond">Profond</option></select></div></div>
+                    <div class="row"><div class="form-group"><label>Channeling</label><select name="channeling"><option value="non">Non</option>
+                    <option value="oui">Oui</option></select></div><div class="form-group"><label>Débit</label>
+                    <select name="flow"><option value="rapide">Rapide</option><option value="stable" selected>Stable</option>
+                    <option value="lent">Lent</option></select></div></div>
+                    <div class="form-group"><label>Note</label><div class="star-rating" id="star-rating">
+                    ${[1,2,3,4,5].map(i => `<span class="star ${i <= currentRating ? 'filled' : ''}" onclick="window.setRating(${i})">★</span>`).join('')}</div></div>
+                    <div class="form-group"><label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" name="validated" style="width: auto; cursor: pointer;"><span>✓ Shot validé</span></label></div>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button></form></div>
+                    <div class="section"><h2>📋 Historique (${shots.length})</h2>
+                    ${shots.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun shot</p>' : ''}`;
                 shots.forEach(s => {
-                    const validatedBadge = s.validated 
-                        ? '<span style="display:inline-block; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700; background:#4caf50; color:white; margin-left:10px;">✓ Validé</span>'
-                        : '<span style="display:inline-block; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700; background:#9e9e9e; color:white; margin-left:10px;">○ Test</span>';
-                    
-                    html += `
-                        <div class="shot-item">
-                            <div class="shot-header">
-                                <div style="display:flex; align-items:center; gap:12px;">
-                                    <img src="${getLogo(s.coffee)}" style="width:40px; height:40px; border-radius:50%;">
-                                    <div>
-                                        <div class="shot-title">${s.coffee}${validatedBadge}</div>
-                                        <div class="shot-date">${s.date}</div>
-                                    </div>
-                                </div>
-                                <div style="display:flex; gap:8px;">
-                                    <button class="btn btn-secondary btn-small" onclick="window.toggleValidation('${s.id}', ${s.validated})">${s.validated ? 'Invalider' : 'Valider'}</button>
-                                    <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')">✕</button>
-                                </div>
-                            </div>
-                            <div class="shot-details">
-                                <div class="detail"><strong>Dose → Sortie</strong>${s.dose}g → ${s.output}g (1:${s.ratio.toFixed(1)})</div>
-                                <div class="detail"><strong>Mouture</strong>${s.grind}</div>
-                                <div class="detail"><strong>Temps</strong>${s.time}s</div>
-                                <div class="detail"><strong>Préinfusion</strong>${s.preinfusion}s</div>
-                                <div class="detail"><strong>Âge</strong>${s.age}j</div>
-                                <div class="detail"><strong>WDT</strong>${s.wdt}</div>
-                                <div class="detail"><strong>Channeling</strong>${s.channeling}</div>
-                                <div class="detail"><strong>Goût</strong>${s.taste || '-'}</div>
-                            </div>
-                        </div>
-                    `;
+                    const validatedBadge = s.validated ? '<span style="display:inline-block; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700; background:#4caf50; color:white; margin-left:10px;">✓ Validé</span>' : '<span style="display:inline-block; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700; background:#9e9e9e; color:white; margin-left:10px;">○ Test</span>';
+                    html += `<div class="shot-item"><div class="shot-header"><div style="display:flex; align-items:center; gap:12px;">
+                        <img src="${getLogo(s.coffee)}" style="width:40px; height:40px; border-radius:50%;">
+                        <div><div class="shot-title">${s.coffee}${validatedBadge}</div><div class="shot-date">${s.date}</div></div></div>
+                        <div style="display:flex; gap:8px;"><button class="btn btn-secondary btn-small" onclick="window.toggleValidation('${s.id}', ${s.validated})">${s.validated ? 'Invalider' : 'Valider'}</button>
+                        <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')">✕</button></div></div>
+                        <div class="shot-details"><div class="detail"><strong>Dose → Sortie</strong>${s.dose}g → ${s.output}g (1:${s.ratio.toFixed(1)})</div>
+                        <div class="detail"><strong>Mouture</strong>${s.grind}</div><div class="detail"><strong>Temps</strong>${s.time}s</div>
+                        <div class="detail"><strong>Préinfusion</strong>${s.preinfusion}s</div><div class="detail"><strong>Âge</strong>${s.age}j</div>
+                        <div class="detail"><strong>WDT</strong>${s.wdt}</div><div class="detail"><strong>Channeling</strong>${s.channeling}</div>
+                        <div class="detail"><strong>Note</strong><span class="star-display">${renderStars(s.rating || 0)}</span></div></div></div>`;
                 });
-
                 html += `</div>`;
             }
-            // --- ONGLET BAGS ---
             else if (currentTab === 'bags') {
-                html += `
-                    <div class="section">
-                        <h2>+ Nouveau Paquet</h2>
-                        <form id="form-bag" onsubmit="event.preventDefault(); window.addBag(event)">
-                            <div class="form-group">
-                                <label>Nom du café *</label>
-                                <input type="text" name="name" placeholder="Gédéo, Timanà..." required>
-                            </div>
-                            <div class="form-group">
-                                <label>Torréfacteur</label>
-                                <input type="text" name="roaster" value="L'Arbre à Café">
-                            </div>
-                            <div class="row">
-                                <div class="form-group">
-                                    <label>Date torréfaction (JJ/MM/AAAA) *</label>
-                                    <input type="text" name="roast_date" placeholder="31/12/2025" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Poids (g)</label>
-                                    <input type="number" name="weight" value="250">
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Ajouter le Paquet</button>
-                        </form>
-                    </div>
-                    <div class="section">
-                        <h2>📦 Mes Paquets (${bags.length})</h2>
-                        ${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun paquet</p>' : ''}
-                `;
-
+                html += `<div class="section"><h2>+ Nouveau Paquet</h2><form id="form-bag" onsubmit="event.preventDefault(); window.addBag(event)">
+                    <div class="form-group"><label>Nom *</label><input type="text" name="name" placeholder="Gédéo, Timanà..." required></div>
+                    <div class="form-group"><label>Torréfacteur</label><input type="text" name="roaster" value="L'Arbre à Café"></div>
+                    <div class="row"><div class="form-group"><label>Date torréfaction (JJ/MM/AAAA) *</label>
+                    <input type="text" name="roast_date" placeholder="31/12/2025" required></div>
+                    <div class="form-group"><label>Poids (g)</label><input type="number" name="weight" value="250"></div></div>
+                    <button type="submit" class="btn btn-primary">Ajouter</button></form></div>
+                    <div class="section"><h2>📦 Mes Paquets (${bags.length})</h2>${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun paquet</p>' : ''}`;
                 bags.forEach(b => {
                     const age = b.roast_date ? Math.floor((new Date() - new Date(b.roast_date.split('/').reverse().join('-'))) / 86400000) : 0;
                     const bgImage = getPackageImage(b.name);
                     const bgStyle = bgImage ? `style="background-image: url('${bgImage}');"` : '';
-                    html += `
-                        <div class="bag-item" ${bgStyle}>
-                            <div class="bag-header">
-                                <div style="display:flex; align-items:flex-start; gap:15px;">
-                                    <img src="${getLogo(b.name)}" style="width:50px; height:50px; border-radius:50%; margin-top:4px;">
-                                    <div>
-                                        <div class="bag-title">${b.name}</div>
-                                        <div class="bag-info">${b.roaster} • Torréfié le ${b.roast_date}<br>Âge: ${age} jours • ${b.weight}g</div>
-                                        <span class="bag-status ${b.status}">${b.status === 'active' ? '✓ Actif' : '○ Terminé'}</span>
-                                    </div>
-                                </div>
-                                <div style="display:flex; gap:10px;">
-                                    <button class="btn btn-secondary btn-small" onclick="window.toggleBag('${b.id}', '${b.status}')">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
-                                    <button class="btn btn-danger btn-small" onclick="window.deleteBag('${b.id}')">✕</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                    html += `<div class="bag-item" ${bgStyle}><div class="bag-header"><div style="display:flex; align-items:flex-start; gap:15px;">
+                        <img src="${getLogo(b.name)}" style="width:50px; height:50px; border-radius:50%; margin-top:4px;">
+                        <div><div class="bag-title">${b.name}</div><div class="bag-info">${b.roaster} • ${b.roast_date}<br>Âge: ${age}j • ${b.weight}g</div>
+                        <span class="bag-status ${b.status}">${b.status === 'active' ? '✓ Actif' : '○ Terminé'}</span></div></div>
+                        <div style="display:flex; gap:10px;"><button class="btn btn-secondary btn-small" onclick="window.toggleBag('${b.id}', '${b.status}')">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
+                        <button class="btn btn-danger btn-small" onclick="window.deleteBag('${b.id}')">✕</button></div></div></div>`;
                 });
-
                 html += `</div>`;
             }
-            // --- ONGLET ANALYSE ---
             else if (currentTab === 'analysis') {
-                html += `
-                    <div class="section">
-                        <h2>📊 Analyse : Mouture vs Âge du café</h2>
-                        <div class="alert alert-info">💡 Seuls les shots <strong>validés</strong> apparaissent dans ce graphique</div>
-                `;
-
-                if (bags.length === 0) {
-                    html += `<div class="alert alert-info">Ajoutez des paquets pour voir l'analyse</div>`;
-                } else {
-                    html += `
-                        <div class="form-group">
-                            <label>Sélectionner un paquet</label>
-                            <select id="analysis-bag" onchange="window.updateChart(this.value)">
-                                <option value="">-- Tous les paquets --</option>
-                                ${bags.map(b => `<option value="${b.id}">${b.name} (${b.roaster})</option>`).join('')}
-                            </select>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart"></canvas>
-                        </div>
-                    `;
+                html += `<div class="section"><h2>📊 Analyse : Mouture vs Âge</h2>
+                    <div class="alert alert-info">💡 Seuls les shots <strong>validés avec 4 ou 5 étoiles</strong> apparaissent</div>`;
+                if (bags.length === 0) html += `<div class="alert alert-info">Ajoutez des paquets</div>`;
+                else {
+                    html += `<div class="form-group"><label>Sélectionner un paquet</label>
+                        <select id="analysis-bag" onchange="window.updateChart(this.value)"><option value="">-- Tous --</option>
+                        ${bags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
+                        <div class="chart-container"><canvas id="chart"></canvas></div>`;
                 }
-
                 html += `</div>`;
             }
-            // --- ONGLET SETTINGS ---
             else if (currentTab === 'settings') {
-                html += `
-                    <div class="section">
-                        <h2>⚙️ Paramètres</h2>
-                        <div class="alert alert-success">✅ Synchronisé avec Supabase</div>
-                        <h3 style="margin-top:25px; margin-bottom:15px;">Importer CSV</h3>
-                        <p style="margin-bottom:15px; color:#666;">Les paquets manquants seront créés automatiquement.</p>
-                        <input type="file" accept=".csv" onchange="window.importCSV(this.files[0])" style="width: 100%; padding: 15px; border: 3px dashed #8B4513; border-radius: 12px; background: #fafaf8; font-size: 16px; color: #8B4513; font-weight: 600; cursor: pointer;">
-                        <h3 style="margin-top:30px; margin-bottom:15px;">Exporter</h3>
-                        <p style="margin-bottom:15px; color:#666;">${shots.length} shots</p>
-                        <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button>
-                    </div>
-                `;
+                html += `<div class="section"><h2>⚙️ Paramètres</h2><div class="alert alert-success">✅ Synchronisé</div>
+                    <h3 style="margin-top:25px; margin-bottom:15px;">Importer CSV</h3>
+                    <p style="margin-bottom:15px; color:#666;">Les paquets manquants seront créés automatiquement.</p>
+                    <input type="file" accept=".csv" onchange="window.importCSV(this.files[0])" style="width: 100%; padding: 15px; border: 3px dashed #8B4513; border-radius: 12px; background: #fafaf8; font-size: 16px; color: #8B4513; font-weight: 600; cursor: pointer;">
+                    <h3 style="margin-top:30px; margin-bottom:15px;">Exporter</h3>
+                    <p style="margin-bottom:15px; color:#666;">${shots.length} shots</p>
+                    <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button></div>`;
             }
-
             appEl.innerHTML = html;
-
-            // Créer le graphique si on est dans l'onglet analyse
-            if (currentTab === 'analysis' && bags.length > 0) {
-                setTimeout(() => window.updateChart(''), 100);
-            }
+            if (currentTab === 'analysis' && bags.length > 0) setTimeout(() => window.updateChart(''), 100);
         }
 
-        // === GRAPHIQUE ===
         function updateChart(bagId) {
             const canvas = document.getElementById('chart');
             if (!canvas) return;
-
             const ctx = canvas.getContext('2d');
-
-            // Filtrer les shots VALIDÉS uniquement
-            let filteredShots = shots.filter(s => s.validated === true);
-            
-            // Filtrer par paquet si sélectionné
+            let filteredShots = shots.filter(s => s.validated === true && (s.rating === 4 || s.rating === 5));
             if (bagId) {
                 const bag = bags.find(b => b.id.toString() === bagId);
                 if (bag) {
                     filteredShots = filteredShots.filter(s => {
                         const sameRoastDate = s.roast_date === bag.roast_date;
-                        const sameName = s.coffee.toLowerCase().includes(bag.name.toLowerCase()) || 
-                                       bag.name.toLowerCase().includes(s.coffee.toLowerCase());
+                        const sameName = s.coffee.toLowerCase().includes(bag.name.toLowerCase()) || bag.name.toLowerCase().includes(s.coffee.toLowerCase());
                         return sameName && sameRoastDate;
                     });
                 }
             }
-
-            // Trier par âge
             const sorted = filteredShots.sort((a, b) => a.age - b.age);
-
-            // Préparer les données
             const data = sorted.map(s => ({ x: s.age, y: s.grind }));
-
-            // Détruire l'ancien graphique
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-
-            // Créer le nouveau graphique
+            if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: 'Mouture vs Âge (shots validés)',
-                        data: data,
-                        backgroundColor: 'rgba(139, 69, 19, 0.6)',
-                        borderColor: 'rgba(139, 69, 19, 1)',
-                        borderWidth: 2,
-                        pointRadius: 8,
-                        pointHoverRadius: 10
-                    }]
-                },
+                data: { datasets: [{ label: 'Mouture vs Âge (validés 4-5★)', data: data, backgroundColor: 'rgba(139, 69, 19, 0.6)', borderColor: 'rgba(139, 69, 19, 1)', borderWidth: 2, pointRadius: 8, pointHoverRadius: 10 }] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Âge du café (jours depuis torréfaction)',
-                                font: { size: 14, weight: 'bold' }
-                            },
-                            ticks: { font: { size: 12 } }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Mouture',
-                                font: { size: 14, weight: 'bold' }
-                            },
-                            ticks: { font: { size: 12 } }
-                        }
+                        x: { title: { display: true, text: 'Âge du café (jours)', font: { size: 14, weight: 'bold' } } },
+                        y: { title: { display: true, text: 'Mouture', font: { size: 14, weight: 'bold' } } }
                     },
                     plugins: {
-                        legend: {
-                            display: true
-                        },
+                        legend: { display: true },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
                                     const shot = sorted[context.dataIndex];
-                                    return [
-                                        `Mouture: ${shot.grind}`,
-                                        `Âge: ${shot.age} jours`,
-                                        `Temps: ${shot.time}s`,
-                                        `Goût: ${shot.taste || '-'}`
-                                    ];
+                                    return [`Mouture: ${shot.grind}`, `Âge: ${shot.age}j`, `Temps: ${shot.time}s`, `Note: ${renderStars(shot.rating)}`];
                                 }
                             }
                         }
@@ -667,11 +498,8 @@
             });
         }
 
-        // === FONCTIONS GLOBALES ===
-        window.setTab = function(tab) {
-            currentTab = tab;
-            render();
-        };
+        window.setTab = function(tab) { currentTab = tab; render(); };
+        window.setRating = function(rating) { currentRating = rating; render(); };
         window.addShot = addShot;
         window.deleteShot = deleteShot;
         window.toggleValidation = toggleValidation;
@@ -682,7 +510,6 @@
         window.exportCSV = exportCSV;
         window.updateChart = updateChart;
 
-        // === DÉMARRAGE ===
         loadData();
     </script>
 </body>
