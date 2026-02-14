@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#8B4513">
     <title>☕ Espresso Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f5f0; padding: 0; min-height: 100vh; }
         .header { background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); color: white; padding: 25px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
         .header h1 { font-size: 28px; font-weight: 700; }
         .container { max-width: 900px; margin: 0 auto; padding: 30px 20px; }
-        .tabs { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
+        .tabs { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap; }
         .tab { padding: 15px 35px; background: white; border: 2px solid #e0d5c7; border-radius: 12px; cursor: pointer; font-size: 17px; font-weight: 600; color: #666; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .tab:hover { border-color: #8B4513; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15); }
         .tab.active { background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%); color: white; border-color: #8B4513; }
@@ -47,12 +51,12 @@
         .alert { padding: 18px 22px; border-radius: 12px; margin-bottom: 25px; font-weight: 500; font-size: 15px; }
         .alert-success { background: #d4edda; color: #155724; border-left: 5px solid #28a745; }
         .alert-error { background: #f8d7da; color: #721c24; border-left: 5px solid #dc3545; }
-        .file-input-wrapper { position: relative; display: inline-block; }
-        .file-input-wrapper input[type=file] { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-        .actions { display: flex; gap: 12px; margin-top: 25px; }
+        .alert-info { background: #e3f2fd; color: #1976d2; border-left: 5px solid #1976d2; }
+        .chart-container { position: relative; height: 400px; margin-top: 20px; }
         @media (max-width: 600px) { .row { grid-template-columns: 1fr; } .container { padding: 20px 15px; } .tabs { flex-direction: column; gap: 10px; } .tab { padding: 12px 20px; } }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -63,11 +67,10 @@
     </div>
 
     <script>
-        // === CONFIG SUPABASE (tes clés) ===
+        // === CONFIG SUPABASE ===
         const SUPABASE_URL = 'https://duzxzqmjkovrsfwhdyml.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1enh6cW1qa292cnNmd2hkeW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3NjAzMzYsImV4cCI6MjA4NjMzNjMzNn0.hRUDEbr9yhd_R1Q0lLVYYppnht5tUAd5TtE9kanzvos';
 
-        // ✅ Création du client Supabase – renommé "sb" pour éviter le conflit avec la variable globale
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // === DONNÉES GLOBALES ===
@@ -75,16 +78,10 @@
         let shots = [];
         let bags = [];
         let message = null;
+        let chartInstance = null;
         const appEl = document.getElementById('app');
 
-        // === FONCTIONS UTILITAIRES ===
-        function showMessage(type, text) {
-            message = { type, text };
-            setTimeout(() => { message = null; render(); }, 4000);
-            render();
-        }
-
-        // Logos et images
+        // === LOGOS ET IMAGES ===
         const LOGOS = {
             timana: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACbUlEQVR4nO2bPVLDMBSEVxnOkQ5OQUtDTkBNmYaOM9DRUKbmBlSUnIKSjlOYgiiRZcnSk/WzzmgbMkNG8n5vnyx7IoW6GgTfVcWuouIkEsMhFbnWEoN6TQ/vN9GDqIfv2X8Lrmd+nlwDwWFcYjgkD5DF158DQFHjtnKDWArgZL6kaZ8sGEleUgGMqt7CvJYjESJPKQDOVd8f/j/cviQMk1epadgI55maB4CvZ+Ew+WWlMPr2KwHgNk+kFAixAMLmCVIAyCHEAIiv/AohhADQx96nWAhzANLMk6QAiIMQbIG1Vd5WaI/iAzAAC8wTpQAYQZikwAUgzyMsGQRDI3/eFlh79G35WsEGsCz6tshS4GoF6Vb44mQCyPn66iyyFBgaAEcCLq33bdlrQZ0W4E3B6bk57+LnE8F7Ay39/qAvglVnI2yFngDU6n8tkhTou0FPQJNZSVIAtEwACYTeAk1nJ0jBVesL2P1+Npx921ugKYDd9V3L6QE0BMBgHmi9CBJog+MjsXp7rDYpQ/U/nrYAegLqA2CovqmegOPfKusAS/V1/wNQ1RLAYt7WBEDNu0ELGdUHMAZQ7HfDpNVXQF8EJwCyL4ZM1TcXP/3Bm4BLWwvs3tdyAci2FjBV39DIny8Bi1uBybwr+lrBRXDtreCLvtYcgBMtKQSW6lvmna0dSkAyhNaKMQ/E7QNEEBiqH2seiN8IRUFYm3lAthOkbwepeUC+FfZCaF39FPOiL1oanxnaH5oBcNzmRJ5SH4YUCFrCUXVxQYucG7x//ckwrFuejU2zc4OmioLIbTzbAA55f3EqARLYwlKeHXaJ/vT4H4+IseLBtt/JAAAAAElFTkSuQmCC',
             gedeo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACcUlEQVR4nO2bvU7DMBSFTyo2dgZmNhaeAYmZHfYO3XkKdiTYeQDmCt6CjZWFvXNY6shx7NjX8c9J5bNQidbO+e65jhMlHcqqF3y3y3YUBSeRGPYpy7HmGNRp+vb9EDzI1+P53L+THXdKABPjEsM+OYAsPv4UALIaN5UaxFIAg/mcpl0yYER5iQUwqnoN80qWRIg8xQAYzG/3OwDAz99zxDBpFZuGjXCeiXkAuLp4Eg6TXkYKg0+/EgBW80yKgRAKwGueIQWAHEIIgODKrxGCDwB97F0KhTAHIMo8SwqAMAjeFlhb5U359iguAD0Qb54pBcAIwiQFNgBJLmHZIGga+XO2wNqjb8rVCiaARdE3xZYCWytIt8InJx1AyttXg9hSoKkHLAk4td43Za4FRVqAOAXDdXPSxc8lhvsGSur+QVsES07G2AotASjU/0osKVBng5aAGpOypAComAAWCK0Fak7OkIKz2gfwefNQbe4OrQXqAni9/K05PYCKABjMA60FsMHxkvjt7qXYpAzV764/ALQElAfAUH1dLQHHv0XWAZbqq/4H0BVLAIt5UxMAJc8GNaRVH8AYQLbnhkmr3wFtEZwASL4YMlVfX/zUB2cCTm0tMHtfyQYg2VrAVH1NI3+uBCxuBSbztugreRfBtbeCK/pKcwAGWlIILNU3zFtb25eAaAi1FWIeCNsHiCAwVD/UPBC+EQqCsDbzgGwnSN8OUvOAfCvshFC7+jHmRV80NHqibLvfVQNgOc1lf2dI1wCi/75fOJRcsVVf/CNDk+cLc8JwbGyqvTeoKyuI1MaTDWCR84lTCRDPFpby3WGb6N8e/wdHGbWdc2XBIwAAAABJRU5ErkJggg==',
@@ -112,6 +109,12 @@
             return null;
         }
 
+        function showMessage(type, text) {
+            message = { type, text };
+            setTimeout(() => { message = null; render(); }, 4000);
+            render();
+        }
+
         // === CHARGEMENT DES DONNÉES ===
         async function loadData() {
             try {
@@ -121,7 +124,7 @@
                 bags = b || [];
             } catch (e) {
                 console.error(e);
-                showMessage('error', '❌ Erreur de chargement Supabase');
+                showMessage('error', '❌ Erreur de chargement');
             }
             render();
         }
@@ -136,7 +139,7 @@
 
             const shot = {
                 date: new Date().toLocaleString('fr-FR'),
-                coffee: form.coffee.value || (selectedBag ? selectedBag.name : ''),
+                coffee: selectedBag ? selectedBag.name : '',
                 roaster: selectedBag ? selectedBag.roaster : "L'Arbre à Café",
                 roast_date: selectedBag ? selectedBag.roast_date : '',
                 age,
@@ -150,7 +153,7 @@
                 channeling: form.channeling.value,
                 flow: form.flow.value,
                 taste: form.taste.value,
-                notes: form.notes.value
+                notes: ''
             };
 
             const { data } = await sb.from('shots').insert([shot]).select();
@@ -169,6 +172,7 @@
             if (!confirm('Supprimer ce shot ?')) return;
             await sb.from('shots').delete().eq('id', id);
             shots = shots.filter(s => s.id !== id);
+            showMessage('success', '✅ Supprimé');
             render();
         }
 
@@ -181,7 +185,7 @@
                 roaster: form.roaster.value,
                 roast_date: form.roast_date.value,
                 weight: parseInt(form.weight.value),
-                notes: form.notes.value,
+                notes: '',
                 status: 'active'
             };
             const { data } = await sb.from('bags').insert([bag]).select();
@@ -202,25 +206,49 @@
             if (!confirm('Supprimer ce paquet ?')) return;
             await sb.from('bags').delete().eq('id', id);
             bags = bags.filter(b => b.id !== id);
+            showMessage('success', '✅ Supprimé');
             render();
         }
 
-        // === IMPORT/EXPORT ===
+        // === IMPORT CSV INTELLIGENT ===
         async function importCSV(file) {
             if (!file) return;
             const reader = new FileReader();
             reader.onload = async (ev) => {
                 try {
                     const lines = ev.target.result.split('\n').filter(l => l.trim());
-                    const data = [];
+                    const shotsToImport = [];
+                    const bagsToCreate = new Map(); // clé: "nom|roaster|roast_date"
+
+                    // Parser le CSV
                     for (let i = 1; i < lines.length; i++) {
                         const v = lines[i].split(',');
                         if (v.length < 10) continue;
-                        data.push({
+
+                        const coffee = v[1].trim();
+                        const roaster = v[2].trim();
+                        const roast_date = v[3].trim();
+
+                        // Créer une clé unique pour le paquet
+                        const bagKey = `${coffee}|${roaster}|${roast_date}`;
+                        
+                        // Si le paquet n'existe pas encore, l'ajouter à la map
+                        if (!bagsToCreate.has(bagKey) && roast_date) {
+                            bagsToCreate.set(bagKey, {
+                                name: coffee,
+                                roaster: roaster,
+                                roast_date: roast_date,
+                                weight: 250,
+                                notes: '',
+                                status: 'active'
+                            });
+                        }
+
+                        shotsToImport.push({
                             date: v[0].trim(),
-                            coffee: v[1].trim(),
-                            roaster: v[2].trim(),
-                            roast_date: v[3].trim(),
+                            coffee: coffee,
+                            roaster: roaster,
+                            roast_date: roast_date,
                             age: parseInt(v[4]) || 0,
                             dose: parseFloat(v[5]) || 18,
                             output: parseFloat(v[6]) || 36,
@@ -235,11 +263,32 @@
                             notes: v[15]?.trim() || ''
                         });
                     }
-                    await sb.from('shots').insert(data);
+
+                    // Vérifier quels paquets existent déjà
+                    const newBags = [];
+                    for (const [key, bag] of bagsToCreate) {
+                        const exists = bags.some(b => 
+                            b.name.toLowerCase() === bag.name.toLowerCase() && 
+                            b.roast_date === bag.roast_date
+                        );
+                        if (!exists) {
+                            newBags.push(bag);
+                        }
+                    }
+
+                    // Créer les nouveaux paquets
+                    if (newBags.length > 0) {
+                        await sb.from('bags').insert(newBags);
+                    }
+
+                    // Importer les shots
+                    await sb.from('shots').insert(shotsToImport);
+                    
                     await loadData();
-                    showMessage('success', `✅ ${data.length} shots importés !`);
+                    showMessage('success', `✅ ${shotsToImport.length} shots et ${newBags.length} paquets importés !`);
                 } catch (e) {
-                    showMessage('error', '❌ ' + e.message);
+                    console.error(e);
+                    showMessage('error', '❌ Erreur: ' + e.message);
                 }
             };
             reader.readAsText(file);
@@ -264,7 +313,8 @@
                 <div class="tabs">
                     <button class="tab ${currentTab === 'shots' ? 'active' : ''}" onclick="window.setTab('shots')">☕ Shots</button>
                     <button class="tab ${currentTab === 'bags' ? 'active' : ''}" onclick="window.setTab('bags')">📦 Paquets</button>
-                    <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="window.setTab('settings')">⚙️ Paramètres</button>
+                    <button class="tab ${currentTab === 'analysis' ? 'active' : ''}" onclick="window.setTab('analysis')">📊 Analyse</button>
+                    <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="window.setTab('settings')">⚙️</button>
                 </div>
             `;
 
@@ -272,22 +322,18 @@
                 html += `<div class="alert alert-${message.type}">${message.text}</div>`;
             }
 
-            // --- SHOTS ---
+            // --- ONGLET SHOTS ---
             if (currentTab === 'shots') {
                 html += `
                     <div class="section">
                         <h2>+ Nouveau Shot</h2>
                         <form id="form-shot" onsubmit="event.preventDefault(); window.addShot(event)">
                             <div class="form-group">
-                                <label>Paquet actif</label>
-                                <select name="bag_id">
+                                <label>Paquet actif *</label>
+                                <select name="bag_id" required>
                                     <option value="">-- Choisir un paquet --</option>
                                     ${activeBags.map(b => `<option value="${b.id}">${b.name} (${b.roaster})</option>`).join('')}
                                 </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Café (optionnel si paquet sélectionné)</label>
-                                <input type="text" name="coffee" placeholder="Nom du café">
                             </div>
                             <div class="row">
                                 <div class="form-group">
@@ -345,10 +391,6 @@
                                 <label>Goût</label>
                                 <input type="text" name="taste" placeholder="très bon, bon, acide...">
                             </div>
-                            <div class="form-group">
-                                <label>Notes</label>
-                                <textarea name="notes" rows="3" placeholder="Observations..."></textarea>
-                            </div>
                             <button type="submit" class="btn btn-primary">Enregistrer le Shot</button>
                         </form>
                     </div>
@@ -368,7 +410,7 @@
                                         <div class="shot-date">${s.date}</div>
                                     </div>
                                 </div>
-                                <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')">✕ Supprimer</button>
+                                <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')">✕</button>
                             </div>
                             <div class="shot-details">
                                 <div class="detail"><strong>Dose → Sortie</strong>${s.dose}g → ${s.output}g (1:${s.ratio.toFixed(1)})</div>
@@ -380,14 +422,13 @@
                                 <div class="detail"><strong>Channeling</strong>${s.channeling}</div>
                                 <div class="detail"><strong>Goût</strong>${s.taste || '-'}</div>
                             </div>
-                            ${s.notes ? `<div style="margin-top:15px; font-size:15px; color:#666; font-style:italic;">📝 ${s.notes}</div>` : ''}
                         </div>
                     `;
                 });
 
                 html += `</div>`;
             }
-            // --- BAGS ---
+            // --- ONGLET BAGS ---
             else if (currentTab === 'bags') {
                 html += `
                     <div class="section">
@@ -411,16 +452,12 @@
                                     <input type="number" name="weight" value="250">
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>Notes</label>
-                                <textarea name="notes" rows="3" placeholder="Profil aromatique..."></textarea>
-                            </div>
                             <button type="submit" class="btn btn-primary">Ajouter le Paquet</button>
                         </form>
                     </div>
                     <div class="section">
                         <h2>📦 Mes Paquets (${bags.length})</h2>
-                        ${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun paquet enregistré</p>' : ''}
+                        ${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun paquet</p>' : ''}
                 `;
 
                 bags.forEach(b => {
@@ -443,37 +480,150 @@
                                     <button class="btn btn-danger btn-small" onclick="window.deleteBag('${b.id}')">✕</button>
                                 </div>
                             </div>
-                            ${b.notes ? `<div style="margin-top:12px; font-size:15px; color:#666; font-style:italic;">📝 ${b.notes}</div>` : ''}
                         </div>
                     `;
                 });
 
                 html += `</div>`;
             }
-            // --- SETTINGS ---
+            // --- ONGLET ANALYSE ---
+            else if (currentTab === 'analysis') {
+                html += `
+                    <div class="section">
+                        <h2>📊 Analyse : Mouture vs Âge du café</h2>
+                `;
+
+                if (bags.length === 0) {
+                    html += `<div class="alert alert-info">Ajoutez des paquets pour voir l'analyse</div>`;
+                } else {
+                    html += `
+                        <div class="form-group">
+                            <label>Sélectionner un paquet</label>
+                            <select id="analysis-bag" onchange="window.updateChart(this.value)">
+                                <option value="">-- Tous les paquets --</option>
+                                ${bags.map(b => `<option value="${b.id}">${b.name} (${b.roaster})</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart"></canvas>
+                        </div>
+                    `;
+                }
+
+                html += `</div>`;
+            }
+            // --- ONGLET SETTINGS ---
             else if (currentTab === 'settings') {
                 html += `
                     <div class="section">
                         <h2>⚙️ Paramètres</h2>
                         <div class="alert alert-success">✅ Synchronisé avec Supabase</div>
-                        <h3 style="margin-top:25px; margin-bottom:15px;">Importer des données CSV</h3>
-                        <div style="margin: 20px 0;">
-    <input type="file" 
-           accept=".csv" 
-           onchange="window.importCSV(this.files[0])" 
-           style="width: 100%; padding: 15px; border: 3px dashed #8B4513; border-radius: 12px; background: #fafaf8; font-size: 16px; color: #8B4513; font-weight: 600; cursor: pointer;">
-</div>
-                        <h3 style="margin-top:30px; margin-bottom:15px;">Exporter les données</h3>
-                        <p style="margin-bottom:15px; color:#666;">${shots.length} shots enregistrés</p>
+                        <h3 style="margin-top:25px; margin-bottom:15px;">Importer CSV</h3>
+                        <p style="margin-bottom:15px; color:#666;">Les paquets manquants seront créés automatiquement.</p>
+                        <input type="file" accept=".csv" onchange="window.importCSV(this.files[0])" style="width: 100%; padding: 15px; border: 3px dashed #8B4513; border-radius: 12px; background: #fafaf8; font-size: 16px; color: #8B4513; font-weight: 600; cursor: pointer;">
+                        <h3 style="margin-top:30px; margin-bottom:15px;">Exporter</h3>
+                        <p style="margin-bottom:15px; color:#666;">${shots.length} shots</p>
                         <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button>
                     </div>
                 `;
             }
 
             appEl.innerHTML = html;
+
+            // Créer le graphique si on est dans l'onglet analyse
+            if (currentTab === 'analysis' && bags.length > 0) {
+                setTimeout(() => window.updateChart(''), 100);
+            }
         }
 
-        // === FONCTIONS GLOBALES POUR LES ÉVÉNEMENTS ===
+        // === GRAPHIQUE ===
+        function updateChart(bagId) {
+            const canvas = document.getElementById('chart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            // Filtrer les shots
+            let filteredShots = shots;
+            if (bagId) {
+                const bag = bags.find(b => b.id.toString() === bagId);
+                if (bag) {
+                    filteredShots = shots.filter(s => 
+                        s.coffee.toLowerCase() === bag.name.toLowerCase() && 
+                        s.roast_date === bag.roast_date
+                    );
+                }
+            }
+
+            // Trier par âge
+            const sorted = filteredShots.sort((a, b) => a.age - b.age);
+
+            // Préparer les données
+            const data = sorted.map(s => ({ x: s.age, y: s.grind }));
+
+            // Détruire l'ancien graphique
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            // Créer le nouveau graphique
+            chartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Mouture vs Âge',
+                        data: data,
+                        backgroundColor: 'rgba(139, 69, 19, 0.6)',
+                        borderColor: 'rgba(139, 69, 19, 1)',
+                        borderWidth: 2,
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Âge du café (jours depuis torréfaction)',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            ticks: { font: { size: 12 } }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Mouture',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            ticks: { font: { size: 12 } }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const shot = sorted[context.dataIndex];
+                                    return [
+                                        `Mouture: ${shot.grind}`,
+                                        `Âge: ${shot.age} jours`,
+                                        `Temps: ${shot.time}s`,
+                                        `Goût: ${shot.taste || '-'}`
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // === FONCTIONS GLOBALES ===
         window.setTab = function(tab) {
             currentTab = tab;
             render();
@@ -485,6 +635,7 @@
         window.deleteBag = deleteBag;
         window.importCSV = importCSV;
         window.exportCSV = exportCSV;
+        window.updateChart = updateChart;
 
         // === DÉMARRAGE ===
         loadData();
