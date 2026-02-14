@@ -153,7 +153,8 @@
                 channeling: form.channeling.value,
                 flow: form.flow.value,
                 taste: form.taste.value,
-                notes: ''
+                notes: '',
+                validated: form.validated.checked
             };
 
             const { data } = await sb.from('shots').insert([shot]).select();
@@ -173,6 +174,13 @@
             await sb.from('shots').delete().eq('id', id);
             shots = shots.filter(s => s.id !== id);
             showMessage('success', '✅ Supprimé');
+            render();
+        }
+
+        async function toggleValidation(id, currentStatus) {
+            const newStatus = !currentStatus;
+            await sb.from('shots').update({ validated: newStatus }).eq('id', id);
+            shots = shots.map(s => s.id === id ? { ...s, validated: newStatus } : s);
             render();
         }
 
@@ -218,7 +226,7 @@
                 try {
                     const lines = ev.target.result.split('\n').filter(l => l.trim());
                     const shotsToImport = [];
-                    const bagsToCreate = new Map(); // clé: "nom|roaster|roast_date"
+                    const bagsToCreate = new Map();
 
                     // Parser le CSV
                     for (let i = 1; i < lines.length; i++) {
@@ -229,10 +237,8 @@
                         const roaster = v[2].trim();
                         const roast_date = v[3].trim();
 
-                        // Créer une clé unique pour le paquet
+                        // Gérer les paquets
                         const bagKey = `${coffee}|${roaster}|${roast_date}`;
-                        
-                        // Si le paquet n'existe pas encore, l'ajouter à la map
                         if (!bagsToCreate.has(bagKey) && roast_date) {
                             bagsToCreate.set(bagKey, {
                                 name: coffee,
@@ -244,7 +250,7 @@
                             });
                         }
 
-                        shotsToImport.push({
+                        const shotData = {
                             date: v[0].trim(),
                             coffee: coffee,
                             roaster: roaster,
@@ -260,11 +266,24 @@
                             channeling: v[12]?.trim() || 'non',
                             flow: v[13]?.trim() || 'stable',
                             taste: v[14]?.trim() || '',
-                            notes: v[15]?.trim() || ''
-                        });
+                            notes: v[15]?.trim() || '',
+                            validated: false
+                        };
+
+                        // Détecter les doublons (date + café + mouture + temps)
+                        const isDuplicate = shots.some(s => 
+                            s.date === shotData.date &&
+                            s.coffee === shotData.coffee &&
+                            s.grind === shotData.grind &&
+                            s.time === shotData.time
+                        );
+
+                        if (!isDuplicate) {
+                            shotsToImport.push(shotData);
+                        }
                     }
 
-                    // Vérifier quels paquets existent déjà
+                    // Créer les nouveaux paquets
                     const newBags = [];
                     for (const [key, bag] of bagsToCreate) {
                         const exists = bags.some(b => 
@@ -276,16 +295,23 @@
                         }
                     }
 
-                    // Créer les nouveaux paquets
                     if (newBags.length > 0) {
                         await sb.from('bags').insert(newBags);
                     }
 
-                    // Importer les shots
-                    await sb.from('shots').insert(shotsToImport);
+                    if (shotsToImport.length > 0) {
+                        await sb.from('shots').insert(shotsToImport);
+                    }
                     
                     await loadData();
-                    showMessage('success', `✅ ${shotsToImport.length} shots et ${newBags.length} paquets importés !`);
+                    
+                    const skipped = (lines.length - 1) - shotsToImport.length;
+                    let msg = `✅ ${shotsToImport.length} shots`;
+                    if (newBags.length > 0) msg += ` et ${newBags.length} paquets`;
+                    msg += ' importés !';
+                    if (skipped > 0) msg += ` (${skipped} doublons ignorés)`;
+                    
+                    showMessage('success', msg);
                 } catch (e) {
                     console.error(e);
                     showMessage('error', '❌ Erreur: ' + e.message);
@@ -391,6 +417,12 @@
                                 <label>Goût</label>
                                 <input type="text" name="taste" placeholder="très bon, bon, acide...">
                             </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                    <input type="checkbox" name="validated" style="width: auto; cursor: pointer;">
+                                    <span>✓ Shot validé (pour l'analyse)</span>
+                                </label>
+                            </div>
                             <button type="submit" class="btn btn-primary">Enregistrer le Shot</button>
                         </form>
                     </div>
@@ -400,17 +432,24 @@
                 `;
 
                 shots.forEach(s => {
+                    const validatedBadge = s.validated 
+                        ? '<span style="display:inline-block; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700; background:#4caf50; color:white; margin-left:10px;">✓ Validé</span>'
+                        : '<span style="display:inline-block; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:700; background:#9e9e9e; color:white; margin-left:10px;">○ Test</span>';
+                    
                     html += `
                         <div class="shot-item">
                             <div class="shot-header">
                                 <div style="display:flex; align-items:center; gap:12px;">
                                     <img src="${getLogo(s.coffee)}" style="width:40px; height:40px; border-radius:50%;">
                                     <div>
-                                        <div class="shot-title">${s.coffee}</div>
+                                        <div class="shot-title">${s.coffee}${validatedBadge}</div>
                                         <div class="shot-date">${s.date}</div>
                                     </div>
                                 </div>
-                                <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')">✕</button>
+                                <div style="display:flex; gap:8px;">
+                                    <button class="btn btn-secondary btn-small" onclick="window.toggleValidation('${s.id}', ${s.validated})">${s.validated ? 'Invalider' : 'Valider'}</button>
+                                    <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')">✕</button>
+                                </div>
                             </div>
                             <div class="shot-details">
                                 <div class="detail"><strong>Dose → Sortie</strong>${s.dose}g → ${s.output}g (1:${s.ratio.toFixed(1)})</div>
@@ -491,6 +530,7 @@
                 html += `
                     <div class="section">
                         <h2>📊 Analyse : Mouture vs Âge du café</h2>
+                        <div class="alert alert-info">💡 Seuls les shots <strong>validés</strong> apparaissent dans ce graphique</div>
                 `;
 
                 if (bags.length === 0) {
@@ -543,15 +583,19 @@
 
             const ctx = canvas.getContext('2d');
 
-            // Filtrer les shots
-            let filteredShots = shots;
+            // Filtrer les shots VALIDÉS uniquement
+            let filteredShots = shots.filter(s => s.validated === true);
+            
+            // Filtrer par paquet si sélectionné
             if (bagId) {
                 const bag = bags.find(b => b.id.toString() === bagId);
                 if (bag) {
-                    filteredShots = shots.filter(s => 
-                        s.coffee.toLowerCase() === bag.name.toLowerCase() && 
-                        s.roast_date === bag.roast_date
-                    );
+                    filteredShots = filteredShots.filter(s => {
+                        const sameRoastDate = s.roast_date === bag.roast_date;
+                        const sameName = s.coffee.toLowerCase().includes(bag.name.toLowerCase()) || 
+                                       bag.name.toLowerCase().includes(s.coffee.toLowerCase());
+                        return sameName && sameRoastDate;
+                    });
                 }
             }
 
@@ -571,7 +615,7 @@
                 type: 'scatter',
                 data: {
                     datasets: [{
-                        label: 'Mouture vs Âge',
+                        label: 'Mouture vs Âge (shots validés)',
                         data: data,
                         backgroundColor: 'rgba(139, 69, 19, 0.6)',
                         borderColor: 'rgba(139, 69, 19, 1)',
@@ -603,7 +647,7 @@
                     },
                     plugins: {
                         legend: {
-                            display: false
+                            display: true
                         },
                         tooltip: {
                             callbacks: {
@@ -630,6 +674,7 @@
         };
         window.addShot = addShot;
         window.deleteShot = deleteShot;
+        window.toggleValidation = toggleValidation;
         window.addBag = addBag;
         window.toggleBag = toggleBag;
         window.deleteBag = deleteBag;
