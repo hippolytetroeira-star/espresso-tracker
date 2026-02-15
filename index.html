@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* ... styles inchangés (identiques à la version précédente) ... */
+        /* ... styles identiques à la version précédente ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -751,7 +751,7 @@
             link.click();
         }
 
-        // Analyse par nom de café (sans restriction sur la note)
+        // Analyse par nom de café (tous les shots, avec ligne de tendance)
         function updateChartByCoffee(coffeeName) {
             const canvas = document.getElementById('chart');
             if (!canvas) return;
@@ -764,22 +764,58 @@
             
             // Trier par âge
             const sorted = filteredShots.sort((a, b) => a.age - b.age);
-            const data = sorted.map(s => ({ x: s.age, y: s.grind }));
+            const scatterData = sorted.map(s => ({ x: s.age, y: s.grind }));
+            
+            // Calcul de la régression linéaire pour la tendance
+            let trendData = [];
+            if (sorted.length >= 2) {
+                const n = sorted.length;
+                const sumX = sorted.reduce((acc, s) => acc + s.age, 0);
+                const sumY = sorted.reduce((acc, s) => acc + s.grind, 0);
+                const sumXY = sorted.reduce((acc, s) => acc + s.age * s.grind, 0);
+                const sumX2 = sorted.reduce((acc, s) => acc + s.age * s.age, 0);
+                
+                const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+                const intercept = (sumY - slope * sumX) / n;
+                
+                const xMin = Math.min(...sorted.map(s => s.age));
+                const xMax = Math.max(...sorted.map(s => s.age));
+                const yMin = slope * xMin + intercept;
+                const yMax = slope * xMax + intercept;
+                
+                trendData = [
+                    { x: xMin, y: yMin },
+                    { x: xMax, y: yMax }
+                ];
+            }
             
             if (chartInstance) chartInstance.destroy();
             
             chartInstance = new Chart(ctx, {
                 type: 'scatter',
                 data: { 
-                    datasets: [{ 
-                        label: `${coffeeName} - Mouture vs Âge (tous shots)`, 
-                        data: data, 
-                        backgroundColor: 'rgba(204, 120, 92, 0.7)', 
-                        borderColor: '#CC785C', 
-                        borderWidth: 2, 
-                        pointRadius: 9, 
-                        pointHoverRadius: 11 
-                    }] 
+                    datasets: [
+                        {
+                            label: `${coffeeName} - Mouture vs Âge`,
+                            data: scatterData,
+                            backgroundColor: 'rgba(204, 120, 92, 0.7)',
+                            borderColor: '#CC785C',
+                            borderWidth: 2,
+                            pointRadius: 9,
+                            pointHoverRadius: 11
+                        },
+                        ...(trendData.length ? [{
+                            label: 'Tendance linéaire',
+                            data: trendData,
+                            type: 'line',
+                            fill: false,
+                            borderColor: '#FF6384',
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            tension: 0 // ligne droite
+                        }] : [])
+                    ] 
                 },
                 options: {
                     responsive: true,
