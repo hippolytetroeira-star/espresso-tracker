@@ -66,7 +66,7 @@
             opacity: 0.45;
         }
         
-        .header, .container, .tabs { position: relative; z-index: 1; }
+        .header, .container, .tabs { display: none; position: relative; z-index: 1; }
         
         .header { 
             background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
@@ -84,9 +84,107 @@
             letter-spacing: 1px;
         }
         
+        /* Menu Hamburger */
+        .hamburger-btn {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1001;
+            background: white;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            transition: all 0.2s;
+        }
+        .hamburger-btn:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+            transform: scale(1.05);
+        }
+        .hamburger-icon {
+            width: 26px;
+            height: 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .hamburger-icon span {
+            width: 100%;
+            height: 3px;
+            background: #CC785C;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+        
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 320px;
+            height: 100%;
+            background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+            box-shadow: -6px 0 30px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 100px 0 30px 0;
+        }
+        .side-menu.open {
+            right: 0;
+        }
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .menu-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 32px;
+            color: #555;
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .menu-item .icon {
+            font-size: 24px;
+            transition: transform 0.2s;
+        }
+        .menu-item:hover {
+            background: rgba(204, 120, 92, 0.08);
+            border-left-color: #CC785C;
+            color: #CC785C;
+        }
+        .menu-item:hover .icon {
+            transform: scale(1.15);
+        }
+        .menu-item.active {
+            background: rgba(204, 120, 92, 0.12);
+            border-left-color: #CC785C;
+            color: #CC785C;
+            font-weight: 600;
+        }
+        
         .container { max-width: 920px; margin: 0 auto; padding: 40px 20px; }
         
-        .tabs { 
+        .tabs { display: none; 
             display: flex; 
             gap: 12px; 
             margin-bottom: 35px; 
@@ -261,50 +359,21 @@
         .bag-item { 
             background: rgba(250, 250, 248, 0.9);
             border: 1.5px solid rgba(204, 120, 92, 0.12);
-            border-radius: 16px;
-            padding: 28px;
-            margin-bottom: 20px;
-            
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 10px;
             position: relative;
             transition: all 0.3s;
             backdrop-filter: blur(10px);
         }
         .bag-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-        }
-        .bag-item::before { 
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(250, 250, 248, 0.88);
-            border-radius: 16px;
-            z-index: 0;
-        }
-        .bag-item > * { position: relative; z-index: 1; }
-        
-        .bag-header { 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            border-color: #CC785C;
         }
         
-        .bag-title { 
-            font-size: 19px;
-            font-weight: 600;
-            color: #CC785C;
-            letter-spacing: 0.3px;
-        }
         
-        .bag-info { 
-            margin-top: 12px;
-            font-size: 14px;
-            color: #666;
-            line-height: 1.7;
-        }
+        
         
         .bag-status { 
             display: inline-block;
@@ -384,7 +453,7 @@
         @media (max-width: 600px) { 
             .row { grid-template-columns: 1fr; }
             .container { padding: 25px 16px; }
-            .tabs { flex-direction: column; gap: 8px; }
+            .tabs { display: none; flex-direction: column; gap: 8px; }
             .tab { padding: 12px 20px; }
             .section { padding: 25px 20px; }
             .header h1 { font-size: 32px; }
@@ -397,6 +466,37 @@
     <div class="header">
         <h1>Espresso Tracker</h1>
     </div>
+    
+    <!-- Menu Hamburger -->
+    <button class="hamburger-btn" onclick="window.toggleMenu()">
+        <div class="hamburger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </button>
+    
+    <div class="menu-overlay" onclick="window.toggleMenu()"></div>
+    
+    <nav class="side-menu" id="sideMenu">
+        <a class="menu-item" onclick="window.setTab('shots'); window.toggleMenu();">
+            <span class="icon">☕</span>
+            <span>Shots</span>
+        </a>
+        <a class="menu-item" onclick="window.setTab('bags'); window.toggleMenu();">
+            <span class="icon">📦</span>
+            <span>Paquets</span>
+        </a>
+        <a class="menu-item" onclick="window.setTab('analysis'); window.toggleMenu();">
+            <span class="icon">📊</span>
+            <span>Analyse</span>
+        </a>
+        <a class="menu-item" onclick="window.setTab('settings'); window.toggleMenu();">
+            <span class="icon">⚙️</span>
+            <span>Réglages</span>
+        </a>
+    </nav>
+    
     <div id="app" class="container">
         <div style="text-align: center; padding: 60px; color: #CC785C;">⏳ Chargement...</div>
     </div>
@@ -695,12 +795,7 @@
 
         function render() {
             const activeBags = bags.filter(b => b.status === 'active');
-            let html = `<div class="tabs">
-                <button class="tab ${currentTab === 'shots' ? 'active' : ''}" onclick="window.setTab('shots')">Shots</button>
-                <button class="tab ${currentTab === 'bags' ? 'active' : ''}" onclick="window.setTab('bags')">Paquets</button>
-                <button class="tab ${currentTab === 'analysis' ? 'active' : ''}" onclick="window.setTab('analysis')">Analyse</button>
-                <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="window.setTab('settings')">Réglages</button>
-            </div>`;
+            let html = ``;
             if (message) html += `<div class="alert alert-${message.type}">${message.text}</div>`;
             
             if (currentTab === 'shots') {
@@ -782,24 +877,45 @@
                         const roastDate = new Date(`${year}-${month}-${day}`);
                         age = Math.floor((new Date() - roastDate) / 86400000);
                     }
-                    html += `<div class="bag-item"><div class="bag-header"><div style="display:flex; align-items:flex-start; gap:16px;">
-                        <img src="${getLogo(b.name)}" style="width:52px; height:52px; border-radius:50%; border: 2px solid rgba(204, 120, 92, 0.1); margin-top:2px;">
-                        <div><div class="bag-title">${b.name}</div><div class="bag-info">${b.roaster} · Torréfié le ${b.roast_date}<br>Âge: ${age} jours · ${b.weight}g</div>
-                        <span class="bag-status ${b.status}">${b.status === 'active' ? 'Actif' : 'Terminé'}</span></div></div>
-                        <div style="display:flex; gap:10px;"><button class="btn btn-secondary btn-small" onclick="window.toggleBag('${b.id}', '${b.status}')">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
-                        <button class="btn btn-danger btn-small" onclick="window.deleteBag('${b.id}')">✕</button></div></div></div>`;
+                    html += `<div class="bag-item" style="padding:14px 20px; margin-bottom:10px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <img src="${getLogo(b.name)}" style="width:28px; height:28px; border-radius:50%; border: 1.5px solid rgba(204, 120, 92, 0.2);">
+                            <div style="flex:1; font-size:13px; color:#555; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                                <strong style="color:#CC785C; font-size:14px;">${b.name}</strong>
+                                <span style="color:#999;">·</span>
+                                <span>${b.roaster}</span>
+                                <span>📅 ${b.roast_date}</span>
+                                <span>⏳ ${age}j</span>
+                                <span>⚖️ ${b.weight}g</span>
+                                <span class="bag-status ${b.status}" style="padding:4px 10px; font-size:11px;">${b.status === 'active' ? '✓ Actif' : '○ Terminé'}</span>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn btn-secondary btn-small" onclick="window.toggleBag('${b.id}', '${b.status}')" style="padding:6px 12px; font-size:12px;">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
+                                <button class="btn btn-danger btn-small" onclick="window.deleteBag('${b.id}')" style="padding:6px 12px; font-size:12px;">✕</button>
+                            </div>
+                        </div>
+                    </div>`;
                 });
                 html += `</div>`;
             }
             else if (currentTab === 'analysis') {
                 html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>
                     <div class="alert alert-info">Seuls les shots validés avec 4 ou 5 étoiles apparaissent dans le graphique</div>`;
-                if (bags.length === 0) html += `<div class="alert alert-info">Ajoutez des paquets pour voir l'analyse</div>`;
-                else {
-                    html += `<div class="form-group"><label>Sélectionner un paquet</label>
-                        <select id="analysis-bag" onchange="window.updateChart(this.value)"><option value="">Tous les paquets</option>
-                        ${bags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
-                        <div class="chart-container"><canvas id="chart"></canvas></div>`;
+                
+                // Récupérer les noms uniques de café
+                const uniqueCoffeeNames = [...new Set(bags.map(b => b.name))].sort();
+                
+                if (uniqueCoffeeNames.length === 0) {
+                    html += `<div class="alert alert-info">Ajoutez des paquets pour voir l'analyse</div>`;
+                } else {
+                    html += `<div class="form-group"><label>Sélectionner un café</label>
+                        <select id="analysis-coffee" onchange="window.updateChartByCoffee(this.value)">
+                        <option value="">-- Choisir un café --</option>
+                        ${uniqueCoffeeNames.map(name => `<option value="${name}">${name}</option>`).join('')}
+                        </select></div>
+                        <div id="chart-wrapper" style="display:none;">
+                            <div class="chart-container"><canvas id="chart"></canvas></div>
+                        </div>`;
                 }
                 html += `</div>`;
             }
@@ -813,7 +929,6 @@
                     <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto; padding: 14px 32px;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button></div>`;
             }
             appEl.innerHTML = html;
-            if (currentTab === 'analysis' && bags.length > 0) setTimeout(() => window.updateChart(''), 100);
             
             if (currentBagId) {
                 updateBackground(currentBagId);
@@ -902,7 +1017,114 @@
                 }
             });
         }
+        
+        window.updateChartByCoffee = function(coffeeName) {
+            const chartWrapper = document.getElementById('chart-wrapper');
+            if (!chartWrapper) return;
+            
+            if (!coffeeName) {
+                // Rien sélectionné → cacher le graphique
+                chartWrapper.style.display = 'none';
+                if (chartInstance) chartInstance.destroy();
+                return;
+            }
+            
+            // Afficher le graphique
+            chartWrapper.style.display = 'block';
+            
+            const canvas = document.getElementById('chart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            // Filtrer les shots validés 4-5★ ET qui ont le même nom de café
+            let filteredShots = shots.filter(s => {
+                const isValidated = s.validated === true && (s.rating === 4 || s.rating === 5);
+                const matchesCoffee = s.coffee.toLowerCase().includes(coffeeName.toLowerCase()) || 
+                                     coffeeName.toLowerCase().includes(s.coffee.toLowerCase());
+                return isValidated && matchesCoffee;
+            });
+            
+            const sorted = filteredShots.sort((a, b) => a.age - b.age);
+            const data = sorted.map(s => ({ x: s.age, y: s.grind }));
+            
+            if (chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: { 
+                    datasets: [{ 
+                        label: `${coffeeName} - Mouture vs Âge (validés 4-5★)`, 
+                        data: data, 
+                        backgroundColor: 'rgba(204, 120, 92, 0.7)', 
+                        borderColor: '#CC785C', 
+                        borderWidth: 2, 
+                        pointRadius: 9, 
+                        pointHoverRadius: 11 
+                    }] 
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            title: { 
+                                display: true, 
+                                text: 'Âge du café (jours depuis torréfaction)', 
+                                font: { size: 13, weight: '600' }, 
+                                color: '#CC785C' 
+                            } 
+                        },
+                        y: { 
+                            title: { 
+                                display: true, 
+                                text: 'Mouture', 
+                                font: { size: 13, weight: '600' }, 
+                                color: '#CC785C' 
+                            } 
+                        }
+                    },
+                    plugins: {
+                        legend: { 
+                            display: true, 
+                            labels: { font: { size: 13, weight: '500' } } 
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const shot = sorted[context.dataIndex];
+                                    return [
+                                        `Café: ${shot.coffee}`,
+                                        `Date torréfaction: ${shot.roast_date}`,
+                                        `Mouture: ${shot.grind}`, 
+                                        `Âge: ${shot.age}j`, 
+                                        `Temps: ${shot.time}s`, 
+                                        `Note: ${renderStars(shot.rating)}`
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
 
+        window.toggleMenu = function() {
+            const menu = document.querySelector('.side-menu');
+            const overlay = document.querySelector('.menu-overlay');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('open');
+            
+            // Mettre à jour les items actifs
+            document.querySelectorAll('.menu-item').forEach((item, index) => {
+                const tabs = ['shots', 'bags', 'analysis', 'settings'];
+                if (tabs[index] === currentTab) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        };
+        
         window.setTab = function(tab) { currentTab = tab; render(); };
         window.setRating = function(rating) { 
             currentRating = rating;
