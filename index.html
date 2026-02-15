@@ -405,29 +405,6 @@
             color: #ffc107;
             letter-spacing: 2px;
         }
-        /* Style pour les boutons radio inline */
-        .radio-group {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            background: rgba(250, 250, 248, 0.8);
-            padding: 10px 16px;
-            border-radius: 12px;
-            border: 1.5px solid #e0d5c7;
-        }
-        .radio-group label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin: 0;
-            font-weight: normal;
-            color: #555;
-        }
-        .radio-group input[type="radio"] {
-            width: auto;
-            margin: 0;
-            accent-color: #CC785C;
-        }
         @media (max-width: 600px) { 
             .row { grid-template-columns: 1fr; }
             .container { padding: 25px 16px; }
@@ -579,9 +556,6 @@
             const [shotYear, shotMonth, shotDay] = shotDate.split('-');
             const formattedDate = `${shotDay}/${shotMonth}/${shotYear}`;
 
-            // Récupérer la valeur du WDT via les boutons radio
-            const wdtValue = document.querySelector('input[name="wdt"]:checked')?.value || 'non';
-
             const shot = {
                 date: formattedDate,
                 coffee: selectedBag ? selectedBag.name : '',
@@ -594,7 +568,7 @@
                 grind: parseFloat(form.grind.value),
                 time: parseInt(form.time.value),
                 preinfusion: parseInt(form.preinfusion.value),
-                wdt: wdtValue,
+                wdt: form.wdt.value,
                 remarks: form.remarks.value,
                 rating: currentRating,
                 validated: (currentRating === 4 || currentRating === 5)
@@ -609,8 +583,6 @@
             form.grind.value = 7.5;
             form.time.value = 30;
             form.preinfusion.value = 8;
-            // Remettre le WDT par défaut sur "non"
-            document.querySelector('input[name="wdt"][value="non"]').checked = true;
             currentRating = 0;
             render();
         }
@@ -785,57 +757,18 @@
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             
-            // Filtrer les shots dont le nom correspond
+            // Filtrer les shots dont le nom correspond (tous, sans condition de note)
             let filteredShots = shots.filter(s => 
                 s.coffee && s.coffee.toLowerCase().includes(coffeeName.toLowerCase())
             );
             
-            // Séparer par WDT
-            const wdtNon = filteredShots.filter(s => s.wdt === 'non');
-            const wdtLeger = filteredShots.filter(s => s.wdt === 'léger');
-            const wdtProfond = filteredShots.filter(s => s.wdt === 'profond');
+            // Trier par âge
+            const sorted = filteredShots.sort((a, b) => a.age - b.age);
+            const scatterData = sorted.map(s => ({ x: s.age, y: s.grind }));
             
-            // Préparer les datasets
-            const datasets = [];
-            
-            if (wdtNon.length) {
-                datasets.push({
-                    label: 'WDT Non',
-                    data: wdtNon.map(s => ({ x: s.age, y: s.grind })),
-                    backgroundColor: 'rgba(150, 150, 150, 0.8)',
-                    borderColor: '#666',
-                    borderWidth: 1,
-                    pointRadius: 8,
-                    pointHoverRadius: 10
-                });
-            }
-            if (wdtLeger.length) {
-                datasets.push({
-                    label: 'WDT Léger',
-                    data: wdtLeger.map(s => ({ x: s.age, y: s.grind })),
-                    backgroundColor: 'rgba(76, 175, 80, 0.8)',
-                    borderColor: '#2E7D32',
-                    borderWidth: 1,
-                    pointRadius: 8,
-                    pointHoverRadius: 10
-                });
-            }
-            if (wdtProfond.length) {
-                datasets.push({
-                    label: 'WDT Profond',
-                    data: wdtProfond.map(s => ({ x: s.age, y: s.grind })),
-                    backgroundColor: 'rgba(33, 150, 243, 0.8)',
-                    borderColor: '#0D47A1',
-                    borderWidth: 1,
-                    pointRadius: 8,
-                    pointHoverRadius: 10
-                });
-            }
-            
-            // Calcul de la régression linéaire pour la tendance (sur tous les points confondus)
+            // Calcul de la régression linéaire pour la tendance
             let trendData = [];
-            if (filteredShots.length >= 2) {
-                const sorted = filteredShots.sort((a, b) => a.age - b.age);
+            if (sorted.length >= 2) {
                 const n = sorted.length;
                 const sumX = sorted.reduce((acc, s) => acc + s.age, 0);
                 const sumY = sorted.reduce((acc, s) => acc + s.grind, 0);
@@ -856,25 +789,34 @@
                 ];
             }
             
-            if (trendData.length) {
-                datasets.push({
-                    label: 'Tendance linéaire',
-                    data: trendData,
-                    type: 'line',
-                    fill: false,
-                    borderColor: '#FF6384',
-                    borderWidth: 3,
-                    pointRadius: 0,
-                    pointHoverRadius: 0,
-                    tension: 0
-                });
-            }
-            
             if (chartInstance) chartInstance.destroy();
             
             chartInstance = new Chart(ctx, {
                 type: 'scatter',
-                data: { datasets },
+                data: { 
+                    datasets: [
+                        {
+                            label: `${coffeeName} - Mouture vs Âge`,
+                            data: scatterData,
+                            backgroundColor: 'rgba(204, 120, 92, 0.7)',
+                            borderColor: '#CC785C',
+                            borderWidth: 2,
+                            pointRadius: 9,
+                            pointHoverRadius: 11
+                        },
+                        ...(trendData.length ? [{
+                            label: 'Tendance linéaire',
+                            data: trendData,
+                            type: 'line',
+                            fill: false,
+                            borderColor: '#FF6384',
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            tension: 0 // ligne droite
+                        }] : [])
+                    ] 
+                },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -904,16 +846,8 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    const datasetLabel = context.dataset.label || '';
-                                    if (datasetLabel === 'Tendance linéaire') {
-                                        return 'Ligne de tendance';
-                                    }
-                                    const raw = context.raw;
-                                    // Trouver le shot correspondant
-                                    const shot = filteredShots.find(s => s.age === raw.x && s.grind === raw.y);
-                                    if (!shot) return datasetLabel;
+                                    const shot = sorted[context.dataIndex];
                                     return [
-                                        `${datasetLabel}`,
                                         `Café: ${shot.coffee}`,
                                         `Torréfaction: ${shot.roast_date}`,
                                         `Mouture: ${shot.grind}`, 
@@ -970,13 +904,8 @@
                         <input type="number" name="preinfusion" value="8" style="flex:1;">
                         <button type="button" onclick="const el = document.querySelector('input[name=preinfusion]'); el.value = parseInt(el.value) + 1;" class="btn btn-secondary btn-small" style="width:40px; padding:8px;">+</button>
                     </div></div>
-                    <div class="form-group"><label>WDT</label>
-                        <div class="radio-group">
-                            <label><input type="radio" name="wdt" value="non" checked> Non</label>
-                            <label><input type="radio" name="wdt" value="léger"> Léger</label>
-                            <label><input type="radio" name="wdt" value="profond"> Profond</label>
-                        </div>
-                    </div></div>
+                    <div class="form-group"><label>WDT</label><select name="wdt"><option value="non">Non</option><option value="léger">Léger</option>
+                    <option value="normal">Normal</option><option value="profond">Profond</option></select></div></div>
                     <div class="form-group"><label>Remarques</label><textarea name="remarks" rows="2" placeholder="Notes sur ce shot..."></textarea></div>
                     <div class="form-group">
                         <div class="star-rating">
@@ -1056,6 +985,7 @@
                 }
 
                 html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>`;
+                // Ligne supprimée : "Seuls les shots validés..."
                 if (coffeeNames.length === 0) {
                     html += `<div class="alert alert-info">Ajoutez des grains pour voir l'analyse</div>`;
                 } else {
@@ -1109,9 +1039,7 @@
                         form.grind.value = lastShot.grind || 7.5;
                         form.time.value = lastShot.time || 30;
                         form.preinfusion.value = lastShot.preinfusion || 8;
-                        // Pré-sélectionner le WDT du dernier shot
-                        const wdtRadio = document.querySelector(`input[name="wdt"][value="${lastShot.wdt}"]`);
-                        if (wdtRadio) wdtRadio.checked = true;
+                        form.wdt.value = lastShot.wdt || 'non';
                     }
                 }
                 
