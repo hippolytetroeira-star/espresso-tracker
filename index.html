@@ -110,12 +110,12 @@
             transition: all 0.2s;
         }
         .tab:hover { 
-            background: rgba(107, 68, 35, 0.08);
+            background: rgba(204, 120, 92, 0.08);
         }
         .tab.active { 
             background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
             color: white;
-            box-shadow: 0 2px 8px rgba(107, 68, 35, 0.3);
+            box-shadow: 0 2px 8px rgba(204, 120, 92, 0.3);
         }
         
         .section { 
@@ -124,7 +124,7 @@
             padding: 35px;
             margin-bottom: 25px;
             box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-            border: 1px solid rgba(107, 68, 35, 0.1);
+            border: 1px solid rgba(204, 120, 92, 0.1);
             backdrop-filter: blur(10px);
         }
         
@@ -162,7 +162,7 @@
             outline: none;
             border-color: #CC785C;
             background: white;
-            box-shadow: 0 0 0 4px rgba(107, 68, 35, 0.08);
+            box-shadow: 0 0 0 4px rgba(204, 120, 92, 0.08);
         }
         
         .row { 
@@ -186,11 +186,11 @@
             background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
             color: white;
             width: 100%;
-            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.25);
+            box-shadow: 0 4px 12px rgba(204, 120, 92, 0.25);
         }
         .btn-primary:hover:not(:disabled) { 
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(107, 68, 35, 0.35);
+            box-shadow: 0 6px 16px rgba(204, 120, 92, 0.35);
         }
         .btn-primary:disabled {
             opacity: 0.5;
@@ -222,16 +222,16 @@
         
         .shot-item { 
             background: linear-gradient(135deg, rgba(250, 250, 248, 0.75) 0%, rgba(245, 241, 235, 0.75) 100%);
-            border: 1.5px solid rgba(107, 68, 35, 0.12);
-            border-radius: 16px;
-            padding: 28px;
-            margin-bottom: 20px;
+            border: 1.5px solid rgba(204, 120, 92, 0.12);
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 10px;
             transition: all 0.3s;
             backdrop-filter: blur(10px);
         }
         .shot-item:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             border-color: #CC785C;
         }
         
@@ -241,7 +241,7 @@
             align-items: center;
             margin-bottom: 22px;
             padding-bottom: 18px;
-            border-bottom: 1.5px solid rgba(107, 68, 35, 0.12);
+            border-bottom: 1.5px solid rgba(204, 120, 92, 0.12);
         }
         
         .shot-title { 
@@ -251,40 +251,16 @@
             letter-spacing: 0.3px;
         }
         
-        .shot-date { 
-            font-size: 13px;
-            color: #888;
-            margin-top: 6px;
-        }
+
         
-        .shot-details { 
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-        }
+
         
-        .detail { 
-            background: rgba(255, 255, 255, 0.8);
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            color: #555;
-            border: 1px solid rgba(107, 68, 35, 0.08);
-        }
-        .detail strong { 
-            color: #CC785C;
-            font-weight: 600;
-            display: block;
-            margin-bottom: 6px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+
+
         
         .bag-item { 
             background: rgba(250, 250, 248, 0.9);
-            border: 1.5px solid rgba(107, 68, 35, 0.12);
+            border: 1.5px solid rgba(204, 120, 92, 0.12);
             border-radius: 16px;
             padding: 28px;
             margin-bottom: 20px;
@@ -746,17 +722,25 @@
                     <div class="section"><h2>Historique (${shots.length})</h2>
                     ${shots.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun shot enregistré</p>' : ''}`;
                 shots.forEach(s => {
-                    html += `<div class="shot-item"><div class="shot-header"><div style="display:flex; align-items:center; gap:14px;">
-                        <img src="${getLogo(s.coffee)}" style="width:42px; height:42px; border-radius:50%; border: 2px solid rgba(107, 68, 35, 0.1);">
-                        <div><div class="shot-title">${s.coffee}</div><div class="shot-date">${s.date}</div></div></div>
-                        <div style="display:flex; gap:10px;">
-                        <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')">✕</button></div></div>
-                        <div class="shot-details"><div class="detail"><strong>Dose → Sortie</strong>${s.dose}g → ${s.output}g (1:${s.ratio.toFixed(1)})</div>
-                        <div class="detail"><strong>Mouture</strong>${s.grind}</div><div class="detail"><strong>Temps</strong>${s.time}s</div>
-                        <div class="detail"><strong>Préinfusion</strong>${s.preinfusion}s</div><div class="detail"><strong>Âge</strong>${s.age}j</div>
-                        <div class="detail"><strong>WDT</strong>${s.wdt}</div>
-                        ${s.remarks ? `<div class="detail"><strong>Remarques</strong>${s.remarks}</div>` : ''}
-                        <div class="detail"><strong>Note</strong><span class="star-display">${renderStars(s.rating || 0)}</span></div></div></div>`;
+                    html += `<div class="shot-item" style="padding:14px 20px; margin-bottom:10px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <img src="${getLogo(s.coffee)}" style="width:28px; height:28px; border-radius:50%; border: 1.5px solid rgba(204, 120, 92, 0.2);">
+                            <div style="flex:1; font-size:13px; color:#555; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                                <strong style="color:#CC785C; font-size:14px;">${s.coffee}</strong>
+                                <span class="star-display" style="font-size:13px;">${renderStars(s.rating || 0)}</span>
+                                <span style="color:#999;">·</span>
+                                <span>${s.dose}→${s.output}g</span>
+                                <span>⚙️${s.grind}</span>
+                                <span>⏱️${s.time}s</span>
+                                <span>💧${s.preinfusion}s</span>
+                                <span>📅${s.age}j</span>
+                                <span>🌀${s.wdt}</span>
+                                <span style="color:#aaa; font-size:12px;">${s.date}</span>
+                                ${s.remarks ? `<span style="color:#999; font-style:italic; font-size:12px;">💬 ${s.remarks}</span>` : ''}
+                            </div>
+                            <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')" style="padding:6px 12px; font-size:12px;">✕</button>
+                        </div>
+                    </div>`;
                 });
                 html += `</div>`;
             }
@@ -777,7 +761,7 @@
                         age = Math.floor((new Date() - roastDate) / 86400000);
                     }
                     html += `<div class="bag-item"><div class="bag-header"><div style="display:flex; align-items:flex-start; gap:16px;">
-                        <img src="${getLogo(b.name)}" style="width:52px; height:52px; border-radius:50%; border: 2px solid rgba(107, 68, 35, 0.1); margin-top:2px;">
+                        <img src="${getLogo(b.name)}" style="width:52px; height:52px; border-radius:50%; border: 2px solid rgba(204, 120, 92, 0.1); margin-top:2px;">
                         <div><div class="bag-title">${b.name}</div><div class="bag-info">${b.roaster} · Torréfié le ${b.roast_date}<br>Âge: ${age} jours · ${b.weight}g</div>
                         <span class="bag-status ${b.status}">${b.status === 'active' ? 'Actif' : 'Terminé'}</span></div></div>
                         <div style="display:flex; gap:10px;"><button class="btn btn-secondary btn-small" onclick="window.toggleBag('${b.id}', '${b.status}')">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
@@ -846,7 +830,7 @@
             if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'scatter',
-                data: { datasets: [{ label: 'Mouture vs Âge (validés 4-5★)', data: data, backgroundColor: 'rgba(107, 68, 35, 0.7)', borderColor: '#CC785C', borderWidth: 2, pointRadius: 9, pointHoverRadius: 11 }] },
+                data: { datasets: [{ label: 'Mouture vs Âge (validés 4-5★)', data: data, backgroundColor: 'rgba(204, 120, 92, 0.7)', borderColor: '#CC785C', borderWidth: 2, pointRadius: 9, pointHoverRadius: 11 }] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
