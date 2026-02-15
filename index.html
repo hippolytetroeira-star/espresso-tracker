@@ -508,14 +508,14 @@
             let age = 0;
             if (selectedBag && selectedBag.roast_date) {
                 // roast_date est au format DD/MM/YYYY
-                const [day, month, year] = selectedBag.roast_date.split('/');
-                const roastDate = new Date(`${year}-${month}-${day}`);
+                const [roastDay, roastMonth, roastYear] = selectedBag.roast_date.split('/');
+                const roastDate = new Date(`${roastYear}-${roastMonth}-${roastDay}`);
                 age = Math.floor((new Date() - roastDate) / 86400000);
             }
 
             const shotDate = form.shot_date.value; // format YYYY-MM-DD
-            const [year, month, day] = shotDate.split('-');
-            const formattedDate = `${day}/${month}/${year}`;
+            const [shotYear, shotMonth, shotDay] = shotDate.split('-');
+            const formattedDate = `${shotDay}/${shotMonth}/${shotYear}`;
 
             const shot = {
                 date: formattedDate,
@@ -861,7 +861,17 @@
         }
 
         window.setTab = function(tab) { currentTab = tab; render(); };
-        window.setRating = function(rating) { currentRating = rating; render(); };
+        window.setRating = function(rating) { 
+            currentRating = rating;
+            // Mettre à jour visuellement les étoiles sans tout re-render
+            document.querySelectorAll('.star-rating .star').forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('filled');
+                } else {
+                    star.classList.remove('filled');
+                }
+            });
+        };
         window.addShot = addShot;
         window.deleteShot = deleteShot;
         window.toggleValidation = toggleValidation;
