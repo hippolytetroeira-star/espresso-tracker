@@ -704,19 +704,31 @@
             if (message) html += `<div class="alert alert-${message.type}">${message.text}</div>`;
             
             if (currentTab === 'shots') {
-                html += `<div class="section"><h2>Nouveau Shot</h2><form id="form-shot" onsubmit="event.preventDefault(); window.addShot(event)">
+                html += `<div class="section"><h2>Nouveau Shot</h2>
+                    ${shots.length > 0 ? `<div style="margin-bottom:20px;"><button type="button" onclick="window.duplicateLastShot()" class="btn btn-secondary" style="width:100%; font-size:14px;">📋 Dupliquer le dernier shot</button></div>` : ''}
+                    <form id="form-shot" onsubmit="event.preventDefault(); window.addShot(event)">
                     <div class="form-group"><label>Paquet</label><select name="bag_id" required onchange="window.updateBackground(this.value); window.currentBagId = this.value;"><option value="">Sélectionner</option>
                     ${activeBags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
                     <div class="form-group"><label>Date du shot</label><input type="date" name="shot_date" required></div>
                     <div class="row"><div class="form-group"><label>Dose (g)</label><input type="number" step="0.1" name="dose" value="18" required></div>
                     <div class="form-group"><label>Sortie (g)</label><input type="number" step="0.1" name="output" value="38" required></div></div>
-                    <div class="row"><div class="form-group"><label>Mouture</label><input type="number" step="0.1" name="grind" value="7.5" required></div>
+                    <div class="row"><div class="form-group"><label>Mouture</label>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <button type="button" onclick="document.querySelector('input[name=grind]').value = (parseFloat(document.querySelector('input[name=grind]').value) - 0.1).toFixed(1); document.querySelector('input[name=grind]').dispatchEvent(new Event('input'));" class="btn btn-secondary btn-small" style="width:40px; padding:8px;">−</button>
+                        <input type="number" step="0.1" name="grind" value="7.5" required style="flex:1;">
+                        <button type="button" onclick="document.querySelector('input[name=grind]').value = (parseFloat(document.querySelector('input[name=grind]').value) + 0.1).toFixed(1); document.querySelector('input[name=grind]').dispatchEvent(new Event('input'));" class="btn btn-secondary btn-small" style="width:40px; padding:8px;">+</button>
+                    </div></div>
                     <div class="form-group"><label>Temps (s)</label><input type="number" name="time" value="30" required></div></div>
                     <div class="row"><div class="form-group"><label>Préinfusion (s)</label><input type="number" name="preinfusion" value="8"></div>
                     <div class="form-group"><label>WDT</label><select name="wdt"><option value="non">Non</option><option value="léger">Léger</option>
                     <option value="normal">Normal</option><option value="profond">Profond</option></select></div></div>
                     <div class="form-group"><label>Remarques</label><textarea name="remarks" rows="2" placeholder="Notes sur ce shot..."></textarea></div>
-                    <div class="form-group"><div class="star-rating">
+                    <div class="form-group">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                            <label style="margin:0;">Note</label>
+                            <span style="font-size:11px; color:#999;">💡 Raccourcis: touches 1-5</span>
+                        </div>
+                        <div class="star-rating">
                     ${[1,2,3,4,5].map(i => `<span class="star ${i <= currentRating ? 'filled' : ''}" onclick="window.setRating(${i})">★</span>`).join('')}</div></div>
                     <button type="submit" class="btn btn-primary">Enregistrer</button></form></div>
                     <div class="section"><h2>Historique (${shots.length})</h2>
@@ -807,6 +819,34 @@
                     const day = String(now.getDate()).padStart(2, '0');
                     shotDateInput.value = `${year}-${month}-${day}`;
                 }
+                
+                // Pré-remplir avec les valeurs du dernier shot pour aller plus vite
+                if (shots.length > 0) {
+                    const lastShot = shots[0]; // Le plus récent
+                    const form = document.getElementById('form-shot');
+                    if (form && !form.bag_id.value) { // Seulement si pas encore rempli
+                        // Trouver le paquet correspondant
+                        const lastBag = bags.find(b => b.name === lastShot.coffee && b.roast_date === lastShot.roast_date);
+                        if (lastBag) {
+                            form.bag_id.value = lastBag.id;
+                            currentBagId = lastBag.id;
+                            updateBackground(lastBag.id);
+                        }
+                        form.dose.value = lastShot.dose || 18;
+                        form.output.value = lastShot.output || 38;
+                        form.grind.value = lastShot.grind || 7.5;
+                        form.time.value = lastShot.time || 30;
+                        form.preinfusion.value = lastShot.preinfusion || 8;
+                        form.wdt.value = lastShot.wdt || 'non';
+                        // On ne pré-remplit PAS les remarques pour forcer à réfléchir
+                        // On ne pré-remplit PAS le rating pour forcer à noter
+                    }
+                }
+                
+                // Auto-focus sur la date pour commencer rapidement
+                if (shotDateInput) {
+                    setTimeout(() => shotDateInput.focus(), 100);
+                }
             }
         }
 
@@ -865,6 +905,68 @@
                 }
             });
         };
+        
+        window.duplicateLastShot = async function() {
+            if (shots.length === 0) return;
+            const lastShot = shots[0];
+            
+            // Créer une copie du dernier shot avec la date actuelle
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const formattedDate = `${day}/${month}/${year}`;
+            
+            // Calculer le nouvel âge
+            let age = 0;
+            if (lastShot.roast_date) {
+                const [roastDay, roastMonth, roastYear] = lastShot.roast_date.split('/');
+                const roastDate = new Date(`${roastYear}-${roastMonth}-${roastDay}`);
+                age = Math.floor((new Date() - roastDate) / 86400000);
+            }
+            
+            const newShot = {
+                date: formattedDate,
+                coffee: lastShot.coffee,
+                roaster: lastShot.roaster,
+                roast_date: lastShot.roast_date,
+                age: age,
+                dose: lastShot.dose,
+                output: lastShot.output,
+                ratio: lastShot.ratio,
+                grind: lastShot.grind,
+                time: lastShot.time,
+                preinfusion: lastShot.preinfusion,
+                wdt: lastShot.wdt,
+                remarks: lastShot.remarks || '',
+                rating: lastShot.rating || 0,
+                validated: (lastShot.rating === 4 || lastShot.rating === 5)
+            };
+            
+            try {
+                const { data } = await sb.from('shots').insert([newShot]).select();
+                shots = [data[0], ...shots];
+                showMessage('success', '✅ Shot dupliqué !');
+                render();
+            } catch (e) {
+                console.error(e);
+                showMessage('error', '❌ Erreur lors de la duplication');
+            }
+        };
+        
+        // Raccourcis clavier pour noter rapidement
+        document.addEventListener('keydown', function(e) {
+            // Touches 1-5 pour noter (si on est sur l'onglet shots)
+            if (currentTab === 'shots' && e.key >= '1' && e.key <= '5') {
+                // Ne pas intercepter si on est en train de taper dans un input
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                    return;
+                }
+                e.preventDefault();
+                window.setRating(parseInt(e.key));
+            }
+        });
+        
         window.addShot = addShot;
         window.deleteShot = deleteShot;
         window.addBag = addBag;
