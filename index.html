@@ -405,28 +405,6 @@
             color: #ffc107;
             letter-spacing: 2px;
         }
-        .radio-group {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            background: rgba(250, 250, 248, 0.8);
-            padding: 10px 16px;
-            border-radius: 12px;
-            border: 1.5px solid #e0d5c7;
-        }
-        .radio-group label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin: 0;
-            font-weight: normal;
-            color: #555;
-        }
-        .radio-group input[type="radio"] {
-            width: auto;
-            margin: 0;
-            accent-color: #CC785C;
-        }
         @media (max-width: 600px) { 
             .row { grid-template-columns: 1fr; }
             .container { padding: 25px 16px; }
@@ -575,7 +553,7 @@
             const [shotYear, shotMonth, shotDay] = shotDate.split('-');
             const formattedDate = `${shotDay}/${shotMonth}/${shotYear}`;
 
-            const wdtValue = document.querySelector('input[name="wdt"]:checked')?.value || 'non';
+            const wdtValue = form.wdt.value; // récupéré depuis le select
 
             const shot = {
                 date: formattedDate,
@@ -604,7 +582,7 @@
             form.grind.value = 7.5;
             form.time.value = 30;
             form.preinfusion.value = 8;
-            document.querySelector('input[name="wdt"][value="non"]').checked = true;
+            form.wdt.value = 'non'; // remettre la valeur par défaut
             currentRating = 0;
             render();
         }
@@ -782,46 +760,10 @@
                 s.coffee && s.coffee.toLowerCase().includes(coffeeName.toLowerCase())
             );
             
-            const wdtNon = filteredShots.filter(s => s.wdt === 'non');
-            const wdtLeger = filteredShots.filter(s => s.wdt === 'léger');
-            const wdtProfond = filteredShots.filter(s => s.wdt === 'profond');
+            // Tous les points dans un seul dataset (couleur ocre ou grise)
+            const scatterData = filteredShots.map(s => ({ x: s.age, y: s.grind }));
             
-            const datasets = [];
-            
-            if (wdtNon.length) {
-                datasets.push({
-                    label: ' ',
-                    data: wdtNon.map(s => ({ x: s.age, y: s.grind })),
-                    backgroundColor: 'rgba(150, 150, 150, 0.8)',
-                    borderColor: '#666',
-                    borderWidth: 1,
-                    pointRadius: 8,
-                    pointHoverRadius: 10
-                });
-            }
-            if (wdtLeger.length) {
-                datasets.push({
-                    label: ' ',
-                    data: wdtLeger.map(s => ({ x: s.age, y: s.grind })),
-                    backgroundColor: 'rgba(76, 175, 80, 0.8)',
-                    borderColor: '#2E7D32',
-                    borderWidth: 1,
-                    pointRadius: 8,
-                    pointHoverRadius: 10
-                });
-            }
-            if (wdtProfond.length) {
-                datasets.push({
-                    label: ' ',
-                    data: wdtProfond.map(s => ({ x: s.age, y: s.grind })),
-                    backgroundColor: 'rgba(33, 150, 243, 0.8)',
-                    borderColor: '#0D47A1',
-                    borderWidth: 1,
-                    pointRadius: 8,
-                    pointHoverRadius: 10
-                });
-            }
-            
+            // Calcul de la régression linéaire pour la tendance
             let trendData = [];
             if (filteredShots.length >= 2) {
                 const sorted = filteredShots.sort((a, b) => a.age - b.age);
@@ -845,13 +787,25 @@
                 ];
             }
             
+            const datasets = [
+                {
+                    label: ' ',
+                    data: scatterData,
+                    backgroundColor: 'rgba(150, 150, 150, 0.7)', // gris
+                    borderColor: '#666',
+                    borderWidth: 1,
+                    pointRadius: 8,
+                    pointHoverRadius: 10
+                }
+            ];
+            
             if (trendData.length) {
                 datasets.push({
                     label: ' ',
                     data: trendData,
                     type: 'line',
                     fill: false,
-                    borderColor: '#CC785C',  // ocre
+                    borderColor: '#CC785C', // ocre
                     borderWidth: 3,
                     pointRadius: 0,
                     pointHoverRadius: 0,
@@ -886,25 +840,21 @@
                         }
                     },
                     plugins: {
-                        legend: { display: false },  // légende désactivée
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    const datasetLabel = context.dataset.label || '';
-                                    if (datasetLabel === ' ') {
-                                        const raw = context.raw;
-                                        const shot = filteredShots.find(s => s.age === raw.x && s.grind === raw.y);
-                                        if (!shot) return '';
-                                        return [
-                                            `Café: ${shot.coffee}`,
-                                            `Torréfaction: ${shot.roast_date}`,
-                                            `Mouture: ${shot.grind}`, 
-                                            `Âge: ${shot.age}j`, 
-                                            `Temps: ${shot.time}s`,
-                                            `Note: ${renderStars(shot.rating)}`
-                                        ];
-                                    }
-                                    return '';
+                                    const raw = context.raw;
+                                    const shot = filteredShots.find(s => s.age === raw.x && s.grind === raw.y);
+                                    if (!shot) return '';
+                                    return [
+                                        `Café: ${shot.coffee}`,
+                                        `Torréfaction: ${shot.roast_date}`,
+                                        `Mouture: ${shot.grind}`, 
+                                        `Âge: ${shot.age}j`, 
+                                        `Temps: ${shot.time}s`,
+                                        `Note: ${renderStars(shot.rating)}`
+                                    ];
                                 }
                             }
                         }
@@ -955,11 +905,12 @@
                         <button type="button" onclick="const el = document.querySelector('input[name=preinfusion]'); el.value = parseInt(el.value) + 1;" class="btn btn-secondary btn-small" style="width:40px; padding:8px;">+</button>
                     </div></div>
                     <div class="form-group"><label>WDT</label>
-                        <div class="radio-group">
-                            <label><input type="radio" name="wdt" value="non" checked> Non</label>
-                            <label><input type="radio" name="wdt" value="léger"> Léger</label>
-                            <label><input type="radio" name="wdt" value="profond"> Profond</label>
-                        </div>
+                        <select name="wdt">
+                            <option value="non">Non</option>
+                            <option value="léger">Léger</option>
+                            <option value="normal">Normal</option>
+                            <option value="profond">Profond</option>
+                        </select>
                     </div></div>
                     <div class="form-group"><label>Remarques</label><textarea name="remarks" rows="2" placeholder="Notes sur ce shot..."></textarea></div>
                     <div class="form-group">
@@ -1090,8 +1041,7 @@
                         form.grind.value = lastShot.grind || 7.5;
                         form.time.value = lastShot.time || 30;
                         form.preinfusion.value = lastShot.preinfusion || 8;
-                        const wdtRadio = document.querySelector(`input[name="wdt"][value="${lastShot.wdt}"]`);
-                        if (wdtRadio) wdtRadio.checked = true;
+                        form.wdt.value = lastShot.wdt || 'non';
                     }
                 }
                 
