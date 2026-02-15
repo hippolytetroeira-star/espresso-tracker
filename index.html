@@ -556,12 +556,6 @@
             render();
         }
 
-        async function toggleValidation(id, currentStatus) {
-            const newStatus = !currentStatus;
-            await sb.from('shots').update({ validated: newStatus }).eq('id', id);
-            shots = shots.map(s => s.id === id ? { ...s, validated: newStatus } : s);
-            render();
-        }
 
         async function addBag(event) {
             event.preventDefault();
@@ -874,7 +868,6 @@
         };
         window.addShot = addShot;
         window.deleteShot = deleteShot;
-        window.toggleValidation = toggleValidation;
         window.addBag = addBag;
         window.toggleBag = toggleBag;
         window.deleteBag = deleteBag;
