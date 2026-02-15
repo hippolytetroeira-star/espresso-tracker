@@ -550,10 +550,15 @@
 
         async function deleteShot(id) {
             if (!confirm('Supprimer ce shot ?')) return;
-            await sb.from('shots').delete().eq('id', id);
-            shots = shots.filter(s => s.id !== id);
-            showMessage('success', '✅ Supprimé');
-            render();
+            try {
+                await sb.from('shots').delete().eq('id', id);
+                // Recharger les données depuis Supabase pour forcer la mise à jour
+                await loadData();
+                showMessage('success', '✅ Shot supprimé');
+            } catch (e) {
+                console.error(e);
+                showMessage('error', '❌ Erreur lors de la suppression');
+            }
         }
 
 
@@ -582,18 +587,28 @@
         }
 
         async function toggleBag(id, status) {
-            const newStatus = status === 'active' ? 'finished' : 'active';
-            await sb.from('bags').update({ status: newStatus }).eq('id', id);
-            bags = bags.map(b => b.id === id ? { ...b, status: newStatus } : b);
-            render();
+            try {
+                const newStatus = status === 'active' ? 'finished' : 'active';
+                await sb.from('bags').update({ status: newStatus }).eq('id', id);
+                // Recharger les données pour forcer la mise à jour
+                await loadData();
+            } catch (e) {
+                console.error(e);
+                showMessage('error', '❌ Erreur lors de la mise à jour');
+            }
         }
 
         async function deleteBag(id) {
             if (!confirm('Supprimer ce paquet ?')) return;
-            await sb.from('bags').delete().eq('id', id);
-            bags = bags.filter(b => b.id !== id);
-            showMessage('success', '✅ Supprimé');
-            render();
+            try {
+                await sb.from('bags').delete().eq('id', id);
+                // Recharger les données depuis Supabase pour forcer la mise à jour
+                await loadData();
+                showMessage('success', '✅ Paquet supprimé');
+            } catch (e) {
+                console.error(e);
+                showMessage('error', '❌ Erreur lors de la suppression');
+            }
         }
 
         async function importCSV(file) {
