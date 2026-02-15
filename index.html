@@ -66,7 +66,7 @@
             opacity: 0.45;
         }
         
-        .header, .container, .tabs { display: none; position: relative; z-index: 1; }
+        .header, .container, .tabs { position: relative; z-index: 1; }
         
         .header { 
             background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
@@ -115,7 +115,6 @@
             height: 3px;
             background: #CC785C;
             border-radius: 3px;
-            transition: all 0.3s;
         }
         
         .side-menu {
@@ -156,7 +155,6 @@
             gap: 16px;
             padding: 20px 32px;
             color: #555;
-            text-decoration: none;
             font-size: 17px;
             font-weight: 500;
             border-left: 4px solid transparent;
@@ -182,9 +180,11 @@
             font-weight: 600;
         }
         
+        .tabs { display: none !important; }
+        
         .container { max-width: 920px; margin: 0 auto; padding: 40px 20px; }
         
-        .tabs { display: none; 
+        .tabs { 
             display: flex; 
             gap: 12px; 
             margin-bottom: 35px; 
@@ -357,12 +357,11 @@
 
         
         .bag-item { 
-            background: rgba(250, 250, 248, 0.9);
+            background: linear-gradient(135deg, rgba(250, 250, 248, 0.75) 0%, rgba(245, 241, 235, 0.75) 100%);
             border: 1.5px solid rgba(204, 120, 92, 0.12);
             border-radius: 12px;
             padding: 14px 20px;
             margin-bottom: 10px;
-            position: relative;
             transition: all 0.3s;
             backdrop-filter: blur(10px);
         }
@@ -371,9 +370,38 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             border-color: #CC785C;
         }
+        .bag-item::before { 
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(250, 250, 248, 0.88);
+            border-radius: 16px;
+            z-index: 0;
+        }
+        .bag-item > * { position: relative; z-index: 1; }
         
+        .bag-header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         
+        .bag-title { 
+            font-size: 19px;
+            font-weight: 600;
+            color: #CC785C;
+            letter-spacing: 0.3px;
+        }
         
+        .bag-info { 
+            margin-top: 12px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.7;
+        }
         
         .bag-status { 
             display: inline-block;
@@ -453,7 +481,7 @@
         @media (max-width: 600px) { 
             .row { grid-template-columns: 1fr; }
             .container { padding: 25px 16px; }
-            .tabs { display: none; flex-direction: column; gap: 8px; }
+            .tabs { flex-direction: column; gap: 8px; }
             .tab { padding: 12px 20px; }
             .section { padding: 25px 20px; }
             .header h1 { font-size: 32px; }
@@ -467,7 +495,6 @@
         <h1>Espresso Tracker</h1>
     </div>
     
-    <!-- Menu Hamburger -->
     <button class="hamburger-btn" onclick="window.toggleMenu()">
         <div class="hamburger-icon">
             <span></span>
@@ -478,14 +505,14 @@
     
     <div class="menu-overlay" onclick="window.toggleMenu()"></div>
     
-    <nav class="side-menu" id="sideMenu">
+    <nav class="side-menu">
         <a class="menu-item" onclick="window.setTab('shots'); window.toggleMenu();">
             <span class="icon">☕</span>
             <span>Shots</span>
         </a>
         <a class="menu-item" onclick="window.setTab('bags'); window.toggleMenu();">
-            <span class="icon">📦</span>
-            <span>Paquets</span>
+            <span class="icon">☕</span>
+            <span>Grains</span>
         </a>
         <a class="menu-item" onclick="window.setTab('analysis'); window.toggleMenu();">
             <span class="icon">📊</span>
@@ -657,7 +684,7 @@
             };
             const { data } = await sb.from('bags').insert([bag]).select();
             bags = [data[0], ...bags];
-            showMessage('success', '✅ Paquet ajouté');
+            showMessage('success', '✅ Grains ajoutés');
             form.reset();
             render();
         }
@@ -680,7 +707,7 @@
                 await sb.from('bags').delete().eq('id', id);
                 // Recharger les données depuis Supabase pour forcer la mise à jour
                 await loadData();
-                showMessage('success', '✅ Paquet supprimé');
+                showMessage('success', '✅ Grains supprimés');
             } catch (e) {
                 console.error(e);
                 showMessage('error', '❌ Erreur lors de la suppression');
@@ -795,13 +822,18 @@
 
         function render() {
             const activeBags = bags.filter(b => b.status === 'active');
-            let html = ``;
+            let html = `<div class="tabs">
+                <button class="tab ${currentTab === 'shots' ? 'active' : ''}" onclick="window.setTab('shots')">Shots</button>
+                <button class="tab ${currentTab === 'bags' ? 'active' : ''}" onclick="window.setTab('bags')">Paquets</button>
+                <button class="tab ${currentTab === 'analysis' ? 'active' : ''}" onclick="window.setTab('analysis')">Analyse</button>
+                <button class="tab ${currentTab === 'settings' ? 'active' : ''}" onclick="window.setTab('settings')">Réglages</button>
+            </div>`;
             if (message) html += `<div class="alert alert-${message.type}">${message.text}</div>`;
             
             if (currentTab === 'shots') {
                 html += `<div class="section"><h2>Nouveau Shot</h2>
                     <form id="form-shot" onsubmit="event.preventDefault(); window.addShot(event)">
-                    <div class="form-group"><label>Paquet</label><select name="bag_id" required onchange="window.updateBackground(this.value); window.currentBagId = this.value;"><option value="">Sélectionner</option>
+                    <div class="form-group"><label>Grains</label><select name="bag_id" required onchange="window.updateBackground(this.value); window.currentBagId = this.value;"><option value="">Sélectionner</option>
                     ${activeBags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
                     <div class="form-group"><label>Date du shot</label><input type="date" name="shot_date" required></div>
                     <div class="row"><div class="form-group"><label>Dose (g)</label><input type="number" step="0.1" name="dose" value="18" required></div>
@@ -862,14 +894,14 @@
                 html += `</div>`;
             }
             else if (currentTab === 'bags') {
-                html += `<div class="section"><h2>Nouveau Paquet</h2><form id="form-bag" onsubmit="event.preventDefault(); window.addBag(event)">
+                html += `<div class="section"><h2>Nouveaux Grains</h2><form id="form-bag" onsubmit="event.preventDefault(); window.addBag(event)">
                     <div class="form-group"><label>Nom du café</label><input type="text" name="name" placeholder="Gédéo, Timanà..." required></div>
                     <div class="form-group"><label>Torréfacteur</label><input type="text" name="roaster" value="L'Arbre à Café"></div>
                     <div class="row"><div class="form-group"><label>Date torréfaction</label>
                     <input type="date" name="roast_date" required></div>
                     <div class="form-group"><label>Poids (g)</label><input type="number" name="weight" value="250"></div></div>
                     <button type="submit" class="btn btn-primary">Ajouter</button></form></div>
-                    <div class="section"><h2>Mes Paquets (${bags.length})</h2>${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun paquet</p>' : ''}`;
+                    <div class="section"><h2>Mes Grains (${bags.length})</h2>${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucuns grains</p>' : ''}`;
                 bags.forEach(b => {
                     let age = 0;
                     if (b.roast_date) {
@@ -901,21 +933,12 @@
             else if (currentTab === 'analysis') {
                 html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>
                     <div class="alert alert-info">Seuls les shots validés avec 4 ou 5 étoiles apparaissent dans le graphique</div>`;
-                
-                // Récupérer les noms uniques de café
-                const uniqueCoffeeNames = [...new Set(bags.map(b => b.name))].sort();
-                
-                if (uniqueCoffeeNames.length === 0) {
-                    html += `<div class="alert alert-info">Ajoutez des paquets pour voir l'analyse</div>`;
-                } else {
-                    html += `<div class="form-group"><label>Sélectionner un café</label>
-                        <select id="analysis-coffee" onchange="window.updateChartByCoffee(this.value)">
-                        <option value="">-- Choisir un café --</option>
-                        ${uniqueCoffeeNames.map(name => `<option value="${name}">${name}</option>`).join('')}
-                        </select></div>
-                        <div id="chart-wrapper" style="display:none;">
-                            <div class="chart-container"><canvas id="chart"></canvas></div>
-                        </div>`;
+                if (bags.length === 0) html += `<div class="alert alert-info">Ajoutez des paquets pour voir l'analyse</div>`;
+                else {
+                    html += `<div class="form-group"><label>Sélectionner des grains</label>
+                        <select id="analysis-bag" onchange="window.updateChart(this.value)"><option value="">Tous les paquets</option>
+                        ${bags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
+                        <div class="chart-container"><canvas id="chart"></canvas></div>`;
                 }
                 html += `</div>`;
             }
@@ -1017,26 +1040,39 @@
                 }
             });
         }
+
+        window.toggleMenu = function() {
+            const menu = document.querySelector('.side-menu');
+            const overlay = document.querySelector('.menu-overlay');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('open');
+            
+            document.querySelectorAll('.menu-item').forEach((item, index) => {
+                const tabs = ['shots', 'bags', 'analysis', 'settings'];
+                if (tabs[index] === currentTab) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        };
         
         window.updateChartByCoffee = function(coffeeName) {
             const chartWrapper = document.getElementById('chart-wrapper');
             if (!chartWrapper) return;
             
             if (!coffeeName) {
-                // Rien sélectionné → cacher le graphique
                 chartWrapper.style.display = 'none';
                 if (chartInstance) chartInstance.destroy();
                 return;
             }
             
-            // Afficher le graphique
             chartWrapper.style.display = 'block';
             
             const canvas = document.getElementById('chart');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             
-            // Filtrer les shots validés 4-5★ ET qui ont le même nom de café
             let filteredShots = shots.filter(s => {
                 const isValidated = s.validated === true && (s.rating === 4 || s.rating === 5);
                 const matchesCoffee = s.coffee.toLowerCase().includes(coffeeName.toLowerCase()) || 
@@ -1094,11 +1130,10 @@
                                     const shot = sorted[context.dataIndex];
                                     return [
                                         `Café: ${shot.coffee}`,
-                                        `Date torréfaction: ${shot.roast_date}`,
+                                        `Torréfaction: ${shot.roast_date}`,
                                         `Mouture: ${shot.grind}`, 
                                         `Âge: ${shot.age}j`, 
-                                        `Temps: ${shot.time}s`, 
-                                        `Note: ${renderStars(shot.rating)}`
+                                        `Temps: ${shot.time}s`
                                     ];
                                 }
                             }
@@ -1108,22 +1143,6 @@
             });
         };
 
-        window.toggleMenu = function() {
-            const menu = document.querySelector('.side-menu');
-            const overlay = document.querySelector('.menu-overlay');
-            menu.classList.toggle('open');
-            overlay.classList.toggle('open');
-            
-            // Mettre à jour les items actifs
-            document.querySelectorAll('.menu-item').forEach((item, index) => {
-                const tabs = ['shots', 'bags', 'analysis', 'settings'];
-                if (tabs[index] === currentTab) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
-            });
-        };
         
         window.setTab = function(tab) { currentTab = tab; render(); };
         window.setRating = function(rating) { 
