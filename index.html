@@ -12,8 +12,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* ... styles inchangés (identiques à la version précédente) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #f5f1eb 0%, #e8dfd5 100%);
@@ -22,7 +22,6 @@
             position: relative;
             transition: background 0.5s ease;
         }
-        
         body::before {
             content: '';
             position: fixed;
@@ -39,7 +38,6 @@
             pointer-events: none;
             transition: opacity 0.5s ease, background-image 0.5s ease;
         }
-        
         body::after {
             content: '';
             position: fixed;
@@ -55,19 +53,15 @@
             pointer-events: none;
             transition: opacity 0.5s ease, background-image 0.5s ease;
         }
-        
         body.bg-gedeo::after {
             background-image: url('gedeo-bg.png');
             opacity: 0.45;
         }
-        
         body.bg-timana::after {
             background-image: url('timana-bg.png');
             opacity: 0.45;
         }
-        
         .header, .container, .tabs { position: relative; z-index: 1; }
-        
         .header { 
             background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
             color: white; 
@@ -83,8 +77,6 @@
             font-weight: 600;
             letter-spacing: 1px;
         }
-        
-        /* Menu Hamburger */
         .hamburger-btn {
             position: fixed;
             top: 24px;
@@ -116,7 +108,6 @@
             background: #CC785C;
             border-radius: 3px;
         }
-        
         .side-menu {
             position: fixed;
             top: 0;
@@ -179,11 +170,8 @@
             color: #CC785C;
             font-weight: 600;
         }
-        
         .tabs { display: none !important; }
-        
         .container { max-width: 920px; margin: 0 auto; padding: 40px 20px; }
-        
         .section { 
             background: rgba(255, 255, 255, 0.80);
             border-radius: 20px;
@@ -193,7 +181,6 @@
             border: 1px solid rgba(204, 120, 92, 0.1);
             backdrop-filter: blur(10px);
         }
-        
         h2 { 
             color: #CC785C;
             font-family: 'Playfair Display', serif;
@@ -202,9 +189,7 @@
             font-weight: 600;
             letter-spacing: 0.5px;
         }
-        
         .form-group { margin-bottom: 22px; }
-        
         label { 
             display: block;
             margin-bottom: 10px;
@@ -213,7 +198,6 @@
             font-size: 14px;
             letter-spacing: 0.2px;
         }
-        
         input, select, textarea { 
             width: 100%;
             padding: 14px 16px;
@@ -230,13 +214,11 @@
             background: white;
             box-shadow: 0 0 0 4px rgba(204, 120, 92, 0.08);
         }
-        
         .row { 
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 18px;
         }
-        
         .btn { 
             padding: 15px 30px;
             border: none;
@@ -247,7 +229,6 @@
             transition: all 0.2s;
             font-family: inherit;
         }
-        
         .btn-primary { 
             background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
             color: white;
@@ -262,7 +243,6 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
         .btn-secondary { 
             background: #f0e6d9;
             color: #CC785C;
@@ -272,12 +252,10 @@
         .btn-secondary:hover {
             background: #e8ddd0;
         }
-        
         .btn-small { 
             padding: 9px 18px;
             font-size: 13px;
         }
-        
         .btn-danger { 
             background: #dc3545;
             color: white;
@@ -285,7 +263,6 @@
         .btn-danger:hover {
             background: #c82333;
         }
-        
         .shot-item { 
             background: linear-gradient(135deg, rgba(250, 250, 248, 0.75) 0%, rgba(245, 241, 235, 0.75) 100%);
             border: 1.5px solid rgba(204, 120, 92, 0.12);
@@ -300,7 +277,6 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             border-color: #CC785C;
         }
-        
         .shot-header { 
             display: flex;
             justify-content: space-between;
@@ -309,14 +285,12 @@
             padding-bottom: 18px;
             border-bottom: 1.5px solid rgba(204, 120, 92, 0.12);
         }
-        
         .shot-title { 
             font-size: 19px;
             font-weight: 600;
             color: #CC785C;
             letter-spacing: 0.3px;
         }
-        
         .bag-item { 
             background: linear-gradient(135deg, rgba(250, 250, 248, 0.75) 0%, rgba(245, 241, 235, 0.75) 100%);
             border: 1.5px solid rgba(204, 120, 92, 0.12);
@@ -343,27 +317,23 @@
             z-index: 0;
         }
         .bag-item > * { position: relative; z-index: 1; }
-        
         .bag-header { 
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
         .bag-title { 
             font-size: 19px;
             font-weight: 600;
             color: #CC785C;
             letter-spacing: 0.3px;
         }
-        
         .bag-info { 
             margin-top: 12px;
             font-size: 14px;
             color: #666;
             line-height: 1.7;
         }
-        
         .bag-status { 
             display: inline-block;
             padding: 7px 15px;
@@ -381,7 +351,6 @@
             background: #9e9e9e;
             color: white;
         }
-        
         .alert { 
             padding: 16px 20px;
             border-radius: 12px;
@@ -405,7 +374,6 @@
             color: #0c5460;
             border-color: #17a2b8;
         }
-        
         .chart-container { 
             position: relative;
             height: 420px;
@@ -414,7 +382,6 @@
             border-radius: 12px;
             padding: 20px;
         }
-        
         .star-rating { 
             display: flex;
             gap: 10px;
@@ -438,7 +405,6 @@
             color: #ffc107;
             letter-spacing: 2px;
         }
-        
         @media (max-width: 600px) { 
             .row { grid-template-columns: 1fr; }
             .container { padding: 25px 16px; }
@@ -570,11 +536,20 @@
             const form = event.target;
             const selectedBag = bags.find(b => b.id.toString() === form.bag_id.value);
             
+            // Calcul correct de l'âge à partir de la date du shot
             let age = 0;
             if (selectedBag && selectedBag.roast_date) {
                 const [roastDay, roastMonth, roastYear] = selectedBag.roast_date.split('/');
                 const roastDate = new Date(`${roastYear}-${roastMonth}-${roastDay}`);
-                age = Math.floor((new Date() - roastDate) / 86400000);
+                
+                // Date du shot (format YYYY-MM-DD)
+                const shotDateStr = form.shot_date.value;
+                const [shotYear, shotMonth, shotDay] = shotDateStr.split('-');
+                const shotDate = new Date(`${shotYear}-${shotMonth}-${shotDay}`);
+                
+                age = Math.floor((shotDate - roastDate) / 86400000);
+                // Si la date du shot est antérieure à la torréfaction, âge négatif => on met 0
+                if (age < 0) age = 0;
             }
 
             const shotDate = form.shot_date.value;
@@ -776,15 +751,14 @@
             link.click();
         }
 
-        // Nouvelle fonction d'analyse par nom de café
+        // Analyse par nom de café (sans restriction sur la note)
         function updateChartByCoffee(coffeeName) {
             const canvas = document.getElementById('chart');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             
-            // Filtrer les shots validés (4 ou 5 étoiles) et dont le nom correspond
+            // Filtrer les shots dont le nom correspond (tous, sans condition de note)
             let filteredShots = shots.filter(s => 
-                (s.validated === true || s.rating === 4 || s.rating === 5) && 
                 s.coffee && s.coffee.toLowerCase().includes(coffeeName.toLowerCase())
             );
             
@@ -798,7 +772,7 @@
                 type: 'scatter',
                 data: { 
                     datasets: [{ 
-                        label: `${coffeeName} - Mouture vs Âge (validés 4-5★)`, 
+                        label: `${coffeeName} - Mouture vs Âge (tous shots)`, 
                         data: data, 
                         backgroundColor: 'rgba(204, 120, 92, 0.7)', 
                         borderColor: '#CC785C', 
@@ -842,7 +816,8 @@
                                         `Torréfaction: ${shot.roast_date}`,
                                         `Mouture: ${shot.grind}`, 
                                         `Âge: ${shot.age}j`, 
-                                        `Temps: ${shot.time}s`
+                                        `Temps: ${shot.time}s`,
+                                        `Note: ${renderStars(shot.rating)}`
                                     ];
                                 }
                             }
@@ -973,8 +948,8 @@
                     lastCoffee = coffeeNames[0];
                 }
 
-                html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>
-                    <div class="alert alert-info">Seuls les shots validés avec 4 ou 5 étoiles apparaissent dans le graphique</div>`;
+                html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>`;
+                // Ligne supprimée : "Seuls les shots validés..."
                 if (coffeeNames.length === 0) {
                     html += `<div class="alert alert-info">Ajoutez des grains pour voir l'analyse</div>`;
                 } else {
