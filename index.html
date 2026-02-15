@@ -33,8 +33,8 @@
             background-image: url('logo-bg.png');
             background-position: center center;
             background-repeat: no-repeat;
-            background-size: 45%;
-            opacity: 0.25;
+            background-size: 50%;
+            opacity: 0.35;
             z-index: 0;
             pointer-events: none;
             transition: opacity 0.5s ease, background-image 0.5s ease;
@@ -502,11 +502,21 @@
             event.preventDefault();
             const form = event.target;
             const selectedBag = bags.find(b => b.id.toString() === form.bag_id.value);
-            const age = selectedBag && selectedBag.roast_date ? 
-                Math.floor((new Date() - new Date(selectedBag.roast_date.split('/').reverse().join('-'))) / 86400000) : 0;
+            
+            let age = 0;
+            if (selectedBag && selectedBag.roast_date) {
+                // roast_date est au format DD/MM/YYYY
+                const [day, month, year] = selectedBag.roast_date.split('/');
+                const roastDate = new Date(`${year}-${month}-${day}`);
+                age = Math.floor((new Date() - roastDate) / 86400000);
+            }
+
+            const shotDate = form.shot_date.value;
+            const dateObj = new Date(shotDate);
+            const formattedDate = dateObj.toLocaleString('fr-FR');
 
             const shot = {
-                date: new Date().toLocaleString('fr-FR'),
+                date: formattedDate,
                 coffee: selectedBag ? selectedBag.name : '',
                 roaster: selectedBag ? selectedBag.roaster : "L'Arbre à Café",
                 roast_date: selectedBag ? selectedBag.roast_date : '',
@@ -518,11 +528,9 @@
                 time: parseInt(form.time.value),
                 preinfusion: parseInt(form.preinfusion.value),
                 wdt: form.wdt.value,
-                channeling: form.channeling.value,
-                flow: form.flow.value,
+                remarks: form.remarks.value,
                 rating: currentRating,
-                notes: '',
-                validated: form.validated.checked
+                validated: (currentRating === 4 || currentRating === 5)
             };
 
             const { data } = await sb.from('shots').insert([shot]).select();
@@ -556,10 +564,16 @@
         async function addBag(event) {
             event.preventDefault();
             const form = event.target;
+            
+            // Convertir la date de YYYY-MM-DD en DD/MM/YYYY
+            const dateInput = form.roast_date.value; // format YYYY-MM-DD
+            const [year, month, day] = dateInput.split('-');
+            const formattedDate = `${day}/${month}/${year}`;
+            
             const bag = {
                 name: form.name.value,
                 roaster: form.roaster.value,
-                roast_date: form.roast_date.value,
+                roast_date: formattedDate,
                 weight: parseInt(form.weight.value),
                 notes: '',
                 status: 'active'
@@ -628,11 +642,9 @@
                             time: parseInt(v[9]) || 0,
                             preinfusion: parseInt(v[10]) || 0,
                             wdt: v[11]?.trim() || 'non',
-                            channeling: v[12]?.trim() || 'non',
-                            flow: v[13]?.trim() || 'stable',
-                            rating: 0,
-                            notes: v[15]?.trim() || '',
-                            validated: false
+                            remarks: v[15]?.trim() || '',
+                            rating: parseInt(v[14]) || 0,
+                            validated: (parseInt(v[14]) === 4 || parseInt(v[14]) === 5)
                         };
 
                         const isDuplicate = shots.some(s => 
@@ -684,8 +696,8 @@
         }
 
         function exportCSV() {
-            const h = ['Date shot','Café','Torréfacteur','Date torréfaction','Âge (jours)','Dose (g)','Sortie (g)','Ratio','Mouture','Temps (s)','Préinfusion (s)','WDT','Channeling','Débit','Note','Notes'];
-            const rows = shots.map(s => [s.date,s.coffee,s.roaster,s.roast_date,s.age,s.dose,s.output,s.ratio,s.grind,s.time,s.preinfusion,s.wdt,s.channeling,s.flow,s.rating,s.notes].join(','));
+            const h = ['Date shot','Café','Torréfacteur','Date torréfaction','Âge (jours)','Dose (g)','Sortie (g)','Ratio','Mouture','Temps (s)','Préinfusion (s)','WDT','Remarques','Note'];
+            const rows = shots.map(s => [s.date,s.coffee,s.roaster,s.roast_date,s.age,s.dose,s.output,s.ratio,s.grind,s.time,s.preinfusion,s.wdt,s.remarks||'',s.rating||0].join(','));
             const csv = [h.join(','), ...rows].join('\n');
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -706,6 +718,7 @@
             
             if (currentTab === 'shots') {
                 html += `<div class="section"><h2>Nouveau Shot</h2><form id="form-shot" onsubmit="event.preventDefault(); window.addShot(event)">
+                    <div class="form-group"><label>Date du shot</label><input type="datetime-local" name="shot_date" required></div>
                     <div class="form-group"><label>Paquet</label><select name="bag_id" required onchange="window.updateBackground(this.value); window.currentBagId = this.value;"><option value="">Sélectionner</option>
                     ${activeBags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
                     <div class="row"><div class="form-group"><label>Dose (g)</label><input type="number" step="0.1" name="dose" value="18" required></div>
@@ -715,28 +728,23 @@
                     <div class="row"><div class="form-group"><label>Préinfusion (s)</label><input type="number" name="preinfusion" value="8"></div>
                     <div class="form-group"><label>WDT</label><select name="wdt"><option value="non">Non</option><option value="léger">Léger</option>
                     <option value="normal">Normal</option><option value="profond">Profond</option></select></div></div>
-                    <div class="row"><div class="form-group"><label>Channeling</label><select name="channeling"><option value="non">Non</option>
-                    <option value="oui">Oui</option></select></div><div class="form-group"><label>Débit</label>
-                    <select name="flow"><option value="rapide">Rapide</option><option value="stable" selected>Stable</option>
-                    <option value="lent">Lent</option></select></div></div>
-                    <div class="form-group"><label>Note</label><div class="star-rating">
+                    <div class="form-group"><label>Remarques</label><textarea name="remarks" rows="2" placeholder="Notes sur ce shot..."></textarea></div>
+                    <div class="form-group"><div class="star-rating">
                     ${[1,2,3,4,5].map(i => `<span class="star ${i <= currentRating ? 'filled' : ''}" onclick="window.setRating(${i})">★</span>`).join('')}</div></div>
-                    <div class="form-group"><label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <input type="checkbox" name="validated" style="width: auto; cursor: pointer;"><span>Shot validé (pour l'analyse)</span></label></div>
                     <button type="submit" class="btn btn-primary">Enregistrer</button></form></div>
                     <div class="section"><h2>Historique (${shots.length})</h2>
                     ${shots.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun shot enregistré</p>' : ''}`;
                 shots.forEach(s => {
-                    const validatedBadge = s.validated ? '<span style="display:inline-block; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; background:#4caf50; color:white; margin-left:10px;">Validé</span>' : '<span style="display:inline-block; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; background:#9e9e9e; color:white; margin-left:10px;">Test</span>';
                     html += `<div class="shot-item"><div class="shot-header"><div style="display:flex; align-items:center; gap:14px;">
                         <img src="${getLogo(s.coffee)}" style="width:42px; height:42px; border-radius:50%; border: 2px solid rgba(107, 68, 35, 0.1);">
-                        <div><div class="shot-title">${s.coffee}${validatedBadge}</div><div class="shot-date">${s.date}</div></div></div>
-                        <div style="display:flex; gap:10px;"><button class="btn btn-secondary btn-small" onclick="window.toggleValidation('${s.id}', ${s.validated})">${s.validated ? 'Invalider' : 'Valider'}</button>
+                        <div><div class="shot-title">${s.coffee}</div><div class="shot-date">${s.date}</div></div></div>
+                        <div style="display:flex; gap:10px;">
                         <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')">✕</button></div></div>
                         <div class="shot-details"><div class="detail"><strong>Dose → Sortie</strong>${s.dose}g → ${s.output}g (1:${s.ratio.toFixed(1)})</div>
                         <div class="detail"><strong>Mouture</strong>${s.grind}</div><div class="detail"><strong>Temps</strong>${s.time}s</div>
                         <div class="detail"><strong>Préinfusion</strong>${s.preinfusion}s</div><div class="detail"><strong>Âge</strong>${s.age}j</div>
-                        <div class="detail"><strong>WDT</strong>${s.wdt}</div><div class="detail"><strong>Channeling</strong>${s.channeling}</div>
+                        <div class="detail"><strong>WDT</strong>${s.wdt}</div>
+                        ${s.remarks ? `<div class="detail"><strong>Remarques</strong>${s.remarks}</div>` : ''}
                         <div class="detail"><strong>Note</strong><span class="star-display">${renderStars(s.rating || 0)}</span></div></div></div>`;
                 });
                 html += `</div>`;
@@ -745,13 +753,18 @@
                 html += `<div class="section"><h2>Nouveau Paquet</h2><form id="form-bag" onsubmit="event.preventDefault(); window.addBag(event)">
                     <div class="form-group"><label>Nom du café</label><input type="text" name="name" placeholder="Gédéo, Timanà..." required></div>
                     <div class="form-group"><label>Torréfacteur</label><input type="text" name="roaster" value="L'Arbre à Café"></div>
-                    <div class="row"><div class="form-group"><label>Date torréfaction (JJ/MM/AAAA)</label>
-                    <input type="text" name="roast_date" placeholder="31/12/2025" required></div>
+                    <div class="row"><div class="form-group"><label>Date torréfaction</label>
+                    <input type="date" name="roast_date" required></div>
                     <div class="form-group"><label>Poids (g)</label><input type="number" name="weight" value="250"></div></div>
                     <button type="submit" class="btn btn-primary">Ajouter</button></form></div>
                     <div class="section"><h2>Mes Paquets (${bags.length})</h2>${bags.length === 0 ? '<p style="text-align:center; color:#888; padding:40px;">Aucun paquet</p>' : ''}`;
                 bags.forEach(b => {
-                    const age = b.roast_date ? Math.floor((new Date() - new Date(b.roast_date.split('/').reverse().join('-'))) / 86400000) : 0;
+                    let age = 0;
+                    if (b.roast_date) {
+                        const [day, month, year] = b.roast_date.split('/');
+                        const roastDate = new Date(`${year}-${month}-${day}`);
+                        age = Math.floor((new Date() - roastDate) / 86400000);
+                    }
                     html += `<div class="bag-item"><div class="bag-header"><div style="display:flex; align-items:flex-start; gap:16px;">
                         <img src="${getLogo(b.name)}" style="width:52px; height:52px; border-radius:50%; border: 2px solid rgba(107, 68, 35, 0.1); margin-top:2px;">
                         <div><div class="bag-title">${b.name}</div><div class="bag-info">${b.roaster} · Torréfié le ${b.roast_date}<br>Âge: ${age} jours · ${b.weight}g</div>
@@ -787,6 +800,20 @@
             
             if (currentBagId) {
                 updateBackground(currentBagId);
+            }
+            
+            // Initialiser la date du shot avec la date/heure actuelle
+            if (currentTab === 'shots') {
+                const shotDateInput = document.querySelector('input[name="shot_date"]');
+                if (shotDateInput && !shotDateInput.value) {
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    shotDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+                }
             }
         }
 
