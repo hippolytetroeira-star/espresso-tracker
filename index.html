@@ -501,6 +501,11 @@
             .section { padding: 25px 20px; }
             .header h1 { font-size: 32px; }
             .toast-message { white-space: normal; max-width: 200px; text-align: center; }
+            /* Éviter que le hamburger chevauche le titre */
+            .header {
+                padding-left: 80px;
+                padding-right: 20px;
+            }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -527,7 +532,7 @@
             <span>Shots</span>
         </a>
         <a class="menu-item" onclick="window.setTab('bags'); window.toggleMenu();">
-            <span class="icon">☕</span>
+            <span class="icon">🫘</span>
             <span>Grains</span>
         </a>
         <a class="menu-item" onclick="window.setTab('analysis'); window.toggleMenu();">
@@ -599,7 +604,6 @@
         }
 
         function showToast(text, target = null) {
-            // Supprimer tout toast existant
             const existing = document.querySelector('.toast-message');
             if (existing) existing.remove();
             
@@ -609,34 +613,28 @@
             document.body.appendChild(toast);
             
             if (target) {
-                // Positionner près de la cible
                 const rect = target.getBoundingClientRect();
                 const toastRect = toast.getBoundingClientRect();
                 let left = rect.left + rect.width / 2 - toastRect.width / 2;
                 let top = rect.top - toastRect.height - 8;
                 
-                // Ajustements si débordement
                 if (left < 10) left = 10;
                 if (left + toastRect.width > window.innerWidth - 10) {
                     left = window.innerWidth - toastRect.width - 10;
                 }
                 if (top < 10) {
-                    top = rect.bottom + 8; // placer en dessous
+                    top = rect.bottom + 8;
                 }
                 
                 toast.style.left = left + 'px';
                 toast.style.top = top + 'px';
             } else {
-                // Centré en bas
                 toast.style.left = '50%';
                 toast.style.bottom = '20px';
                 toast.style.transform = 'translateX(-50%)';
             }
             
-            // Animation
             setTimeout(() => toast.classList.add('show'), 10);
-            
-            // Disparition après 1,5s
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 200);
@@ -658,7 +656,6 @@
                 shots = s || [];
                 bags = b || [];
                 
-                // Sauvegarder la position de défilement si nécessaire
                 let scrollY = 0;
                 if (preserveScroll) {
                     scrollY = window.scrollY;
@@ -666,7 +663,6 @@
                 
                 render();
                 
-                // Restaurer la position de défilement
                 if (preserveScroll) {
                     window.scrollTo(0, scrollY);
                 }
@@ -683,13 +679,12 @@
             
             let age = 0;
             if (selectedBag && selectedBag.roast_date) {
-                // roast_date est au format DD/MM/YYYY
                 const [roastDay, roastMonth, roastYear] = selectedBag.roast_date.split('/');
                 const roastDate = new Date(`${roastYear}-${roastMonth}-${roastDay}`);
                 age = Math.floor((new Date() - roastDate) / 86400000);
             }
 
-            const shotDate = form.shot_date.value; // format YYYY-MM-DD
+            const shotDate = form.shot_date.value;
             const [shotYear, shotMonth, shotDay] = shotDate.split('-');
             const formattedDate = `${shotDay}/${shotMonth}/${shotYear}`;
 
@@ -725,24 +720,21 @@
         }
 
         async function deleteShot(id, event) {
-            // Suppression de la confirmation
             try {
                 await sb.from('shots').delete().eq('id', id);
                 showToast('✅ Shot supprimé', event?.target);
-                await loadData(true); // Recharger en préservant le scroll
+                await loadData(true);
             } catch (e) {
                 console.error(e);
                 showToast('❌ Erreur lors de la suppression', event?.target);
             }
         }
 
-
         async function addBag(event) {
             event.preventDefault();
             const form = event.target;
             
-            // Convertir la date de YYYY-MM-DD en DD/MM/YYYY
-            const dateInput = form.roast_date.value; // format YYYY-MM-DD
+            const dateInput = form.roast_date.value;
             const [year, month, day] = dateInput.split('-');
             const formattedDate = `${day}/${month}/${year}`;
             
@@ -766,7 +758,7 @@
                 const newStatus = status === 'active' ? 'finished' : 'active';
                 await sb.from('bags').update({ status: newStatus }).eq('id', id);
                 showToast(`✅ ${newStatus === 'active' ? 'Réactivé' : 'Terminé'}`, event?.target);
-                await loadData(true); // Recharger en préservant le scroll
+                await loadData(true);
             } catch (e) {
                 console.error(e);
                 showToast('❌ Erreur lors du changement', event?.target);
@@ -774,11 +766,10 @@
         }
 
         async function deleteBag(id, event) {
-            // Suppression de la confirmation
             try {
                 await sb.from('bags').delete().eq('id', id);
                 showToast('✅ Grains supprimés', event?.target);
-                await loadData(true); // Recharger en préservant le scroll
+                await loadData(true);
             } catch (e) {
                 console.error(e);
                 showToast('❌ Erreur lors de la suppression', event?.target);
@@ -1010,10 +1001,18 @@
                 html += `</div>`;
             }
             else if (currentTab === 'analysis') {
-                html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>
-                    <div class="alert alert-info">Seuls les shots validés avec 4 ou 5 étoiles apparaissent dans le graphique</div>`;
+                html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>`;
                 
+                // Récupérer les noms uniques de cafés
                 const uniqueCoffeeNames = [...new Set(bags.map(b => b.name))].sort();
+                
+                // Déterminer le dernier café utilisé (le plus récent dans les shots)
+                let lastCoffeeName = '';
+                if (shots.length > 0) {
+                    lastCoffeeName = shots[0].coffee; // le plus récent
+                } else if (uniqueCoffeeNames.length > 0) {
+                    lastCoffeeName = uniqueCoffeeNames[0]; // premier de la liste
+                }
                 
                 if (uniqueCoffeeNames.length === 0) {
                     html += `<div class="alert alert-info">Ajoutez des grains pour voir l'analyse</div>`;
@@ -1021,13 +1020,20 @@
                     html += `<div class="form-group"><label>Sélectionner un café</label>
                         <select id="analysis-coffee" onchange="window.updateChartByCoffee(this.value)">
                         <option value="">-- Choisir un café --</option>
-                        ${uniqueCoffeeNames.map(name => `<option value="${name}">${name}</option>`).join('')}
+                        ${uniqueCoffeeNames.map(name => `<option value="${name}" ${name === lastCoffeeName ? 'selected' : ''}>${name}</option>`).join('')}
                         </select></div>
-                        <div id="chart-wrapper" style="display:none;">
+                        <div id="chart-wrapper" style="display:block;">
                             <div class="chart-container"><canvas id="chart"></canvas></div>
                         </div>`;
                 }
                 html += `</div>`;
+                
+                // Initialiser le graphique après le rendu si un café est sélectionné
+                setTimeout(() => {
+                    if (lastCoffeeName) {
+                        window.updateChartByCoffee(lastCoffeeName);
+                    }
+                }, 0);
             }
             else if (currentTab === 'settings') {
                 html += `<div class="section"><h2>Réglages</h2><div class="alert alert-success">✅ Synchronisé avec Supabase</div>
@@ -1044,7 +1050,6 @@
                 updateBackground(currentBagId);
             }
             
-            // Initialiser la date du shot avec la date actuelle (sans heure)
             if (currentTab === 'shots') {
                 const shotDateInput = document.querySelector('input[name="shot_date"]');
                 if (shotDateInput && !shotDateInput.value) {
@@ -1055,12 +1060,10 @@
                     shotDateInput.value = `${year}-${month}-${day}`;
                 }
                 
-                // Pré-remplir avec les valeurs du dernier shot pour aller plus vite
                 if (shots.length > 0) {
-                    const lastShot = shots[0]; // Le plus récent
+                    const lastShot = shots[0];
                     const form = document.getElementById('form-shot');
-                    if (form && !form.bag_id.value) { // Seulement si pas encore rempli
-                        // Trouver le paquet correspondant
+                    if (form && !form.bag_id.value) {
                         const lastBag = bags.find(b => b.name === lastShot.coffee && b.roast_date === lastShot.roast_date);
                         if (lastBag) {
                             form.bag_id.value = lastBag.id;
@@ -1073,12 +1076,9 @@
                         form.time.value = lastShot.time || 30;
                         form.preinfusion.value = lastShot.preinfusion || 8;
                         form.wdt.value = lastShot.wdt || 'non';
-                        // On ne pré-remplit PAS les remarques pour forcer à réfléchir
-                        // On ne pré-remplit PAS le rating pour forcer à noter
                     }
                 }
                 
-                // Auto-focus sur la date pour commencer rapidement
                 if (shotDateInput) {
                     setTimeout(() => shotDateInput.focus(), 100);
                 }
@@ -1086,46 +1086,7 @@
         }
 
         function updateChart(bagId) {
-            const canvas = document.getElementById('chart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let filteredShots = shots.filter(s => s.validated === true && (s.rating === 4 || s.rating === 5));
-            if (bagId) {
-                const bag = bags.find(b => b.id.toString() === bagId);
-                if (bag) {
-                    filteredShots = filteredShots.filter(s => {
-                        const sameRoastDate = s.roast_date === bag.roast_date;
-                        const sameName = s.coffee.toLowerCase().includes(bag.name.toLowerCase()) || bag.name.toLowerCase().includes(s.coffee.toLowerCase());
-                        return sameName && sameRoastDate;
-                    });
-                }
-            }
-            const sorted = filteredShots.sort((a, b) => a.age - b.age);
-            const data = sorted.map(s => ({ x: s.age, y: s.grind }));
-            if (chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'scatter',
-                data: { datasets: [{ label: 'Mouture vs Âge (validés 4-5★)', data: data, backgroundColor: 'rgba(204, 120, 92, 0.7)', borderColor: '#CC785C', borderWidth: 2, pointRadius: 9, pointHoverRadius: 11 }] },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { title: { display: true, text: 'Âge du café (jours depuis torréfaction)', font: { size: 13, weight: '600' }, color: '#CC785C' } },
-                        y: { title: { display: true, text: 'Mouture', font: { size: 13, weight: '600' }, color: '#CC785C' } }
-                    },
-                    plugins: {
-                        legend: { display: true, labels: { font: { size: 13, weight: '500' } } },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const shot = sorted[context.dataIndex];
-                                    return [`Mouture: ${shot.grind}`, `Âge: ${shot.age}j`, `Temps: ${shot.time}s`, `Note: ${renderStars(shot.rating)}`];
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+            // Cette fonction n'est plus utilisée directement, on utilise updateChartByCoffee
         }
 
         window.toggleMenu = function() {
@@ -1176,7 +1137,7 @@
                 type: 'scatter',
                 data: { 
                     datasets: [{ 
-                        label: `${coffeeName} - Mouture vs Âge (validés 4-5★)`, 
+                        label: `${coffeeName} - Mouture vs Âge`, 
                         data: data, 
                         backgroundColor: 'rgba(204, 120, 92, 0.7)', 
                         borderColor: '#CC785C', 
@@ -1192,7 +1153,7 @@
                         x: { 
                             title: { 
                                 display: true, 
-                                text: 'Âge du café (jours depuis torréfaction)', 
+                                text: 'Âge du café', 
                                 font: { size: 13, weight: '600' }, 
                                 color: '#CC785C' 
                             } 
@@ -1208,8 +1169,7 @@
                     },
                     plugins: {
                         legend: { 
-                            display: true, 
-                            labels: { font: { size: 13, weight: '500' } } 
+                            display: false // Légende supprimée
                         },
                         tooltip: {
                             callbacks: {
@@ -1234,7 +1194,6 @@
         window.setTab = function(tab) { currentTab = tab; render(); };
         window.setRating = function(rating) { 
             currentRating = rating;
-            // Mettre à jour visuellement les étoiles sans tout re-render
             document.querySelectorAll('.star-rating .star').forEach((star, index) => {
                 if (index < rating) {
                     star.classList.add('filled');
@@ -1283,7 +1242,6 @@
             if (shot.rating) text += ` - ${stars}`;
             if (shot.remarks) text += ` - ${shot.remarks}`;
             
-            // Utilisation du toast pour confirmer la copie (ou fallback prompt si échec)
             function fallbackCopy(text) {
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
