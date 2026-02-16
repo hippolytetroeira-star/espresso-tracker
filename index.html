@@ -12,8 +12,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* ... styles inchangés ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #f5f1eb 0%, #e8dfd5 100%);
@@ -22,6 +22,7 @@
             position: relative;
             transition: background 0.5s ease;
         }
+        
         body::before {
             content: '';
             position: fixed;
@@ -38,6 +39,7 @@
             pointer-events: none;
             transition: opacity 0.5s ease, background-image 0.5s ease;
         }
+        
         body::after {
             content: '';
             position: fixed;
@@ -53,15 +55,19 @@
             pointer-events: none;
             transition: opacity 0.5s ease, background-image 0.5s ease;
         }
+        
         body.bg-gedeo::after {
             background-image: url('gedeo-bg.png');
             opacity: 0.45;
         }
+        
         body.bg-timana::after {
             background-image: url('timana-bg.png');
             opacity: 0.45;
         }
+        
         .header, .container, .tabs { position: relative; z-index: 1; }
+        
         .header { 
             background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
             color: white; 
@@ -77,10 +83,12 @@
             font-weight: 600;
             letter-spacing: 1px;
         }
+        
+        /* Menu Hamburger */
         .hamburger-btn {
             position: fixed;
             top: 24px;
-            left: 24px;
+            right: 24px;
             z-index: 1001;
             background: white;
             border: none;
@@ -108,20 +116,21 @@
             background: #CC785C;
             border-radius: 3px;
         }
+        
         .side-menu {
             position: fixed;
             top: 0;
-            left: -320px;
+            right: -320px;
             width: 320px;
             height: 100%;
             background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
-            box-shadow: 6px 0 30px rgba(0,0,0,0.15);
+            box-shadow: -6px 0 30px rgba(0,0,0,0.15);
             z-index: 1000;
-            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 100px 0 30px 0;
         }
         .side-menu.open {
-            left: 0;
+            right: 0;
         }
         .menu-overlay {
             position: fixed;
@@ -170,8 +179,43 @@
             color: #CC785C;
             font-weight: 600;
         }
+        
         .tabs { display: none !important; }
+        
         .container { max-width: 920px; margin: 0 auto; padding: 40px 20px; }
+        
+        .tabs { 
+            display: flex; 
+            gap: 12px; 
+            margin-bottom: 35px; 
+            justify-content: center; 
+            flex-wrap: wrap;
+            background: white;
+            padding: 8px;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .tab { 
+            padding: 14px 28px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: #CC785C;
+            transition: all 0.2s;
+        }
+        .tab:hover { 
+            background: rgba(204, 120, 92, 0.08);
+        }
+        .tab.active { 
+            background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(204, 120, 92, 0.3);
+        }
+        
         .section { 
             background: rgba(255, 255, 255, 0.80);
             border-radius: 20px;
@@ -181,6 +225,7 @@
             border: 1px solid rgba(204, 120, 92, 0.1);
             backdrop-filter: blur(10px);
         }
+        
         h2 { 
             color: #CC785C;
             font-family: 'Playfair Display', serif;
@@ -189,7 +234,9 @@
             font-weight: 600;
             letter-spacing: 0.5px;
         }
+        
         .form-group { margin-bottom: 22px; }
+        
         label { 
             display: block;
             margin-bottom: 10px;
@@ -198,6 +245,7 @@
             font-size: 14px;
             letter-spacing: 0.2px;
         }
+        
         input, select, textarea { 
             width: 100%;
             padding: 14px 16px;
@@ -214,11 +262,13 @@
             background: white;
             box-shadow: 0 0 0 4px rgba(204, 120, 92, 0.08);
         }
+        
         .row { 
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 18px;
         }
+        
         .btn { 
             padding: 15px 30px;
             border: none;
@@ -229,6 +279,7 @@
             transition: all 0.2s;
             font-family: inherit;
         }
+        
         .btn-primary { 
             background: linear-gradient(135deg, #CC785C 0%, #B5674A 100%);
             color: white;
@@ -243,6 +294,7 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+        
         .btn-secondary { 
             background: #f0e6d9;
             color: #CC785C;
@@ -252,10 +304,12 @@
         .btn-secondary:hover {
             background: #e8ddd0;
         }
+        
         .btn-small { 
             padding: 9px 18px;
             font-size: 13px;
         }
+        
         .btn-danger { 
             background: #dc3545;
             color: white;
@@ -263,6 +317,7 @@
         .btn-danger:hover {
             background: #c82333;
         }
+        
         .shot-item { 
             background: linear-gradient(135deg, rgba(250, 250, 248, 0.75) 0%, rgba(245, 241, 235, 0.75) 100%);
             border: 1.5px solid rgba(204, 120, 92, 0.12);
@@ -277,6 +332,7 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             border-color: #CC785C;
         }
+        
         .shot-header { 
             display: flex;
             justify-content: space-between;
@@ -285,12 +341,21 @@
             padding-bottom: 18px;
             border-bottom: 1.5px solid rgba(204, 120, 92, 0.12);
         }
+        
         .shot-title { 
             font-size: 19px;
             font-weight: 600;
             color: #CC785C;
             letter-spacing: 0.3px;
         }
+        
+
+        
+
+        
+
+
+        
         .bag-item { 
             background: linear-gradient(135deg, rgba(250, 250, 248, 0.75) 0%, rgba(245, 241, 235, 0.75) 100%);
             border: 1.5px solid rgba(204, 120, 92, 0.12);
@@ -317,23 +382,27 @@
             z-index: 0;
         }
         .bag-item > * { position: relative; z-index: 1; }
+        
         .bag-header { 
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+        
         .bag-title { 
             font-size: 19px;
             font-weight: 600;
             color: #CC785C;
             letter-spacing: 0.3px;
         }
+        
         .bag-info { 
             margin-top: 12px;
             font-size: 14px;
             color: #666;
             line-height: 1.7;
         }
+        
         .bag-status { 
             display: inline-block;
             padding: 7px 15px;
@@ -351,6 +420,7 @@
             background: #9e9e9e;
             color: white;
         }
+        
         .alert { 
             padding: 16px 20px;
             border-radius: 12px;
@@ -374,6 +444,7 @@
             color: #0c5460;
             border-color: #17a2b8;
         }
+        
         .chart-container { 
             position: relative;
             height: 420px;
@@ -382,6 +453,7 @@
             border-radius: 12px;
             padding: 20px;
         }
+        
         .star-rating { 
             display: flex;
             gap: 10px;
@@ -405,14 +477,14 @@
             color: #ffc107;
             letter-spacing: 2px;
         }
+        
         @media (max-width: 600px) { 
             .row { grid-template-columns: 1fr; }
             .container { padding: 25px 16px; }
+            .tabs { flex-direction: column; gap: 8px; }
+            .tab { padding: 12px 20px; }
             .section { padding: 25px 20px; }
-            .header h1 { 
-                font-size: 32px; 
-                padding-left: 60px;
-            }
+            .header h1 { font-size: 32px; }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -439,7 +511,7 @@
             <span>Shots</span>
         </a>
         <a class="menu-item" onclick="window.setTab('bags'); window.toggleMenu();">
-            <span class="icon">🫘</span>
+            <span class="icon">☕</span>
             <span>Grains</span>
         </a>
         <a class="menu-item" onclick="window.setTab('analysis'); window.toggleMenu();">
@@ -538,22 +610,15 @@
             
             let age = 0;
             if (selectedBag && selectedBag.roast_date) {
+                // roast_date est au format DD/MM/YYYY
                 const [roastDay, roastMonth, roastYear] = selectedBag.roast_date.split('/');
                 const roastDate = new Date(`${roastYear}-${roastMonth}-${roastDay}`);
-                
-                const shotDateStr = form.shot_date.value;
-                const [shotYear, shotMonth, shotDay] = shotDateStr.split('-');
-                const shotDate = new Date(`${shotYear}-${shotMonth}-${shotDay}`);
-                
-                age = Math.floor((shotDate - roastDate) / 86400000);
-                if (age < 0) age = 0;
+                age = Math.floor((new Date() - roastDate) / 86400000);
             }
 
-            const shotDate = form.shot_date.value;
+            const shotDate = form.shot_date.value; // format YYYY-MM-DD
             const [shotYear, shotMonth, shotDay] = shotDate.split('-');
             const formattedDate = `${shotDay}/${shotMonth}/${shotYear}`;
-
-            const wdtValue = form.wdt.value; // récupéré depuis le select
 
             const shot = {
                 date: formattedDate,
@@ -567,7 +632,7 @@
                 grind: parseFloat(form.grind.value),
                 time: parseInt(form.time.value),
                 preinfusion: parseInt(form.preinfusion.value),
-                wdt: wdtValue,
+                wdt: form.wdt.value,
                 remarks: form.remarks.value,
                 rating: currentRating,
                 validated: (currentRating === 4 || currentRating === 5)
@@ -582,7 +647,6 @@
             form.grind.value = 7.5;
             form.time.value = 30;
             form.preinfusion.value = 8;
-            form.wdt.value = 'non'; // remettre la valeur par défaut
             currentRating = 0;
             render();
         }
@@ -591,6 +655,7 @@
             if (!confirm('Supprimer ce shot ?')) return;
             try {
                 await sb.from('shots').delete().eq('id', id);
+                // Recharger les données depuis Supabase pour forcer la mise à jour
                 await loadData();
                 showMessage('success', '✅ Shot supprimé');
             } catch (e) {
@@ -599,11 +664,13 @@
             }
         }
 
+
         async function addBag(event) {
             event.preventDefault();
             const form = event.target;
             
-            const dateInput = form.roast_date.value;
+            // Convertir la date de YYYY-MM-DD en DD/MM/YYYY
+            const dateInput = form.roast_date.value; // format YYYY-MM-DD
             const [year, month, day] = dateInput.split('-');
             const formattedDate = `${day}/${month}/${year}`;
             
@@ -626,6 +693,7 @@
             try {
                 const newStatus = status === 'active' ? 'finished' : 'active';
                 await sb.from('bags').update({ status: newStatus }).eq('id', id);
+                // Recharger les données pour forcer la mise à jour
                 await loadData();
             } catch (e) {
                 console.error(e);
@@ -637,6 +705,7 @@
             if (!confirm('Supprimer ce paquet ?')) return;
             try {
                 await sb.from('bags').delete().eq('id', id);
+                // Recharger les données depuis Supabase pour forcer la mise à jour
                 await loadData();
                 showMessage('success', '✅ Grains supprimés');
             } catch (e) {
@@ -751,118 +820,6 @@
             link.click();
         }
 
-        function updateChartByCoffee(coffeeName) {
-            const canvas = document.getElementById('chart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            
-            let filteredShots = shots.filter(s => 
-                s.coffee && s.coffee.toLowerCase().includes(coffeeName.toLowerCase())
-            );
-            
-            // Tous les points dans un seul dataset (couleur ocre ou grise)
-            const scatterData = filteredShots.map(s => ({ x: s.age, y: s.grind }));
-            
-            // Calcul de la régression linéaire pour la tendance
-            let trendData = [];
-            if (filteredShots.length >= 2) {
-                const sorted = filteredShots.sort((a, b) => a.age - b.age);
-                const n = sorted.length;
-                const sumX = sorted.reduce((acc, s) => acc + s.age, 0);
-                const sumY = sorted.reduce((acc, s) => acc + s.grind, 0);
-                const sumXY = sorted.reduce((acc, s) => acc + s.age * s.grind, 0);
-                const sumX2 = sorted.reduce((acc, s) => acc + s.age * s.age, 0);
-                
-                const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-                const intercept = (sumY - slope * sumX) / n;
-                
-                const xMin = Math.min(...sorted.map(s => s.age));
-                const xMax = Math.max(...sorted.map(s => s.age));
-                const yMin = slope * xMin + intercept;
-                const yMax = slope * xMax + intercept;
-                
-                trendData = [
-                    { x: xMin, y: yMin },
-                    { x: xMax, y: yMax }
-                ];
-            }
-            
-            const datasets = [
-                {
-                    label: ' ',
-                    data: scatterData,
-                    backgroundColor: 'rgba(150, 150, 150, 0.7)', // gris
-                    borderColor: '#666',
-                    borderWidth: 1,
-                    pointRadius: 8,
-                    pointHoverRadius: 10
-                }
-            ];
-            
-            if (trendData.length) {
-                datasets.push({
-                    label: ' ',
-                    data: trendData,
-                    type: 'line',
-                    fill: false,
-                    borderColor: '#CC785C', // ocre
-                    borderWidth: 3,
-                    pointRadius: 0,
-                    pointHoverRadius: 0,
-                    tension: 0
-                });
-            }
-            
-            if (chartInstance) chartInstance.destroy();
-            
-            chartInstance = new Chart(ctx, {
-                type: 'scatter',
-                data: { datasets },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { 
-                            title: { 
-                                display: true, 
-                                text: 'Âge du café', 
-                                font: { size: 13, weight: '600' }, 
-                                color: '#CC785C' 
-                            } 
-                        },
-                        y: { 
-                            title: { 
-                                display: true, 
-                                text: 'Mouture', 
-                                font: { size: 13, weight: '600' }, 
-                                color: '#CC785C' 
-                            } 
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const raw = context.raw;
-                                    const shot = filteredShots.find(s => s.age === raw.x && s.grind === raw.y);
-                                    if (!shot) return '';
-                                    return [
-                                        `Café: ${shot.coffee}`,
-                                        `Torréfaction: ${shot.roast_date}`,
-                                        `Mouture: ${shot.grind}`, 
-                                        `Âge: ${shot.age}j`, 
-                                        `Temps: ${shot.time}s`,
-                                        `Note: ${renderStars(shot.rating)}`
-                                    ];
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
         function render() {
             const activeBags = bags.filter(b => b.status === 'active');
             let html = `<div class="tabs">
@@ -904,14 +861,8 @@
                         <input type="number" name="preinfusion" value="8" style="flex:1;">
                         <button type="button" onclick="const el = document.querySelector('input[name=preinfusion]'); el.value = parseInt(el.value) + 1;" class="btn btn-secondary btn-small" style="width:40px; padding:8px;">+</button>
                     </div></div>
-                    <div class="form-group"><label>WDT</label>
-                        <select name="wdt">
-                            <option value="non">Non</option>
-                            <option value="léger">Léger</option>
-                            <option value="normal">Normal</option>
-                            <option value="profond">Profond</option>
-                        </select>
-                    </div></div>
+                    <div class="form-group"><label>WDT</label><select name="wdt"><option value="non">Non</option><option value="léger">Léger</option>
+                    <option value="normal">Normal</option><option value="profond">Profond</option></select></div></div>
                     <div class="form-group"><label>Remarques</label><textarea name="remarks" rows="2" placeholder="Notes sur ce shot..."></textarea></div>
                     <div class="form-group">
                         <div class="star-rating">
@@ -936,7 +887,10 @@
                                 <span style="color:#aaa; font-size:12px;">${s.date}</span>
                                 ${s.remarks ? `<span style="color:#999; font-style:italic; font-size:12px;">💬 ${s.remarks}</span>` : ''}
                             </div>
-                            <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')" style="padding:6px 12px; font-size:12px;">✕</button>
+                            <div style="display:flex; gap:6px;">
+                                <button class="btn btn-secondary btn-small" onclick="window.copyShot('${s.id}')" style="padding:6px 10px; font-size:12px;" title="Copier pour analyse">📋</button>
+                                <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')" style="padding:6px 12px; font-size:12px;">✕</button>
+                            </div>
                         </div>
                     </div>`;
                 });
@@ -980,24 +934,14 @@
                 html += `</div>`;
             }
             else if (currentTab === 'analysis') {
-                const coffeeNames = [...new Set(bags.map(b => b.name))].sort();
-                let lastCoffee = '';
-                if (shots.length > 0) {
-                    lastCoffee = shots[0].coffee;
-                } else if (coffeeNames.length > 0) {
-                    lastCoffee = coffeeNames[0];
-                }
-
-                html += `<div class="section"><h2>Analyse</h2>`;
-                if (coffeeNames.length === 0) {
-                    html += `<div class="alert alert-info">Ajoutez des grains pour voir l'analyse</div>`;
-                } else {
-                    html += `<div class="form-group">
-                        <select id="analysis-coffee" onchange="window.updateChartByCoffee(this.value)" style="margin-bottom:20px;">
-                        ${coffeeNames.map(name => `<option value="${name}" ${name === lastCoffee ? 'selected' : ''}>${name}</option>`).join('')}
-                        </select></div>
+                html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>
+                    <div class="alert alert-info">Seuls les shots validés avec 4 ou 5 étoiles apparaissent dans le graphique</div>`;
+                if (bags.length === 0) html += `<div class="alert alert-info">Ajoutez des paquets pour voir l'analyse</div>`;
+                else {
+                    html += `<div class="form-group"><label>Sélectionner des grains</label>
+                        <select id="analysis-bag" onchange="window.updateChart(this.value)"><option value="">Tous les paquets</option>
+                        ${bags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
                         <div class="chart-container"><canvas id="chart"></canvas></div>`;
-                    setTimeout(() => window.updateChartByCoffee(lastCoffee), 100);
                 }
                 html += `</div>`;
             }
@@ -1016,6 +960,7 @@
                 updateBackground(currentBagId);
             }
             
+            // Initialiser la date du shot avec la date actuelle (sans heure)
             if (currentTab === 'shots') {
                 const shotDateInput = document.querySelector('input[name="shot_date"]');
                 if (shotDateInput && !shotDateInput.value) {
@@ -1026,10 +971,12 @@
                     shotDateInput.value = `${year}-${month}-${day}`;
                 }
                 
+                // Pré-remplir avec les valeurs du dernier shot pour aller plus vite
                 if (shots.length > 0) {
-                    const lastShot = shots[0];
+                    const lastShot = shots[0]; // Le plus récent
                     const form = document.getElementById('form-shot');
-                    if (form && !form.bag_id.value) {
+                    if (form && !form.bag_id.value) { // Seulement si pas encore rempli
+                        // Trouver le paquet correspondant
                         const lastBag = bags.find(b => b.name === lastShot.coffee && b.roast_date === lastShot.roast_date);
                         if (lastBag) {
                             form.bag_id.value = lastBag.id;
@@ -1042,13 +989,59 @@
                         form.time.value = lastShot.time || 30;
                         form.preinfusion.value = lastShot.preinfusion || 8;
                         form.wdt.value = lastShot.wdt || 'non';
+                        // On ne pré-remplit PAS les remarques pour forcer à réfléchir
+                        // On ne pré-remplit PAS le rating pour forcer à noter
                     }
                 }
                 
+                // Auto-focus sur la date pour commencer rapidement
                 if (shotDateInput) {
                     setTimeout(() => shotDateInput.focus(), 100);
                 }
             }
+        }
+
+        function updateChart(bagId) {
+            const canvas = document.getElementById('chart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let filteredShots = shots.filter(s => s.validated === true && (s.rating === 4 || s.rating === 5));
+            if (bagId) {
+                const bag = bags.find(b => b.id.toString() === bagId);
+                if (bag) {
+                    filteredShots = filteredShots.filter(s => {
+                        const sameRoastDate = s.roast_date === bag.roast_date;
+                        const sameName = s.coffee.toLowerCase().includes(bag.name.toLowerCase()) || bag.name.toLowerCase().includes(s.coffee.toLowerCase());
+                        return sameName && sameRoastDate;
+                    });
+                }
+            }
+            const sorted = filteredShots.sort((a, b) => a.age - b.age);
+            const data = sorted.map(s => ({ x: s.age, y: s.grind }));
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets: [{ label: 'Mouture vs Âge (validés 4-5★)', data: data, backgroundColor: 'rgba(204, 120, 92, 0.7)', borderColor: '#CC785C', borderWidth: 2, pointRadius: 9, pointHoverRadius: 11 }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Âge du café (jours depuis torréfaction)', font: { size: 13, weight: '600' }, color: '#CC785C' } },
+                        y: { title: { display: true, text: 'Mouture', font: { size: 13, weight: '600' }, color: '#CC785C' } }
+                    },
+                    plugins: {
+                        legend: { display: true, labels: { font: { size: 13, weight: '500' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const shot = sorted[context.dataIndex];
+                                    return [`Mouture: ${shot.grind}`, `Âge: ${shot.age}j`, `Temps: ${shot.time}s`, `Note: ${renderStars(shot.rating)}`];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         window.toggleMenu = function() {
@@ -1067,9 +1060,97 @@
             });
         };
         
+        window.updateChartByCoffee = function(coffeeName) {
+            const chartWrapper = document.getElementById('chart-wrapper');
+            if (!chartWrapper) return;
+            
+            if (!coffeeName) {
+                chartWrapper.style.display = 'none';
+                if (chartInstance) chartInstance.destroy();
+                return;
+            }
+            
+            chartWrapper.style.display = 'block';
+            
+            const canvas = document.getElementById('chart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            let filteredShots = shots.filter(s => {
+                const isValidated = s.validated === true && (s.rating === 4 || s.rating === 5);
+                const matchesCoffee = s.coffee.toLowerCase().includes(coffeeName.toLowerCase()) || 
+                                     coffeeName.toLowerCase().includes(s.coffee.toLowerCase());
+                return isValidated && matchesCoffee;
+            });
+            
+            const sorted = filteredShots.sort((a, b) => a.age - b.age);
+            const data = sorted.map(s => ({ x: s.age, y: s.grind }));
+            
+            if (chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: { 
+                    datasets: [{ 
+                        label: `${coffeeName} - Mouture vs Âge (validés 4-5★)`, 
+                        data: data, 
+                        backgroundColor: 'rgba(204, 120, 92, 0.7)', 
+                        borderColor: '#CC785C', 
+                        borderWidth: 2, 
+                        pointRadius: 9, 
+                        pointHoverRadius: 11 
+                    }] 
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            title: { 
+                                display: true, 
+                                text: 'Âge du café (jours depuis torréfaction)', 
+                                font: { size: 13, weight: '600' }, 
+                                color: '#CC785C' 
+                            } 
+                        },
+                        y: { 
+                            title: { 
+                                display: true, 
+                                text: 'Mouture', 
+                                font: { size: 13, weight: '600' }, 
+                                color: '#CC785C' 
+                            } 
+                        }
+                    },
+                    plugins: {
+                        legend: { 
+                            display: true, 
+                            labels: { font: { size: 13, weight: '500' } } 
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const shot = sorted[context.dataIndex];
+                                    return [
+                                        `Café: ${shot.coffee}`,
+                                        `Torréfaction: ${shot.roast_date}`,
+                                        `Mouture: ${shot.grind}`, 
+                                        `Âge: ${shot.age}j`, 
+                                        `Temps: ${shot.time}s`
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        
         window.setTab = function(tab) { currentTab = tab; render(); };
         window.setRating = function(rating) { 
             currentRating = rating;
+            // Mettre à jour visuellement les étoiles sans tout re-render
             document.querySelectorAll('.star-rating .star').forEach((star, index) => {
                 if (index < rating) {
                     star.classList.add('filled');
@@ -1080,8 +1161,9 @@
         };
         
         window.updateShotRating = async function(shotId, currentRating) {
+            // Afficher un prompt simple pour changer la note
             const newRating = prompt(`Note actuelle: ${currentRating} étoiles\n\nNouvelle note (1-5):`, currentRating);
-            if (newRating === null) return;
+            if (newRating === null) return; // Annulé
             
             const rating = parseInt(newRating);
             if (isNaN(rating) || rating < 0 || rating > 5) {
@@ -1093,6 +1175,7 @@
                 const validated = (rating === 4 || rating === 5);
                 await sb.from('shots').update({ rating: rating, validated: validated }).eq('id', shotId);
                 
+                // Mettre à jour localement
                 shots = shots.map(s => s.id === shotId ? { ...s, rating: rating, validated: validated } : s);
                 
                 showMessage('success', `✅ Note mise à jour: ${rating} étoile${rating > 1 ? 's' : ''}`);
@@ -1103,6 +1186,33 @@
             }
         };
         
+        window.copyShot = function(shotId) {
+            const shot = shots.find(s => s.id === shotId);
+            if (!shot) return;
+            
+            // Format: Café - Mouture X - Dose→Sortie - Temps - Pré - WDT - Âge - Note - Remarques
+            const stars = '⭐'.repeat(shot.rating || 0);
+            const ratio = shot.ratio ? shot.ratio.toFixed(1) : (shot.output / shot.dose).toFixed(1);
+            
+            let text = `${shot.coffee} - Mouture ${shot.grind} - ${shot.dose}→${shot.output}g (1:${ratio}) - ${shot.time}s - Pré ${shot.preinfusion}s - WDT ${shot.wdt} - ${shot.age}j`;
+            
+            if (shot.rating) {
+                text += ` - ${stars}`;
+            }
+            
+            if (shot.remarks) {
+                text += ` - ${shot.remarks}`;
+            }
+            
+            // Copier dans le presse-papier
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage('success', '📋 Shot copié !');
+            }).catch(err => {
+                console.error('Erreur copie:', err);
+                showMessage('error', '❌ Erreur lors de la copie');
+            });
+        };
+        
         window.addShot = addShot;
         window.deleteShot = deleteShot;
         window.addBag = addBag;
@@ -1110,7 +1220,7 @@
         window.deleteBag = deleteBag;
         window.importCSV = importCSV;
         window.exportCSV = exportCSV;
-        window.updateChartByCoffee = updateChartByCoffee;
+        window.updateChart = updateChart;
         window.updateBackground = updateBackground;
 
         loadData();
