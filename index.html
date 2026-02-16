@@ -707,7 +707,6 @@
             };
 
             const { data } = await sb.from('shots').insert([shot]).select();
-            shots = [data[0], ...shots];
             showMessage('success', '✅ Shot enregistré');
             form.reset();
             form.dose.value = 18;
@@ -716,7 +715,7 @@
             form.time.value = 30;
             form.preinfusion.value = 8;
             currentRating = 0;
-            render();
+            await loadData(true); // Recharge en préservant le scroll
         }
 
         async function deleteShot(id, event) {
@@ -1001,34 +1000,30 @@
                 html += `</div>`;
             }
             else if (currentTab === 'analysis') {
-                html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>`;
+                html += `<div class="section">`; // pas de titre
                 
-                // Récupérer les noms uniques de cafés
                 const uniqueCoffeeNames = [...new Set(bags.map(b => b.name))].sort();
-                
-                // Déterminer le dernier café utilisé (le plus récent dans les shots)
                 let lastCoffeeName = '';
                 if (shots.length > 0) {
-                    lastCoffeeName = shots[0].coffee; // le plus récent
+                    lastCoffeeName = shots[0].coffee;
                 } else if (uniqueCoffeeNames.length > 0) {
-                    lastCoffeeName = uniqueCoffeeNames[0]; // premier de la liste
+                    lastCoffeeName = uniqueCoffeeNames[0];
                 }
                 
                 if (uniqueCoffeeNames.length === 0) {
                     html += `<div class="alert alert-info">Ajoutez des grains pour voir l'analyse</div>`;
                 } else {
-                    html += `<div class="form-group"><label>Sélectionner un café</label>
-                        <select id="analysis-coffee" onchange="window.updateChartByCoffee(this.value)">
-                        <option value="">-- Choisir un café --</option>
-                        ${uniqueCoffeeNames.map(name => `<option value="${name}" ${name === lastCoffeeName ? 'selected' : ''}>${name}</option>`).join('')}
-                        </select></div>
-                        <div id="chart-wrapper" style="display:block;">
-                            <div class="chart-container"><canvas id="chart"></canvas></div>
-                        </div>`;
+                    html += `<div class="form-group">`; // pas de label
+                    html += `<select id="analysis-coffee" onchange="window.updateChartByCoffee(this.value)">`;
+                    html += `<option value="">-- Choisir un café --</option>`;
+                    uniqueCoffeeNames.forEach(name => {
+                        html += `<option value="${name}" ${name === lastCoffeeName ? 'selected' : ''}>${name}</option>`;
+                    });
+                    html += `</select></div>`;
+                    html += `<div id="chart-wrapper" style="display:block;"><div class="chart-container"><canvas id="chart"></canvas></div></div>`;
                 }
                 html += `</div>`;
                 
-                // Initialiser le graphique après le rendu si un café est sélectionné
                 setTimeout(() => {
                     if (lastCoffeeName) {
                         window.updateChartByCoffee(lastCoffeeName);
@@ -1086,7 +1081,7 @@
         }
 
         function updateChart(bagId) {
-            // Cette fonction n'est plus utilisée directement, on utilise updateChartByCoffee
+            // Non utilisé, on utilise updateChartByCoffee
         }
 
         window.toggleMenu = function() {
@@ -1169,7 +1164,7 @@
                     },
                     plugins: {
                         legend: { 
-                            display: false // Légende supprimée
+                            display: false
                         },
                         tooltip: {
                             callbacks: {
