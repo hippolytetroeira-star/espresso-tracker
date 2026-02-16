@@ -88,7 +88,7 @@
         .hamburger-btn {
             position: fixed;
             top: 24px;
-            right: 24px;
+            left: 24px;
             z-index: 1001;
             background: white;
             border: none;
@@ -120,17 +120,17 @@
         .side-menu {
             position: fixed;
             top: 0;
-            right: -320px;
+            left: -320px;
             width: 320px;
             height: 100%;
             background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
-            box-shadow: -6px 0 30px rgba(0,0,0,0.15);
+            box-shadow: 6px 0 30px rgba(0,0,0,0.15);
             z-index: 1000;
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 100px 0 30px 0;
         }
         .side-menu.open {
-            right: 0;
+            left: 0;
         }
         .menu-overlay {
             position: fixed;
@@ -348,6 +348,13 @@
             color: #CC785C;
             letter-spacing: 0.3px;
         }
+        
+
+        
+
+        
+
+
         
         .bag-item { 
             background: linear-gradient(135deg, rgba(250, 250, 248, 0.75) 0%, rgba(245, 241, 235, 0.75) 100%);
@@ -651,17 +658,29 @@
             return html;
         }
 
-        async function loadData() {
+        async function loadData(preserveScroll = false) {
             try {
                 const { data: s } = await sb.from('shots').select('*').order('created_at', { ascending: false });
                 const { data: b } = await sb.from('bags').select('*').order('created_at', { ascending: false });
                 shots = s || [];
                 bags = b || [];
+                
+                // Sauvegarder la position de défilement si nécessaire
+                let scrollY = 0;
+                if (preserveScroll) {
+                    scrollY = window.scrollY;
+                }
+                
+                render();
+                
+                // Restaurer la position de défilement
+                if (preserveScroll) {
+                    window.scrollTo(0, scrollY);
+                }
             } catch (e) {
                 console.error(e);
                 showMessage('error', '❌ Erreur de chargement');
             }
-            render();
         }
 
         async function addShot(event) {
@@ -671,12 +690,13 @@
             
             let age = 0;
             if (selectedBag && selectedBag.roast_date) {
+                // roast_date est au format DD/MM/YYYY
                 const [roastDay, roastMonth, roastYear] = selectedBag.roast_date.split('/');
                 const roastDate = new Date(`${roastYear}-${roastMonth}-${roastDay}`);
                 age = Math.floor((new Date() - roastDate) / 86400000);
             }
 
-            const shotDate = form.shot_date.value;
+            const shotDate = form.shot_date.value; // format YYYY-MM-DD
             const [shotYear, shotMonth, shotDay] = shotDate.split('-');
             const formattedDate = `${shotDay}/${shotMonth}/${shotYear}`;
 
@@ -715,19 +735,21 @@
             if (!confirm('Supprimer ce shot ?')) return;
             try {
                 await sb.from('shots').delete().eq('id', id);
-                showToast('✅ Shot supprimé', event?.target); // toast près du bouton si possible
-                await loadData();
+                showToast('✅ Shot supprimé', event?.target);
+                await loadData(true); // Recharger en préservant le scroll
             } catch (e) {
                 console.error(e);
                 showToast('❌ Erreur lors de la suppression', event?.target);
             }
         }
 
+
         async function addBag(event) {
             event.preventDefault();
             const form = event.target;
             
-            const dateInput = form.roast_date.value;
+            // Convertir la date de YYYY-MM-DD en DD/MM/YYYY
+            const dateInput = form.roast_date.value; // format YYYY-MM-DD
             const [year, month, day] = dateInput.split('-');
             const formattedDate = `${day}/${month}/${year}`;
             
@@ -751,19 +773,21 @@
                 const newStatus = status === 'active' ? 'finished' : 'active';
                 await sb.from('bags').update({ status: newStatus }).eq('id', id);
                 showToast(`✅ ${newStatus === 'active' ? 'Réactivé' : 'Terminé'}`, event?.target);
-                await loadData();
+                await loadData(true); // Recharger en préservant le scroll
             } catch (e) {
                 console.error(e);
                 showToast('❌ Erreur lors du changement', event?.target);
             }
         }
+            }
+        }
 
         async function deleteBag(id, event) {
-            if (!confirm('Supprimer ce paquet ?')) return;
+            if (!confirm('Supprimer ces grains ?')) return;
             try {
                 await sb.from('bags').delete().eq('id', id);
                 showToast('✅ Grains supprimés', event?.target);
-                await loadData();
+                await loadData(true); // Recharger en préservant le scroll
             } catch (e) {
                 console.error(e);
                 showToast('❌ Erreur lors de la suppression', event?.target);
@@ -997,12 +1021,20 @@
             else if (currentTab === 'analysis') {
                 html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>
                     <div class="alert alert-info">Seuls les shots validés avec 4 ou 5 étoiles apparaissent dans le graphique</div>`;
-                if (bags.length === 0) html += `<div class="alert alert-info">Ajoutez des paquets pour voir l'analyse</div>`;
-                else {
-                    html += `<div class="form-group"><label>Sélectionner des grains</label>
-                        <select id="analysis-bag" onchange="window.updateChart(this.value)"><option value="">Tous les paquets</option>
-                        ${bags.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
-                        <div class="chart-container"><canvas id="chart"></canvas></div>`;
+                
+                const uniqueCoffeeNames = [...new Set(bags.map(b => b.name))].sort();
+                
+                if (uniqueCoffeeNames.length === 0) {
+                    html += `<div class="alert alert-info">Ajoutez des grains pour voir l'analyse</div>`;
+                } else {
+                    html += `<div class="form-group"><label>Sélectionner un café</label>
+                        <select id="analysis-coffee" onchange="window.updateChartByCoffee(this.value)">
+                        <option value="">-- Choisir un café --</option>
+                        ${uniqueCoffeeNames.map(name => `<option value="${name}">${name}</option>`).join('')}
+                        </select></div>
+                        <div id="chart-wrapper" style="display:none;">
+                            <div class="chart-container"><canvas id="chart"></canvas></div>
+                        </div>`;
                 }
                 html += `</div>`;
             }
@@ -1021,6 +1053,7 @@
                 updateBackground(currentBagId);
             }
             
+            // Initialiser la date du shot avec la date actuelle (sans heure)
             if (currentTab === 'shots') {
                 const shotDateInput = document.querySelector('input[name="shot_date"]');
                 if (shotDateInput && !shotDateInput.value) {
@@ -1031,10 +1064,12 @@
                     shotDateInput.value = `${year}-${month}-${day}`;
                 }
                 
+                // Pré-remplir avec les valeurs du dernier shot pour aller plus vite
                 if (shots.length > 0) {
-                    const lastShot = shots[0];
+                    const lastShot = shots[0]; // Le plus récent
                     const form = document.getElementById('form-shot');
-                    if (form && !form.bag_id.value) {
+                    if (form && !form.bag_id.value) { // Seulement si pas encore rempli
+                        // Trouver le paquet correspondant
                         const lastBag = bags.find(b => b.name === lastShot.coffee && b.roast_date === lastShot.roast_date);
                         if (lastBag) {
                             form.bag_id.value = lastBag.id;
@@ -1047,9 +1082,12 @@
                         form.time.value = lastShot.time || 30;
                         form.preinfusion.value = lastShot.preinfusion || 8;
                         form.wdt.value = lastShot.wdt || 'non';
+                        // On ne pré-remplit PAS les remarques pour forcer à réfléchir
+                        // On ne pré-remplit PAS le rating pour forcer à noter
                     }
                 }
                 
+                // Auto-focus sur la date pour commencer rapidement
                 if (shotDateInput) {
                     setTimeout(() => shotDateInput.focus(), 100);
                 }
@@ -1205,6 +1243,7 @@
         window.setTab = function(tab) { currentTab = tab; render(); };
         window.setRating = function(rating) { 
             currentRating = rating;
+            // Mettre à jour visuellement les étoiles sans tout re-render
             document.querySelectorAll('.star-rating .star').forEach((star, index) => {
                 if (index < rating) {
                     star.classList.add('filled');
@@ -1241,8 +1280,7 @@
         window.copyShot = function(shotId, event) {
             const shot = shots.find(s => String(s.id) === String(shotId));
             if (!shot) {
-                console.warn('Shot non trouvé avec l\'ID', shotId);
-                showToast('❌ Impossible de copier', event?.target);
+                alert('❌ Shot non trouvé');
                 return;
             }
             
@@ -1254,48 +1292,15 @@
             if (shot.rating) text += ` - ${stars}`;
             if (shot.remarks) text += ` - ${shot.remarks}`;
             
-            function fallbackCopy(text) {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                textarea.style.position = 'fixed';
-                textarea.style.top = '0';
-                textarea.style.left = '0';
-                textarea.style.width = '2em';
-                textarea.style.height = '2em';
-                textarea.style.padding = '0';
-                textarea.style.border = 'none';
-                textarea.style.outline = 'none';
-                textarea.style.boxShadow = 'none';
-                textarea.style.background = 'transparent';
-                
-                document.body.appendChild(textarea);
-                textarea.focus();
-                textarea.select();
-                
-                try {
-                    const successful = document.execCommand('copy');
-                    if (successful) {
-                        showToast('📋 Copié !', event?.target);
-                    } else {
-                        prompt('📋 Copie ce texte (Ctrl+C puis OK):', text);
+            // Afficher directement dans un prompt pour copie manuelle
+            prompt('📋 Copie ce texte (Cmd+A puis Cmd+C) :', text);
+        };
                     }
-                } catch (err) {
-                    console.log('execCommand failed:', err);
-                    prompt('📋 Copie ce texte (Ctrl+C puis OK):', text);
                 }
-                
-                document.body.removeChild(textarea);
             }
             
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
-                    showToast('📋 Copié !', event?.target);
-                }).catch(() => {
-                    fallbackCopy(text);
-                });
-            } else {
-                fallbackCopy(text);
-            }
+            // Si clipboard API pas disponible, utiliser fallback direct
+            fallbackCopy(text);
         };
         
         window.addShot = addShot;
