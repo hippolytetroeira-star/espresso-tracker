@@ -471,7 +471,7 @@
             letter-spacing: 2px;
         }
 
-        /* Toast pour la copie */
+        /* Toast pour les messages contextuels */
         .toast-message {
             position: fixed;
             background: #CC785C;
@@ -598,7 +598,7 @@
             render();
         }
 
-        function showToast(text, target) {
+        function showToast(text, target = null) {
             // Supprimer tout toast existant
             const existing = document.querySelector('.toast-message');
             if (existing) existing.remove();
@@ -608,28 +608,26 @@
             toast.textContent = text;
             document.body.appendChild(toast);
             
-            // Positionner près du target
             if (target) {
+                // Positionner près de la cible
                 const rect = target.getBoundingClientRect();
                 const toastRect = toast.getBoundingClientRect();
-                // Par défaut au-dessus, centré horizontalement
                 let left = rect.left + rect.width / 2 - toastRect.width / 2;
                 let top = rect.top - toastRect.height - 8;
                 
-                // Ajuster si dépasse de l'écran
+                // Ajustements si débordement
                 if (left < 10) left = 10;
                 if (left + toastRect.width > window.innerWidth - 10) {
                     left = window.innerWidth - toastRect.width - 10;
                 }
                 if (top < 10) {
-                    // Pas assez de place en haut → mettre en dessous
-                    top = rect.bottom + 8;
+                    top = rect.bottom + 8; // placer en dessous
                 }
                 
                 toast.style.left = left + 'px';
                 toast.style.top = top + 'px';
             } else {
-                // Fallback: centre en bas
+                // Centré en bas
                 toast.style.left = '50%';
                 toast.style.bottom = '20px';
                 toast.style.transform = 'translateX(-50%)';
@@ -638,7 +636,7 @@
             // Animation
             setTimeout(() => toast.classList.add('show'), 10);
             
-            // Disparition
+            // Disparition après 1,5s
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 200);
@@ -673,13 +671,12 @@
             
             let age = 0;
             if (selectedBag && selectedBag.roast_date) {
-                // roast_date est au format DD/MM/YYYY
                 const [roastDay, roastMonth, roastYear] = selectedBag.roast_date.split('/');
                 const roastDate = new Date(`${roastYear}-${roastMonth}-${roastDay}`);
                 age = Math.floor((new Date() - roastDate) / 86400000);
             }
 
-            const shotDate = form.shot_date.value; // format YYYY-MM-DD
+            const shotDate = form.shot_date.value;
             const [shotYear, shotMonth, shotDay] = shotDate.split('-');
             const formattedDate = `${shotDay}/${shotMonth}/${shotYear}`;
 
@@ -714,16 +711,15 @@
             render();
         }
 
-        async function deleteShot(id) {
+        async function deleteShot(id, event) {
             if (!confirm('Supprimer ce shot ?')) return;
             try {
                 await sb.from('shots').delete().eq('id', id);
-                // Recharger les données depuis Supabase pour forcer la mise à jour
+                showToast('✅ Shot supprimé', event?.target); // toast près du bouton si possible
                 await loadData();
-                showMessage('success', '✅ Shot supprimé');
             } catch (e) {
                 console.error(e);
-                showMessage('error', '❌ Erreur lors de la suppression');
+                showToast('❌ Erreur lors de la suppression', event?.target);
             }
         }
 
@@ -731,8 +727,7 @@
             event.preventDefault();
             const form = event.target;
             
-            // Convertir la date de YYYY-MM-DD en DD/MM/YYYY
-            const dateInput = form.roast_date.value; // format YYYY-MM-DD
+            const dateInput = form.roast_date.value;
             const [year, month, day] = dateInput.split('-');
             const formattedDate = `${day}/${month}/${year}`;
             
@@ -751,28 +746,27 @@
             render();
         }
 
-        async function toggleBag(id, status) {
+        async function toggleBag(id, status, event) {
             try {
                 const newStatus = status === 'active' ? 'finished' : 'active';
                 await sb.from('bags').update({ status: newStatus }).eq('id', id);
-                // Recharger les données pour forcer la mise à jour
+                showToast(`✅ ${newStatus === 'active' ? 'Réactivé' : 'Terminé'}`, event?.target);
                 await loadData();
             } catch (e) {
                 console.error(e);
-                showMessage('error', '❌ Erreur lors de la mise à jour');
+                showToast('❌ Erreur lors du changement', event?.target);
             }
         }
 
-        async function deleteBag(id) {
+        async function deleteBag(id, event) {
             if (!confirm('Supprimer ce paquet ?')) return;
             try {
                 await sb.from('bags').delete().eq('id', id);
-                // Recharger les données depuis Supabase pour forcer la mise à jour
+                showToast('✅ Grains supprimés', event?.target);
                 await loadData();
-                showMessage('success', '✅ Grains supprimés');
             } catch (e) {
                 console.error(e);
-                showMessage('error', '❌ Erreur lors de la suppression');
+                showToast('❌ Erreur lors de la suppression', event?.target);
             }
         }
 
@@ -956,7 +950,7 @@
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                                     </svg>
                                 </button>
-                                <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')" style="padding:6px 12px; font-size:12px;">✕</button>
+                                <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}', event)" style="padding:6px 12px; font-size:12px;">✕</button>
                             </div>
                         </div>
                     </div>`;
@@ -992,8 +986,8 @@
                                 <span class="bag-status ${b.status}" style="padding:4px 10px; font-size:11px;">${b.status === 'active' ? '✓ Actif' : '○ Terminé'}</span>
                             </div>
                             <div style="display:flex; gap:8px;">
-                                <button class="btn btn-secondary btn-small" onclick="window.toggleBag('${b.id}', '${b.status}')" style="padding:6px 12px; font-size:12px;">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
-                                <button class="btn btn-danger btn-small" onclick="window.deleteBag('${b.id}')" style="padding:6px 12px; font-size:12px;">✕</button>
+                                <button class="btn btn-secondary btn-small" onclick="window.toggleBag('${b.id}', '${b.status}', event)" style="padding:6px 12px; font-size:12px;">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
+                                <button class="btn btn-danger btn-small" onclick="window.deleteBag('${b.id}', event)" style="padding:6px 12px; font-size:12px;">✕</button>
                             </div>
                         </div>
                     </div>`;
@@ -1027,7 +1021,6 @@
                 updateBackground(currentBagId);
             }
             
-            // Initialiser la date du shot avec la date actuelle (sans heure)
             if (currentTab === 'shots') {
                 const shotDateInput = document.querySelector('input[name="shot_date"]');
                 if (shotDateInput && !shotDateInput.value) {
@@ -1038,12 +1031,10 @@
                     shotDateInput.value = `${year}-${month}-${day}`;
                 }
                 
-                // Pré-remplir avec les valeurs du dernier shot pour aller plus vite
                 if (shots.length > 0) {
-                    const lastShot = shots[0]; // Le plus récent
+                    const lastShot = shots[0];
                     const form = document.getElementById('form-shot');
-                    if (form && !form.bag_id.value) { // Seulement si pas encore rempli
-                        // Trouver le paquet correspondant
+                    if (form && !form.bag_id.value) {
                         const lastBag = bags.find(b => b.name === lastShot.coffee && b.roast_date === lastShot.roast_date);
                         if (lastBag) {
                             form.bag_id.value = lastBag.id;
@@ -1056,12 +1047,9 @@
                         form.time.value = lastShot.time || 30;
                         form.preinfusion.value = lastShot.preinfusion || 8;
                         form.wdt.value = lastShot.wdt || 'non';
-                        // On ne pré-remplit PAS les remarques pour forcer à réfléchir
-                        // On ne pré-remplit PAS le rating pour forcer à noter
                     }
                 }
                 
-                // Auto-focus sur la date pour commencer rapidement
                 if (shotDateInput) {
                     setTimeout(() => shotDateInput.focus(), 100);
                 }
@@ -1217,7 +1205,6 @@
         window.setTab = function(tab) { currentTab = tab; render(); };
         window.setRating = function(rating) { 
             currentRating = rating;
-            // Mettre à jour visuellement les étoiles sans tout re-render
             document.querySelectorAll('.star-rating .star').forEach((star, index) => {
                 if (index < rating) {
                     star.classList.add('filled');
@@ -1228,9 +1215,8 @@
         };
         
         window.updateShotRating = async function(shotId, currentRating) {
-            // Afficher un prompt simple pour changer la note
             const newRating = prompt(`Note actuelle: ${currentRating} étoiles\n\nNouvelle note (1-5):`, currentRating);
-            if (newRating === null) return; // Annulé
+            if (newRating === null) return;
             
             const rating = parseInt(newRating);
             if (isNaN(rating) || rating < 0 || rating > 5) {
@@ -1242,7 +1228,6 @@
                 const validated = (rating === 4 || rating === 5);
                 await sb.from('shots').update({ rating: rating, validated: validated }).eq('id', shotId);
                 
-                // Mettre à jour localement
                 shots = shots.map(s => String(s.id) === String(shotId) ? { ...s, rating: rating, validated: validated } : s);
                 
                 showMessage('success', `✅ Note mise à jour: ${rating} étoile${rating > 1 ? 's' : ''}`);
@@ -1257,32 +1242,21 @@
             const shot = shots.find(s => String(s.id) === String(shotId));
             if (!shot) {
                 console.warn('Shot non trouvé avec l\'ID', shotId);
-                showMessage('error', '❌ Impossible de copier : shot introuvable');
+                showToast('❌ Impossible de copier', event?.target);
                 return;
             }
             
-            // Récupérer le bouton cliqué (cible de l'événement)
-            const targetButton = event ? event.currentTarget : null;
-            
-            // Format: Café - Mouture X - Dose→Sortie - Temps - Pré - WDT - Âge - Note - Remarques
             const stars = '⭐'.repeat(shot.rating || 0);
             const ratio = shot.ratio ? shot.ratio.toFixed(1) : (shot.output / shot.dose).toFixed(1);
             
             let text = `${shot.coffee} - Mouture ${shot.grind} - ${shot.dose}→${shot.output}g (1:${ratio}) - ${shot.time}s - Pré ${shot.preinfusion}s - WDT ${shot.wdt} - ${shot.age}j`;
             
-            if (shot.rating) {
-                text += ` - ${stars}`;
-            }
+            if (shot.rating) text += ` - ${stars}`;
+            if (shot.remarks) text += ` - ${shot.remarks}`;
             
-            if (shot.remarks) {
-                text += ` - ${shot.remarks}`;
-            }
-            
-            // Fonction de fallback pour la copie
             function fallbackCopy(text) {
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
-                
                 textarea.style.position = 'fixed';
                 textarea.style.top = '0';
                 textarea.style.left = '0';
@@ -1301,9 +1275,8 @@
                 try {
                     const successful = document.execCommand('copy');
                     if (successful) {
-                        showToast('📋 Copié !', targetButton);
+                        showToast('📋 Copié !', event?.target);
                     } else {
-                        // Dernier recours : prompt
                         prompt('📋 Copie ce texte (Ctrl+C puis OK):', text);
                     }
                 } catch (err) {
@@ -1314,10 +1287,9 @@
                 document.body.removeChild(textarea);
             }
             
-            // Tentative 1 : Clipboard API moderne
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
-                    showToast('📋 Copié !', targetButton);
+                    showToast('📋 Copié !', event?.target);
                 }).catch(() => {
                     fallbackCopy(text);
                 });
