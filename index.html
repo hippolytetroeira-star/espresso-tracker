@@ -1204,13 +1204,36 @@
                 text += ` - ${shot.remarks}`;
             }
             
-            // Copier dans le presse-papier
-            navigator.clipboard.writeText(text).then(() => {
-                showMessage('success', '📋 Shot copié !');
-            }).catch(err => {
-                console.error('Erreur copie:', err);
-                showMessage('error', '❌ Erreur lors de la copie');
-            });
+            // Méthode compatible tous navigateurs avec fallback
+            const copyToClipboard = (text) => {
+                // Méthode 1 : Textarea temporaire (compatible partout)
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.top = '-9999px';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                textarea.setSelectionRange(0, 99999); // Pour mobile
+                
+                try {
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    
+                    if (successful) {
+                        showMessage('success', '📋 Shot copié !');
+                    } else {
+                        // Fallback : afficher le texte à copier manuellement
+                        prompt('Copie ce texte (Ctrl+C ou Cmd+C) :', text);
+                    }
+                } catch (err) {
+                    document.body.removeChild(textarea);
+                    // Fallback : afficher le texte à copier manuellement
+                    prompt('Copie ce texte (Ctrl+C ou Cmd+C) :', text);
+                }
+            };
+            
+            copyToClipboard(text);
         };
         
         window.addShot = addShot;
