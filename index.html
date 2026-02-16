@@ -349,13 +349,6 @@
             letter-spacing: 0.3px;
         }
         
-
-        
-
-        
-
-
-        
         .bag-item { 
             background: linear-gradient(135deg, rgba(250, 250, 248, 0.75) 0%, rgba(245, 241, 235, 0.75) 100%);
             border: 1.5px solid rgba(204, 120, 92, 0.12);
@@ -732,7 +725,7 @@
         }
 
         async function deleteShot(id, event) {
-            if (!confirm('Supprimer ce shot ?')) return;
+            // Suppression de la confirmation
             try {
                 await sb.from('shots').delete().eq('id', id);
                 showToast('✅ Shot supprimé', event?.target);
@@ -779,11 +772,9 @@
                 showToast('❌ Erreur lors du changement', event?.target);
             }
         }
-            }
-        }
 
         async function deleteBag(id, event) {
-            if (!confirm('Supprimer ces grains ?')) return;
+            // Suppression de la confirmation
             try {
                 await sb.from('bags').delete().eq('id', id);
                 showToast('✅ Grains supprimés', event?.target);
@@ -1280,7 +1271,7 @@
         window.copyShot = function(shotId, event) {
             const shot = shots.find(s => String(s.id) === String(shotId));
             if (!shot) {
-                alert('❌ Shot non trouvé');
+                showToast('❌ Shot non trouvé', event?.target);
                 return;
             }
             
@@ -1292,15 +1283,49 @@
             if (shot.rating) text += ` - ${stars}`;
             if (shot.remarks) text += ` - ${shot.remarks}`;
             
-            // Afficher directement dans un prompt pour copie manuelle
-            prompt('📋 Copie ce texte (Cmd+A puis Cmd+C) :', text);
-        };
+            // Utilisation du toast pour confirmer la copie (ou fallback prompt si échec)
+            function fallbackCopy(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.top = '0';
+                textarea.style.left = '0';
+                textarea.style.width = '2em';
+                textarea.style.height = '2em';
+                textarea.style.padding = '0';
+                textarea.style.border = 'none';
+                textarea.style.outline = 'none';
+                textarea.style.boxShadow = 'none';
+                textarea.style.background = 'transparent';
+                
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        showToast('📋 Copié !', event?.target);
+                    } else {
+                        prompt('📋 Copie ce texte (Ctrl+C puis OK):', text);
                     }
+                } catch (err) {
+                    console.log('execCommand failed:', err);
+                    prompt('📋 Copie ce texte (Ctrl+C puis OK):', text);
                 }
+                
+                document.body.removeChild(textarea);
             }
             
-            // Si clipboard API pas disponible, utiliser fallback direct
-            fallbackCopy(text);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('📋 Copié !', event?.target);
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
         };
         
         window.addShot = addShot;
