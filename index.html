@@ -470,6 +470,28 @@
             color: #ffc107;
             letter-spacing: 2px;
         }
+
+        /* Toast pour la copie */
+        .toast-message {
+            position: fixed;
+            background: #CC785C;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: opacity 0.2s, transform 0.2s;
+            white-space: nowrap;
+        }
+        .toast-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
         
         @media (max-width: 600px) { 
             .row { grid-template-columns: 1fr; }
@@ -478,6 +500,7 @@
             .tab { padding: 12px 20px; }
             .section { padding: 25px 20px; }
             .header h1 { font-size: 32px; }
+            .toast-message { white-space: normal; max-width: 200px; text-align: center; }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -573,6 +596,53 @@
             message = { type, text };
             setTimeout(() => { message = null; render(); }, 4000);
             render();
+        }
+
+        function showToast(text, target) {
+            // Supprimer tout toast existant
+            const existing = document.querySelector('.toast-message');
+            if (existing) existing.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast-message';
+            toast.textContent = text;
+            document.body.appendChild(toast);
+            
+            // Positionner près du target
+            if (target) {
+                const rect = target.getBoundingClientRect();
+                const toastRect = toast.getBoundingClientRect();
+                // Par défaut au-dessus, centré horizontalement
+                let left = rect.left + rect.width / 2 - toastRect.width / 2;
+                let top = rect.top - toastRect.height - 8;
+                
+                // Ajuster si dépasse de l'écran
+                if (left < 10) left = 10;
+                if (left + toastRect.width > window.innerWidth - 10) {
+                    left = window.innerWidth - toastRect.width - 10;
+                }
+                if (top < 10) {
+                    // Pas assez de place en haut → mettre en dessous
+                    top = rect.bottom + 8;
+                }
+                
+                toast.style.left = left + 'px';
+                toast.style.top = top + 'px';
+            } else {
+                // Fallback: centre en bas
+                toast.style.left = '50%';
+                toast.style.bottom = '20px';
+                toast.style.transform = 'translateX(-50%)';
+            }
+            
+            // Animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Disparition
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 200);
+            }, 1500);
         }
 
         function renderStars(count) {
@@ -880,7 +950,7 @@
                                 ${s.remarks ? `<span style="color:#999; font-style:italic; font-size:12px;">💬 ${s.remarks}</span>` : ''}
                             </div>
                             <div style="display:flex; gap:6px;">
-                                <button class="btn btn-secondary btn-small" onclick="window.copyShot('${s.id}')" style="padding:6px 10px; font-size:12px; display:flex; align-items:center; justify-content:center;" title="Copier pour analyse">
+                                <button class="btn btn-secondary btn-small" onclick="window.copyShot('${s.id}', event)" style="padding:6px 10px; font-size:12px; display:flex; align-items:center; justify-content:center;" title="Copier pour analyse">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -1183,13 +1253,16 @@
             }
         };
         
-        window.copyShot = function(shotId) {
+        window.copyShot = function(shotId, event) {
             const shot = shots.find(s => String(s.id) === String(shotId));
             if (!shot) {
                 console.warn('Shot non trouvé avec l\'ID', shotId);
                 showMessage('error', '❌ Impossible de copier : shot introuvable');
                 return;
             }
+            
+            // Récupérer le bouton cliqué (cible de l'événement)
+            const targetButton = event ? event.currentTarget : null;
             
             // Format: Café - Mouture X - Dose→Sortie - Temps - Pré - WDT - Âge - Note - Remarques
             const stars = '⭐'.repeat(shot.rating || 0);
@@ -1205,26 +1278,11 @@
                 text += ` - ${shot.remarks}`;
             }
             
-            // Approche multi-fallback garantie de fonctionner
-            let success = false;
-            
-            // Tentative 1 : Clipboard API moderne (Chrome, Firefox récents)
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
-                    showMessage('success', '📋 Shot copié !');
-                }).catch(() => {
-                    // Si échec, passer au fallback
-                    fallbackCopy(text);
-                });
-                return;
-            }
-            
-            // Tentative 2 : Méthode textarea avec execCommand
+            // Fonction de fallback pour la copie
             function fallbackCopy(text) {
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
                 
-                // Styles pour être sûr qu'il est visible mais hors écran
                 textarea.style.position = 'fixed';
                 textarea.style.top = '0';
                 textarea.style.left = '0';
@@ -1237,34 +1295,35 @@
                 textarea.style.background = 'transparent';
                 
                 document.body.appendChild(textarea);
-                
-                // Focus et sélection
                 textarea.focus();
                 textarea.select();
                 
                 try {
                     const successful = document.execCommand('copy');
                     if (successful) {
-                        showMessage('success', '📋 Shot copié !');
-                        success = true;
+                        showToast('📋 Copié !', targetButton);
+                    } else {
+                        // Dernier recours : prompt
+                        prompt('📋 Copie ce texte (Ctrl+C puis OK):', text);
                     }
                 } catch (err) {
                     console.log('execCommand failed:', err);
+                    prompt('📋 Copie ce texte (Ctrl+C puis OK):', text);
                 }
                 
                 document.body.removeChild(textarea);
-                
-                // Si toujours pas de succès, dernière option : prompt
-                if (!success) {
-                    const userCopy = prompt('📋 Copie ce texte (Ctrl+C puis OK):', text);
-                    if (userCopy !== null) {
-                        showMessage('success', '✅ Prêt à coller !');
-                    }
-                }
             }
             
-            // Si clipboard API pas disponible, utiliser fallback direct
-            fallbackCopy(text);
+            // Tentative 1 : Clipboard API moderne
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('📋 Copié !', targetButton);
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
         };
         
         window.addShot = addShot;
