@@ -888,7 +888,12 @@
                                 ${s.remarks ? `<span style="color:#999; font-style:italic; font-size:12px;">💬 ${s.remarks}</span>` : ''}
                             </div>
                             <div style="display:flex; gap:6px;">
-                                <button class="btn btn-secondary btn-small" onclick="window.copyShot('${s.id}')" style="padding:6px 10px; font-size:12px;" title="Copier pour analyse">📋</button>
+                                <button class="btn btn-secondary btn-small" onclick="window.copyShot('${s.id}')" style="padding:6px 10px; font-size:12px; display:flex; align-items:center; justify-content:center;" title="Copier pour analyse">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
                                 <button class="btn btn-danger btn-small" onclick="window.deleteShot('${s.id}')" style="padding:6px 12px; font-size:12px;">✕</button>
                             </div>
                         </div>
@@ -1204,36 +1209,66 @@
                 text += ` - ${shot.remarks}`;
             }
             
-            // Méthode compatible tous navigateurs avec fallback
-            const copyToClipboard = (text) => {
-                // Méthode 1 : Textarea temporaire (compatible partout)
+            // Approche multi-fallback garantie de fonctionner
+            let success = false;
+            
+            // Tentative 1 : Clipboard API moderne (Chrome, Firefox récents)
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showMessage('success', '📋 Shot copié !');
+                }).catch(() => {
+                    // Si échec, passer au fallback
+                    fallbackCopy(text);
+                });
+                return;
+            }
+            
+            // Tentative 2 : Méthode textarea avec execCommand
+            function fallbackCopy(text) {
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
+                
+                // Styles pour être sûr qu'il est visible mais hors écran
                 textarea.style.position = 'fixed';
-                textarea.style.top = '-9999px';
-                textarea.style.left = '-9999px';
+                textarea.style.top = '0';
+                textarea.style.left = '0';
+                textarea.style.width = '2em';
+                textarea.style.height = '2em';
+                textarea.style.padding = '0';
+                textarea.style.border = 'none';
+                textarea.style.outline = 'none';
+                textarea.style.boxShadow = 'none';
+                textarea.style.background = 'transparent';
+                
                 document.body.appendChild(textarea);
+                
+                // Focus et sélection
+                textarea.focus();
                 textarea.select();
-                textarea.setSelectionRange(0, 99999); // Pour mobile
                 
                 try {
                     const successful = document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                    
                     if (successful) {
                         showMessage('success', '📋 Shot copié !');
-                    } else {
-                        // Fallback : afficher le texte à copier manuellement
-                        prompt('Copie ce texte (Ctrl+C ou Cmd+C) :', text);
+                        success = true;
                     }
                 } catch (err) {
-                    document.body.removeChild(textarea);
-                    // Fallback : afficher le texte à copier manuellement
-                    prompt('Copie ce texte (Ctrl+C ou Cmd+C) :', text);
+                    console.log('execCommand failed:', err);
                 }
-            };
+                
+                document.body.removeChild(textarea);
+                
+                // Si toujours pas de succès, dernière option : prompt
+                if (!success) {
+                    const userCopy = prompt('📋 Copie ce texte (Ctrl+C puis OK):', text);
+                    if (userCopy !== null) {
+                        showMessage('success', '✅ Prêt à coller !');
+                    }
+                }
+            }
             
-            copyToClipboard(text);
+            // Si clipboard API pas disponible, utiliser fallback direct
+            fallbackCopy(text);
         };
         
         window.addShot = addShot;
