@@ -519,25 +519,25 @@
     
     <nav class="side-menu">
         <a class="menu-item" onclick="window.setTab('shots'); window.toggleMenu();">
-            <span class="icon">☕</span>
+            <span class="icon"></span>
             <span>Shots</span>
         </a>
         <a class="menu-item" onclick="window.setTab('bags'); window.toggleMenu();">
-            <span class="icon">☕</span>
+            <span class="icon"></span>
             <span>Grains</span>
         </a>
         <a class="menu-item" onclick="window.setTab('analysis'); window.toggleMenu();">
-            <span class="icon">📊</span>
+            <span class="icon"></span>
             <span>Analyse</span>
         </a>
         <a class="menu-item" onclick="window.setTab('settings'); window.toggleMenu();">
-            <span class="icon">⚙️</span>
+            <span class="icon"></span>
             <span>Réglages</span>
         </a>
     </nav>
     
     <div id="app" class="container">
-        <div style="text-align: center; padding: 60px; color: #CC785C;">⏳ Chargement...</div>
+        <div style="text-align: center; padding: 60px; color: #CC785C;">Chargement...</div>
     </div>
 
     <script>
@@ -669,7 +669,7 @@
                 }
             } catch (e) {
                 console.error(e);
-                showMessage('error', '❌ Erreur de chargement');
+                showMessage('error', 'Erreur de chargement');
             }
         }
 
@@ -711,13 +711,13 @@
             if (editingShotId) {
                 // Mode édition
                 await sb.from('shots').update(shot).eq('id', editingShotId);
-                showMessage('success', '✅ Shot modifié');
+                showMessage('success', 'Shot modifié');
                 editingShotId = null;
             } else {
                 // Mode création
                 const { data } = await sb.from('shots').insert([shot]).select();
                 shots = [data[0], ...shots];
-                showMessage('success', '✅ Shot enregistré');
+                showMessage('success', 'Shot enregistré');
             }
             
             form.reset();
@@ -772,11 +772,11 @@
             if (!confirm('Supprimer ce shot ?')) return;
             try {
                 await sb.from('shots').delete().eq('id', id);
-                showToast('✅ Shot supprimé', event?.target);
+                showToast('Shot supprimé', event?.target);
                 await loadData(true); // Recharger en préservant le scroll
             } catch (e) {
                 console.error(e);
-                showToast('❌ Erreur lors de la suppression', event?.target);
+                showToast('Erreur lors de la suppression', event?.target);
             }
         }
 
@@ -800,7 +800,7 @@
             };
             const { data } = await sb.from('bags').insert([bag]).select();
             bags = [data[0], ...bags];
-            showMessage('success', '✅ Grains ajoutés');
+            showMessage('success', 'Grains ajoutés');
             form.reset();
             render();
         }
@@ -809,11 +809,11 @@
             try {
                 const newStatus = status === 'active' ? 'finished' : 'active';
                 await sb.from('bags').update({ status: newStatus }).eq('id', id);
-                showToast(`✅ ${newStatus === 'active' ? 'Réactivé' : 'Terminé'}`, event?.target);
+                showToast(`${newStatus === 'active' ? 'Réactivé' : 'Terminé'}`, event?.target);
                 await loadData(true); // Recharger en préservant le scroll
             } catch (e) {
                 console.error(e);
-                showToast('❌ Erreur lors du changement', event?.target);
+                showToast('Erreur lors du changement', event?.target);
             }
         }
 
@@ -821,11 +821,11 @@
             if (!confirm('Supprimer ces grains ?')) return;
             try {
                 await sb.from('bags').delete().eq('id', id);
-                showToast('✅ Grains supprimés', event?.target);
+                showToast('Grains supprimés', event?.target);
                 await loadData(true); // Recharger en préservant le scroll
             } catch (e) {
                 console.error(e);
-                showToast('❌ Erreur lors de la suppression', event?.target);
+                showToast('Erreur lors de la suppression', event?.target);
             }
         }
 
@@ -910,7 +910,7 @@
                     await loadData();
                     
                     const skipped = (lines.length - 1) - shotsToImport.length;
-                    let msg = `✅ ${shotsToImport.length} shots`;
+                    let msg = `${shotsToImport.length} shots`;
                     if (newBags.length > 0) msg += ` et ${newBags.length} paquets`;
                     msg += ' importés';
                     if (skipped > 0) msg += ` (${skipped} doublons ignorés)`;
@@ -918,7 +918,7 @@
                     showMessage('success', msg);
                 } catch (e) {
                     console.error(e);
-                    showMessage('error', '❌ Erreur: ' + e.message);
+                    showMessage('error', 'Erreur: ' + e.message);
                 }
             };
             reader.readAsText(file);
@@ -1005,17 +1005,16 @@
                                 <strong style="color:#CC785C; font-size:14px;">${s.coffee}</strong>
                                 <span style="cursor:pointer;" onclick="window.updateShotRating('${s.id}', ${s.rating || 0})">${[1,2,3,4,5].map(i => `<span style="color:${i <= (s.rating || 0) ? '#ffc107' : '#ddd'}; font-size:13px;">★</span>`).join('')}</span>
                                 <span style="color:#999;">·</span>
-                                <span>${s.dose}→${s.output}g</span>
-                                <span>⚙️${s.grind}</span>
-                                <span>⏱️${s.time}s</span>
-                                <span>💧${s.preinfusion}s</span>
+                                <span style="cursor:pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="window.updateShotField('${s.id}', 'dose', ${s.dose}, 'Dose (g)')" title="Cliquer pour modifier">${s.dose}</span><span>→</span><span style="cursor:pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="window.updateShotField('${s.id}', 'output', ${s.output}, 'Sortie (g)')" title="Cliquer pour modifier">${s.output}g</span>
+                                <span style="cursor:pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="window.updateShotField('${s.id}', 'grind', ${s.grind}, 'Mouture')" title="Cliquer pour modifier">⚙️${s.grind}</span>
+                                <span style="cursor:pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="window.updateShotField('${s.id}', 'time', ${s.time}, 'Temps (s)')" title="Cliquer pour modifier">⏱️${s.time}s</span>
+                                <span style="cursor:pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="window.updateShotField('${s.id}', 'preinfusion', ${s.preinfusion}, 'Préinfusion (s)')" title="Cliquer pour modifier">💧${s.preinfusion}s</span>
                                 <span>📅${s.age}j</span>
-                                <span>🌀${s.wdt}</span>
+                                <span style="cursor:pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="window.updateShotField('${s.id}', 'wdt', '${s.wdt}', 'WDT')" title="Cliquer pour modifier">🌀${s.wdt}</span>
                                 <span style="color:#aaa; font-size:12px;">${s.date}</span>
-                                ${s.remarks ? `<span style="color:#999; font-style:italic; font-size:12px;">💬 ${s.remarks}</span>` : ''}
+                                ${s.remarks ? `<span style="cursor:pointer; color:#999; font-style:italic; font-size:12px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="window.updateShotField('${s.id}', 'remarks', '${(s.remarks || '').replace(/'/g, "\\'")}', 'Remarques')" title="Cliquer pour modifier">💬 ${s.remarks}</span>` : `<span style="cursor:pointer; color:#ccc; font-size:12px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="window.updateShotField('${s.id}', 'remarks', '', 'Remarques')" title="Ajouter une remarque">💬 +</span>`}
                             </div>
                             <div style="display:flex; gap:6px;">
-                                <button class="btn btn-secondary btn-small" onclick="window.editShot('${s.id}')" style="padding:6px 12px; font-size:12px;" title="Modifier">✏️</button>
                                 <button class="btn btn-secondary btn-small" onclick="window.copyShot('${s.id}', event)" style="padding:6px 10px; font-size:12px; display:flex; align-items:center; justify-content:center;" title="Copier pour analyse">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -1030,7 +1029,18 @@
                 html += `</div>`;
             }
             else if (currentTab === 'bags') {
-                html += `<div class="section"><h2>Nouveaux Grains</h2><form id="form-bag" onsubmit="event.preventDefault(); window.addBag(event)">
+                html += `<div class="section">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:28px;">
+                        <button class="hamburger-btn" onclick="window.toggleMenu()">
+                            <div class="hamburger-icon">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </button>
+                        <h2 style="margin:0;">Nouveaux Grains</h2>
+                    </div>
+                    <form id="form-bag" onsubmit="event.preventDefault(); window.addBag(event)">
                     <div class="form-group"><label>Nom du café</label><input type="text" name="name" placeholder="Gédéo, Timanà..." required></div>
                     <div class="form-group"><label>Torréfacteur</label><input type="text" name="roaster" value="L'Arbre à Café"></div>
                     <div class="row"><div class="form-group"><label>Date torréfaction</label>
@@ -1052,10 +1062,10 @@
                                 <strong style="color:#CC785C; font-size:14px;">${b.name}</strong>
                                 <span style="color:#999;">·</span>
                                 <span>${b.roaster}</span>
-                                <span>📅 ${b.roast_date}</span>
-                                <span>⏳ ${age}j</span>
-                                <span>⚖️ ${b.weight}g</span>
-                                <span class="bag-status ${b.status}" style="padding:4px 10px; font-size:11px;">${b.status === 'active' ? '✓ Actif' : '○ Terminé'}</span>
+                                <span>${b.roast_date}</span>
+                                <span>${age}j</span>
+                                <span>${b.weight}g</span>
+                                <span class="bag-status ${b.status}" style="padding:4px 10px; font-size:11px;">${b.status === 'active' ? 'Actif' : 'Terminé'}</span>
                             </div>
                             <div style="display:flex; gap:8px;">
                                 <button class="btn btn-secondary btn-small" onclick="window.toggleBag('${b.id}', '${b.status}', event)" style="padding:6px 12px; font-size:12px;">${b.status === 'active' ? 'Terminer' : 'Réactiver'}</button>
@@ -1067,33 +1077,64 @@
                 html += `</div>`;
             }
             else if (currentTab === 'analysis') {
-                html += `<div class="section"><h2>Analyse : Mouture vs Âge</h2>
-                    <div class="alert alert-info">Seuls les shots validés avec 4 ou 5 étoiles apparaissent dans le graphique</div>`;
+                html += `<div class="section">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:28px;">
+                        <button class="hamburger-btn" onclick="window.toggleMenu()">
+                            <div class="hamburger-icon">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </button>
+                        <h2 style="margin:0;">Analyse</h2>
+                    </div>`;
                 
                 const uniqueCoffeeNames = [...new Set(bags.map(b => b.name))].sort();
+                let lastCoffeeName = '';
+                if (shots.length > 0) {
+                    lastCoffeeName = shots[0].coffee;
+                } else if (uniqueCoffeeNames.length > 0) {
+                    lastCoffeeName = uniqueCoffeeNames[0];
+                }
                 
                 if (uniqueCoffeeNames.length === 0) {
                     html += `<div class="alert alert-info">Ajoutez des grains pour voir l'analyse</div>`;
                 } else {
-                    html += `<div class="form-group"><label>Sélectionner un café</label>
+                    html += `<div class="form-group">
                         <select id="analysis-coffee" onchange="window.updateChartByCoffee(this.value)">
-                        <option value="">-- Choisir un café --</option>
-                        ${uniqueCoffeeNames.map(name => `<option value="${name}">${name}</option>`).join('')}
+                        ${uniqueCoffeeNames.map(name => `<option value="${name}" ${name === lastCoffeeName ? 'selected' : ''}>${name}</option>`).join('')}
                         </select></div>
-                        <div id="chart-wrapper" style="display:none;">
+                        <div id="chart-wrapper" style="display:block;">
                             <div class="chart-container"><canvas id="chart"></canvas></div>
                         </div>`;
                 }
                 html += `</div>`;
+                
+                setTimeout(() => {
+                    if (lastCoffeeName) {
+                        window.updateChartByCoffee(lastCoffeeName);
+                    }
+                }, 0);
             }
             else if (currentTab === 'settings') {
-                html += `<div class="section"><h2>Réglages</h2><div class="alert alert-success">✅ Synchronisé avec Supabase</div>
+                html += `<div class="section">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:28px;">
+                        <button class="hamburger-btn" onclick="window.toggleMenu()">
+                            <div class="hamburger-icon">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </button>
+                        <h2 style="margin:0;">Réglages</h2>
+                    </div>
+                    <div class="alert alert-success">Synchronisé avec Supabase</div>
                     <h3 style="margin: 28px 0 16px; font-size: 16px; font-weight: 600; color: #CC785C;">Importer des données CSV</h3>
                     <p style="margin-bottom:16px; color:#666; font-size: 14px;">Les paquets manquants seront créés automatiquement</p>
                     <input type="file" accept=".csv" onchange="window.importCSV(this.files[0])" style="width: 100%; padding: 16px; border: 2px dashed #CC785C; border-radius: 12px; background: rgba(250, 250, 248, 0.8); font-size: 15px; color: #CC785C; font-weight: 500; cursor: pointer;">
                     <h3 style="margin: 32px 0 16px; font-size: 16px; font-weight: 600; color: #CC785C;">Exporter les données</h3>
                     <p style="margin-bottom:16px; color:#666; font-size: 14px;">${shots.length} shots enregistrés</p>
-                    <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto; padding: 14px 32px;" ${shots.length === 0 ? 'disabled' : ''}>📥 Télécharger CSV</button></div>`;
+                    <button class="btn btn-primary" onclick="window.exportCSV()" style="width:auto; padding: 14px 32px;" ${shots.length === 0 ? 'disabled' : ''}>Télécharger CSV</button></div>`;
             }
             appEl.innerHTML = html;
             
@@ -1251,7 +1292,7 @@
             if (chartInstance) chartInstance.destroy();
             
             const datasets = [{ 
-                label: `${coffeeName} - Mouture vs Âge (validés 4-5★)`, 
+                label: coffeeName, 
                 data: data, 
                 backgroundColor: 'rgba(204, 120, 92, 0.7)', 
                 borderColor: '#CC785C', 
@@ -1345,7 +1386,7 @@
             
             const rating = parseInt(newRating);
             if (isNaN(rating) || rating < 0 || rating > 5) {
-                showMessage('error', '❌ Note invalide (entre 0 et 5)');
+                showMessage('error', 'Note invalide (entre 0 et 5)');
                 return;
             }
             
@@ -1355,18 +1396,83 @@
                 
                 shots = shots.map(s => String(s.id) === String(shotId) ? { ...s, rating: rating, validated: validated } : s);
                 
-                showMessage('success', `✅ Note mise à jour: ${rating} étoile${rating > 1 ? 's' : ''}`);
+                showMessage('success', `Note mise à jour: ${rating} étoile${rating > 1 ? 's' : ''}`);
                 render();
             } catch (e) {
                 console.error(e);
-                showMessage('error', '❌ Erreur lors de la mise à jour');
+                showMessage('error', 'Erreur lors de la mise à jour');
+            }
+        };
+        
+        window.updateShotField = async function(shotId, field, currentValue, label) {
+            const shot = shots.find(s => String(s.id) === String(shotId));
+            if (!shot) return;
+            
+            let newValue;
+            
+            // Cas spécial pour WDT : proposer les options
+            if (field === 'wdt') {
+                const wdtOptions = ['non', 'léger', 'normal', 'profond'];
+                const choice = prompt(`${label || field} actuel: ${currentValue}\n\nChoisir:\n1. non\n2. léger\n3. normal\n4. profond\n\nEntrer le numéro:`, wdtOptions.indexOf(currentValue) + 1);
+                if (choice === null) return;
+                const idx = parseInt(choice) - 1;
+                if (idx < 0 || idx >= wdtOptions.length) {
+                    showMessage('error', 'Choix invalide');
+                    return;
+                }
+                newValue = wdtOptions[idx];
+            }
+            // Cas spécial pour remarques : textarea dans prompt
+            else if (field === 'remarks') {
+                newValue = prompt(`${label || field}:`, currentValue || '');
+                if (newValue === null) return;
+            }
+            // Pour les nombres
+            else {
+                newValue = prompt(`${label || field} actuel: ${currentValue}\n\nNouvelle valeur:`, currentValue);
+                if (newValue === null) return;
+                
+                // Validation selon le type
+                if (field === 'dose' || field === 'output' || field === 'grind') {
+                    newValue = parseFloat(newValue);
+                    if (isNaN(newValue) || newValue <= 0) {
+                        showMessage('error', 'Valeur invalide');
+                        return;
+                    }
+                } else if (field === 'time' || field === 'preinfusion') {
+                    newValue = parseInt(newValue);
+                    if (isNaN(newValue) || newValue < 0) {
+                        showMessage('error', 'Valeur invalide');
+                        return;
+                    }
+                }
+            }
+            
+            try {
+                // Préparer l'objet de mise à jour
+                const updateData = { [field]: newValue };
+                
+                // Si on modifie dose ou output, recalculer le ratio
+                if (field === 'dose' || field === 'output') {
+                    const dose = field === 'dose' ? newValue : shot.dose;
+                    const output = field === 'output' ? newValue : shot.output;
+                    updateData.ratio = parseFloat((output / dose).toFixed(2));
+                }
+                
+                await sb.from('shots').update(updateData).eq('id', shotId);
+                
+                showMessage('success', 'Mis à jour');
+                await loadData(true);
+            } catch (e) {
+                console.error(e);
+                showMessage('error', 'Erreur lors de la mise à jour');
             }
         };
         
         window.copyShot = function(shotId, event) {
             const shot = shots.find(s => String(s.id) === String(shotId));
             if (!shot) {
-                alert('❌ Shot non trouvé');
+                alert('Shot non trouvé');
                 return;
             }
             
@@ -1379,7 +1485,7 @@
             if (shot.remarks) text += ` - ${shot.remarks}`;
             
             // Afficher directement dans un prompt pour copie manuelle
-            prompt('📋 Copie ce texte (Cmd+A puis Cmd+C) :', text);
+            prompt('Copie ce texte (Cmd+A puis Cmd+C) :', text);
         };
         
         window.addShot = addShot;
